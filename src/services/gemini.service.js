@@ -4,8 +4,10 @@
 // then calls Gemini with a strict grounding instruction so it
 // answers ONLY from the UI content visible to that role.
 
-const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent";
+const GEMINI_PRIMARY_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent";
+const GEMINI_FALLBACK_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent";
 
 // ─── Role-Specific Fixed System Prompts ──────────────────────────────────────
 // Each role gets a tailored persona, scope, and guidance instruction.
@@ -132,7 +134,7 @@ Your dashboard sections include:
 
 CRITICAL RULES — follow strictly:
 1. Answer ONLY from the live dashboard data provided below. Never use external knowledge.
-2. If the user asks to generate an RCA, resolve an incident, or query historical databases, reply with exactly: [BACKEND_REQUIRED]
+2. If the user asks about an incident, hotfix, or RCA that is PRESENT in the dashboard data below (like INC-9920 or HF-892), answer it directly using the data. Only reply with exactly [BACKEND_REQUIRED] if they ask for historical incidents NOT in the dashboard.
 3. Be concise and structured. Use bullet points when listing multiple items.
 4. Address the user as "Software Engineer" or "SWE".
 5. Never invent hotfix codes, RCA percentages, or architecture statuses not present in the dashboard.`,
@@ -504,21 +506,31 @@ ${context}
     ],
   };
 
-  const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  let response = await fetch(`${GEMINI_PRIMARY_URL}?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(requestBody),
   });
 
+  // Fallback to Gemini 3.5 Flashlite if primary fails
   if (!response.ok) {
-    let errData;
-    try {
-      errData = await response.json();
-    } catch {
-      // ignore json parse error on non-json response
+    console.warn(`Primary Gemini 3.1 failed (${response.status}), falling back to 3.5 Flashlite...`);
+    response = await fetch(`${GEMINI_FALLBACK_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!response.ok) {
+      let errData;
+      try {
+        errData = await response.json();
+      } catch {
+        // ignore json parse error on non-json response
+      }
+      const msg = errData?.error?.message || `Gemini API fallback error: ${response.status}`;
+      throw new Error(msg);
     }
-    const msg = errData?.error?.message || `Gemini API error: ${response.status}`;
-    throw new Error(msg);
   }
 
   const result = await response.json();

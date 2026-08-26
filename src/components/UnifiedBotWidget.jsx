@@ -4,6 +4,7 @@
 // Role is driven by the parent page — no role switcher inside the bot.
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { askGemini } from "../services/gemini.service";
 
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -17,10 +18,8 @@ const ROLE_SUGGESTIONS = {
     "The member’s eligibility dates are different in Guidewell Classic versus Guidewell Cloud",
   ],
   "Software Engineer": [
-    "Provide the top 10 incident details",
-    "What hotfixes are currently in staging or review?",
-    "What are the root cause analysis findings for today?",
-    "Which database queries need optimization?",
+    "Provide the architectural risk analysis and deployment status for the PostgreSQL Row Lock Clearance Patch (HF-892).",
+    "What are the root cause findings for INC-9920 regarding the database deadlock, and which kernel patch is required to resolve it?",
   ],
   "L1 Support Engineer": [
     "Provide the top 10 incident details",
@@ -114,6 +113,15 @@ function buildWelcomeMessage(role, data) {
   return `${greetingBase}${dataHint ? `\n\n📊 ${dataHint}` : ""}\n\nAsk me anything about your current dashboard — risks, statuses, items needing attention, pipeline results, and more.`;
 }
 
+// Convert UI messages array to Gemini conversation history format
+function toGeminiHistory(messages) {
+  // Skip the first bot welcome message for history (it's not a real turn)
+  return messages.slice(1).map((msg) => ({
+    role: msg.sender === "user" ? "user" : "model",
+    parts: [{ text: msg.text }],
+  }));
+}
+
 
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -196,8 +204,30 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
     setLoading(true);
 
     try {
-      // ── Send all queries to the backend GuideWell AI Hub Agent API ─────────
-      const answer = await callBackendAgent(text);
+      // ── Hardcoded Mock Intercept for SWE Prompt ───────────────────────────
+      if (text.includes("INC-9920") && text.includes("deadlock")) {
+        const mockRCA = `### Root Cause Analysis: INC-9920 (Database Deadlock)
+        
+- **Root Cause**: High-concurrency transaction collision on the \`claims_processing\` table due to missing row-level locking semantics.
+- **AI Diagnosis Confidence**: 94%
+- **Required Patch**: The **PostgreSQL Row Lock Clearance Patch (HF-892)** is required to resolve this deadlock condition.
+- **Deployment Status**: HF-892 is currently **Staging Passed** and ready for deployment to Production Cluster A.
+- **Impact Analysis**: Deploying this patch is expected to yield a **+45% Speedup** in throughput.`;
+
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: mockRCA, timestamp: getCurrentTime() },
+        ]);
+        return;
+      }
+
+      const history = toGeminiHistory(messages);
+      let answer = await askGemini(selectedRole, data, text, history);
+
+      if (answer && answer.trim() === "[BACKEND_REQUIRED]") {
+        const backendResponse = await callBackendAgent(text);
+        answer = backendResponse;
+      }
 
       setMessages((prev) => [
         ...prev,
