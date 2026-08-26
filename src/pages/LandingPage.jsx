@@ -74,12 +74,17 @@ export default function LandingPage() {
   const [ignioIsResolved, setIgnioIsResolved] = useState(false);
   const [ignioItem, setIgnioItem] = useState(null);
 
+  // Agent Resolve Tab specific states
+  const [agentResolveFilter, setAgentResolveFilter] = useState("all");
+
   // Deterministic Application Issue Auto Resolve Chat States
   const [deterministicModalOpen, setDeterministicModalOpen] = useState(false);
   const [deterministicMessages, setDeterministicMessages] = useState([]);
   const [deterministicIsRunning, setDeterministicIsRunning] = useState(false);
   const [deterministicIsResolved, setDeterministicIsResolved] = useState(false);
   const [deterministicItem, setDeterministicItem] = useState(null);
+  const [deterministicInputValue, setDeterministicInputValue] = useState("");
+  const [deterministicAgentTyping, setDeterministicAgentTyping] = useState(false);
   // Applications Dropdown Menu States
   const [appDropdownOpen, setAppDropdownOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
@@ -225,9 +230,9 @@ export default function LandingPage() {
     setDeterministicItem(item);
     setDeterministicIsRunning(true);
     setDeterministicIsResolved(false);
-    setDeterministicMessages([
-      { id: 1, sender: "agent", text: "🤖 Hello! I am the Deterministic Resolution Agent. I have received ticket " + (item?.num || "RITM004120") + " regarding " + (item?.subject || "an Application Issue") + ".", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-    ]);
+    setDeterministicMessages([]);
+    setDeterministicInputValue("");
+    setDeterministicAgentTyping(false);
     setDeterministicModalOpen(true);
   };
 
@@ -235,68 +240,54 @@ export default function LandingPage() {
     let timer;
     if (deterministicIsRunning && deterministicModalOpen) {
       const stepCount = deterministicMessages.length;
+      const isFlow1 = deterministicItem?.num === "RITM004120";
+      
+      const addMsg = (sender, text) => {
+        setDeterministicMessages((prev) => [
+          ...prev,
+          { id: prev.length + 1, sender, text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+        ]);
+      };
+
       if (stepCount === 1) {
+        setDeterministicAgentTyping(true);
         timer = setTimeout(() => {
-          let step2Text = "🔍 Diagnosing Root Cause: Data validation exception detected in User Password Strength & Special Character Regex Schema.";
-          if (deterministicItem?.num === "INC009428") {
-            step2Text = "🔍 Diagnosing Root Cause: Malformed NPI (National Provider Identifier) checksum format detected in EDI 837 Header.";
-          } else if (deterministicItem?.num === "INC009440") {
-            step2Text = "🔍 Diagnosing Root Cause: Token cache corruption on API Gateway node causing HTTP 504 Gateway Timeouts.";
-          } else if (deterministicItem?.num === "INC009452") {
-            step2Text = "🔍 Diagnosing Root Cause: Concurrent member profile session state mismatch detected between Gateway Cache & Redis distributed session store.";
-          }
-          setDeterministicMessages((prev) => [
-            ...prev,
-            { id: 2, sender: "agent", text: step2Text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-          ]);
-        }, 1800);
-      } else if (stepCount === 2) {
-        timer = setTimeout(() => {
-          let step3Text = "⚙️ Executing Automated Password Validation: Testing regex payload against Member Portal Auth Schema & LDAP Security Policy...";
-          if (deterministicItem?.num === "INC009428") {
-            step3Text = "⚙️ Executing Data Validation Fix: Sanitizing NPI payload, applying X12 standard regex validation, and retrying schema check...";
-          } else if (deterministicItem?.num === "INC009440") {
-            step3Text = "⚙️ Executing Automated Remediation: Flushing Redis OAuth token cache and refreshing JWKS public key set...";
-          } else if (deterministicItem?.num === "INC009452") {
-            step3Text = "⚙️ Executing Automated Session Reconciliation: Purging stale session tokens, invalidating corrupt keys, and re-syncing active session state...";
-          }
-          setDeterministicMessages((prev) => [
-            ...prev,
-            { id: 3, sender: "agent", text: step3Text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-          ]);
-        }, 2200);
+          setDeterministicAgentTyping(false);
+          addMsg("agent", isFlow1 ? "I'm sorry to hear you're experiencing trouble with this. Are you trying to register for an account?" : "I understand how frustrating that can be, and I'd be happy to help. Are you trying to register for an account?");
+        }, 2000);
       } else if (stepCount === 3) {
+        setDeterministicAgentTyping(true);
         timer = setTimeout(() => {
-          let step4Text = "✅ Password Validation Test Completed: Password policy schema reconciled and validated with 100% compliance.";
-          if (deterministicItem?.num === "INC009428") {
-            step4Text = "✅ Data Validation Test Completed: EDI 837 claims batch schema re-validated with 100% compliance.";
-          } else if (deterministicItem?.num === "INC009440") {
-            step4Text = "✅ Verification Test Completed: OAuth token exchange test passed with 100% sub-10ms response times.";
-          } else if (deterministicItem?.num === "INC009452") {
-            step4Text = "✅ Session Reconciliation Test Completed: Member portal user session state successfully re-synchronized with 100% data consistency.";
-          }
+          setDeterministicAgentTyping(false);
+          addMsg("agent", isFlow1 ? "Thank you. Could you please provide the exact date of birth you are attempting to enter?" : "Got it. Could you please share the exact date of birth you are typing into the field?");
+        }, 2000);
+      } else if (stepCount === 5) {
+        setDeterministicAgentTyping(true);
+        timer = setTimeout(() => {
+          setDeterministicAgentTyping(false);
+          addMsg("agent", isFlow1 
+            ? "Thank you for sharing that. Your information is perfectly correct! However, our system strictly accepts dates in the MM-DD-YYYY format using dashes instead of slashes. For example: 08-14-1992. Could you please try entering it this way so we can proceed?" 
+            : "Thank you. Your information is correct, but it looks like the month and day are reversed. Our system requires the month first in the MM-DD-YYYY format (e.g. 10-25-1988). Can you please try entering it in that specific format?");
+        }, 3000);
+      } else if (stepCount === 7) {
+        setDeterministicAgentTyping(true);
+        timer = setTimeout(() => {
+          setDeterministicAgentTyping(false);
           setDeterministicMessages((prev) => [
             ...prev,
-            { id: 4, sender: "agent", text: step4Text, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-          ]);
-        }, 2200);
-      } else if (stepCount === 4) {
-        timer = setTimeout(() => {
-          setDeterministicMessages((prev) => [
-            ...prev,
-            { id: 5, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
           ]);
           setDeterministicIsRunning(false);
           setDeterministicIsResolved(true);
           if (deterministicItem) {
             deterministicItem.status = "Resolved (Deterministic)";
             deterministicItem.statusType = "good";
-            deterministicItem.resolution = deterministicItem.resolution || "Validation Reconciled (100% Pass)";
-            deterministicItem.timeToResolve = "6 seconds";
+            deterministicItem.resolution = "Validated & Corrected";
+            deterministicItem.timeToResolve = "12 seconds";
             deterministicItem.csat = "5/5 Stars";
             deterministicItem.isResolved = true;
           }
-        }, 1800);
+        }, 2000);
       }
     }
     return () => clearTimeout(timer);
@@ -1010,8 +1001,8 @@ export default function LandingPage() {
                         window.open("https://ismartams.tcsapps.com/member-portal-observability/", "_blank") || (window.location.href = "https://ismartams.tcsapps.com/member-portal-observability/");
                       }}
                       style={{
-                        background: "var(--surface-input, rgba(8, 145, 178, 0.08))",
-                        border: "1px solid rgba(8, 145, 178, 0.3)",
+                        background: "rgba(239, 68, 68, 0.08)",
+                        border: "1px solid rgba(239, 68, 68, 0.3)",
                         borderRadius: "10px",
                         padding: "14px 16px",
                         color: "var(--text-primary)",
@@ -1026,33 +1017,17 @@ export default function LandingPage() {
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "#0891b2";
-                        e.currentTarget.style.background = "rgba(8, 145, 178, 0.15)";
+                        e.currentTarget.style.borderColor = "#ef4444";
+                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
                         e.currentTarget.style.transform = "translateY(-1px)";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(8, 145, 178, 0.3)";
-                        e.currentTarget.style.background = "var(--surface-input, rgba(8, 145, 178, 0.08))";
+                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
+                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)";
                         e.currentTarget.style.transform = "none";
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span
-                          style={{
-                            background: "#0891b2",
-                            color: "#ffffff",
-                            width: "24px",
-                            height: "24px",
-                            borderRadius: "6px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "12px",
-                            fontWeight: "800",
-                          }}
-                        >
-                          1
-                        </span>
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Claims</span>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1060,8 +1035,8 @@ export default function LandingPage() {
                           style={{
                             fontSize: "11px",
                             fontWeight: "600",
-                            color: "#0891b2",
-                            background: "rgba(8, 145, 178, 0.12)",
+                            color: "#ef4444",
+                            background: "rgba(239, 68, 68, 0.12)",
                             padding: "3px 8px",
                             borderRadius: "12px",
                             display: "flex",
@@ -1069,12 +1044,122 @@ export default function LandingPage() {
                             gap: "4px",
                           }}
                         >
-                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
                           Active
                         </span>
-                        <Icon name="externalLink" size={14} style={{ color: "#0891b2" }} />
+                        <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
                       </div>
                     </button>
+
+                    {/* Member Enrollment & Eligibility (Yellow) */}
+                    <div
+                      style={{
+                        background: "rgba(234, 179, 8, 0.08)",
+                        border: "1px solid rgba(234, 179, 8, 0.3)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Enrollment & Eligibility</span>
+                      </div>
+                    </div>
+
+                    {/* Provider Management (Green) */}
+                    <div
+                      style={{
+                        background: "rgba(16, 185, 129, 0.08)",
+                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Provider Management</span>
+                      </div>
+                    </div>
+
+                    {/* Billing & Premium Management (Purple) */}
+                    <div
+                      style={{
+                        background: "rgba(139, 92, 246, 0.08)",
+                        border: "1px solid rgba(139, 92, 246, 0.3)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Billing & Premium Management</span>
+                      </div>
+                    </div>
+
+                    {/* Customer Service (Orange) */}
+                    <div
+                      style={{
+                        background: "rgba(249, 115, 22, 0.08)",
+                        border: "1px solid rgba(249, 115, 22, 0.3)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Customer Service</span>
+                      </div>
+                    </div>
+
+                    {/* Finance & Compliance (Cyan) */}
+                    <div
+                      style={{
+                        background: "rgba(6, 182, 212, 0.08)",
+                        border: "1px solid rgba(6, 182, 212, 0.3)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textAlign: "left",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Finance & Compliance</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {/* Column 1: Needs My Action */}
@@ -1647,19 +1732,85 @@ export default function LandingPage() {
                   </div>
                 </div>
               ) : (
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
-                    gap: "16px",
-                  }}
-                >
-                  {activeTabData.items.map((item, idx) => (
-                    <div
-                      key={item.id || idx}
+                <>
+                  {activeTab === "agent_resolve" && (
+                    <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+                      <button
+                        type="button"
+                        onClick={() => setAgentResolveFilter("all")}
+                        style={{
+                          background: agentResolveFilter === "all" ? "var(--text-primary)" : "transparent",
+                          color: agentResolveFilter === "all" ? "var(--bg-primary)" : "var(--text-secondary)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "20px",
+                          padding: "6px 16px",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        All Items
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAgentResolveFilter("ignio")}
+                        style={{
+                          background: agentResolveFilter === "ignio" ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)" : "transparent",
+                          color: agentResolveFilter === "ignio" ? "#fff" : "var(--text-secondary)",
+                          border: "1px solid",
+                          borderColor: agentResolveFilter === "ignio" ? "transparent" : "var(--border)",
+                          borderRadius: "20px",
+                          padding: "6px 16px",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        ignio
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setAgentResolveFilter("deterministic")}
+                        style={{
+                          background: agentResolveFilter === "deterministic" ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "transparent",
+                          color: agentResolveFilter === "deterministic" ? "#fff" : "var(--text-secondary)",
+                          border: "1px solid",
+                          borderColor: agentResolveFilter === "deterministic" ? "transparent" : "var(--border)",
+                          borderRadius: "20px",
+                          padding: "6px 16px",
+                          fontSize: "12px",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        Deterministic
+                      </button>
+                    </div>
+                  )}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(360px, 1fr))",
+                      gap: "16px",
+                    }}
+                  >
+                    {activeTabData.items
+                      .filter(item => {
+                        if (activeTab !== "agent_resolve") return true;
+                        if (agentResolveFilter === "ignio") return item.isIgnio;
+                        if (agentResolveFilter === "deterministic") return item.isDeterministic;
+                        return true;
+                      })
+                      .map((item, idx) => (
+                      <div
+                        key={item.id || idx}
                       style={{
                         background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid var(--border)",
+                        border: activeTab === "agent_resolve" ? `1px solid ${item.isIgnio ? "rgba(8,145,178,0.5)" : item.isDeterministic ? "rgba(139,92,246,0.5)" : "var(--border)"}` : "1px solid var(--border)",
+                        boxShadow: activeTab === "agent_resolve" ? (item.isIgnio ? "0 4px 12px rgba(8,145,178,0.1)" : item.isDeterministic ? "0 4px 12px rgba(139,92,246,0.1)" : "none") : "none",
                         borderRadius: "12px",
                         padding: "16px",
                         display: "flex",
@@ -1670,6 +1821,26 @@ export default function LandingPage() {
                       }}
                     >
                       <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                        {/* Agent Resolve Workflow Badge */}
+                        {activeTab === "agent_resolve" && (item.isIgnio || item.isDeterministic) && (
+                          <div style={{ marginBottom: "12px", display: "flex", alignItems: "center" }}>
+                            <span style={{
+                              background: item.isIgnio ? "linear-gradient(135deg, rgba(8,145,178,0.2) 0%, rgba(37,99,235,0.2) 100%)" : "linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(6,182,212,0.2) 100%)",
+                              border: `1px solid ${item.isIgnio ? "rgba(8,145,178,0.5)" : "rgba(139,92,246,0.5)"}`,
+                              color: item.isIgnio ? "#38bdf8" : "#c084fc",
+                              padding: "4px 10px",
+                              borderRadius: "12px",
+                              fontSize: "11px",
+                              fontWeight: "800",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "4px"
+                            }}>
+                              {item.isIgnio ? "ignio" : "Deterministic"}
+                            </span>
+                          </div>
+                        )}
+
                         {/* Card Header Row */}
                         <div
                           style={{
@@ -1719,6 +1890,14 @@ export default function LandingPage() {
                           {item.snippet && <pre style={{ margin: "4px 0", background: "#0a1120", padding: "8px", borderRadius: "6px", fontSize: "11px", color: "#38bdf8", overflowX: "auto", flex: 1 }}>{item.snippet}</pre>}
                           {item.rcaSummary && <p style={{ margin: "4px 0" }}><strong>RCA:</strong> {item.rcaSummary}</p>}
                           {item.recommendation && <p style={{ margin: "4px 0", color: "#34d399" }}><strong>Fix:</strong> {item.recommendation}</p>}
+
+                          {activeTab === "agent_resolve" && item.system && (
+                            <div style={{ background: "var(--surface-card)", borderLeft: "3px solid var(--blue)", padding: "10px 12px", margin: "6px 0", borderRadius: "0 8px 8px 0", border: "1px solid var(--border)", borderLeftWidth: "3px" }}>
+                              <strong style={{ color: "var(--blue)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Impacted System:</strong>
+                              <div style={{ marginTop: "4px", fontSize: "13px", color: "var(--text-primary)", fontWeight: "500" }}>{item.system}</div>
+                            </div>
+                          )}
+
 
                           {/* Key-Value Tag List */}
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
@@ -1797,7 +1976,7 @@ export default function LandingPage() {
                                     transition: "all 0.2s ease",
                                   }}
                                 >
-                                  <Icon name="zap" size={14} /> Auto Resolve
+                                  <Icon name="zap" size={14} /> {item.isIgnio ? "Auto Resolve" : "Agent Resolve"}
                                 </button>
                               )}
                             </div>
@@ -1806,7 +1985,8 @@ export default function LandingPage() {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+                </>
               )}
             </div>
           </section>
@@ -2102,7 +2282,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#f8fafc" }}>
-                    ignio™ Automated Remediation Pipeline
+                    ignio
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
                     Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "ignio Automated Incident Remediation"}
@@ -2110,15 +2290,13 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {!ignioIsRunning && (
-                <button
-                  type="button"
-                  onClick={() => setIgnioModalOpen(false)}
-                  style={{ background: "transparent", border: "none", color: "#94a3b8", fontSize: "18px", cursor: "pointer" }}
-                >
-                  ✕
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setIgnioModalOpen(false)}
+                style={{ background: "transparent", border: "none", color: "#94a3b8", fontSize: "18px", cursor: "pointer" }}
+              >
+                ✕
+              </button>
             </div>
 
             {/* Modal Body */}
@@ -2322,6 +2500,23 @@ export default function LandingPage() {
               animation: "fadeIn 0.2s ease",
             }}
           >
+            <style>{`
+              @keyframes bounce {
+                0%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-4px); }
+              }
+              .typing-dot {
+                width: 6px;
+                height: 6px;
+                background-color: #94a3b8;
+                border-radius: 50%;
+                display: inline-block;
+                animation: bounce 1.4s infinite ease-in-out both;
+              }
+              .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+              .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+            `}</style>
+
             {/* Header */}
             <div
               style={{
@@ -2349,7 +2544,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#f8fafc" }}>
-                    Deterministic Agent — Data Validation Resolution
+                    Deterministic
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
                     Ticket: <strong>{deterministicItem?.num || "RITM004120"}</strong> • Application Data Issue
@@ -2357,15 +2552,13 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {!deterministicIsRunning && (
-                <button
-                  type="button"
-                  onClick={() => setDeterministicModalOpen(false)}
-                  style={{ background: "transparent", border: "none", color: "#94a3b8", fontSize: "18px", cursor: "pointer" }}
-                >
-                  ✕
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => setDeterministicModalOpen(false)}
+                style={{ background: "transparent", border: "none", color: "#94a3b8", fontSize: "18px", cursor: "pointer" }}
+              >
+                ✕
+              </button>
             </div>
 
             {/* Chat Body */}
@@ -2381,7 +2574,7 @@ export default function LandingPage() {
               }}
             >
               {deterministicMessages.map((msg) => (
-                <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: msg.isSuccess ? "center" : "flex-start" }}>
+                <div key={msg.id} style={{ display: "flex", flexDirection: "column", alignItems: msg.isSuccess ? "center" : (msg.sender === "user" ? "flex-end" : "flex-start") }}>
                   {msg.isSuccess ? (
                     <div
                       style={{
@@ -2405,7 +2598,7 @@ export default function LandingPage() {
                           Issue is resolved successfully!
                         </h4>
                         <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>
-                          Deterministic password data validation check completed. Ticket <strong>{deterministicItem?.num || "RITM004120"}</strong> status updated to <strong>Resolved</strong>.
+                          Deterministic agent conversational validation completed. Ticket <strong>{deterministicItem?.num || "RITM004120"}</strong> status updated to <strong>Resolved</strong>.
                         </p>
                       </div>
                     </div>
@@ -2413,24 +2606,55 @@ export default function LandingPage() {
                     <div
                       style={{
                         maxWidth: "85%",
-                        background: "#1e293b",
-                        border: "1px solid #334155",
+                        background: msg.sender === "user" ? "#2563eb" : "#1e293b",
+                        border: "1px solid",
+                        borderColor: msg.sender === "user" ? "#3b82f6" : "#334155",
                         borderRadius: "12px",
+                        borderBottomRightRadius: msg.sender === "user" ? "2px" : "12px",
+                        borderBottomLeftRadius: msg.sender !== "user" ? "2px" : "12px",
                         padding: "12px 16px",
                         fontSize: "13px",
-                        color: "#f1f5f9",
+                        color: "#f8fafc",
                         lineHeight: "1.5",
                         boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                        animation: "fadeIn 0.3s ease",
                       }}
                     >
+                      <div style={{ fontWeight: "700", marginBottom: "4px", fontSize: "11px", color: msg.sender === "user" ? "#93c5fd" : "#94a3b8" }}>
+                        {msg.sender === "user" ? "User" : "Agent"}
+                      </div>
                       {msg.text}
-                      <div style={{ fontSize: "10px", color: "#64748b", marginTop: "6px", textAlign: "right" }}>
+                      <div style={{ fontSize: "10px", color: msg.sender === "user" ? "#bfdbfe" : "#64748b", marginTop: "6px", textAlign: "right" }}>
                         {msg.time}
                       </div>
                     </div>
                   )}
                 </div>
               ))}
+
+              {deterministicAgentTyping && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+                  <div
+                    style={{
+                      maxWidth: "85%",
+                      background: "#1e293b",
+                      border: "1px solid #334155",
+                      borderRadius: "12px",
+                      borderBottomLeftRadius: "2px",
+                      padding: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+                      animation: "fadeIn 0.3s ease",
+                    }}
+                  >
+                    <span className="typing-dot"></span>
+                    <span className="typing-dot"></span>
+                    <span className="typing-dot"></span>
+                  </div>
+                </div>
+              )}
 
               {deterministicIsRunning && (
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#38bdf8", fontSize: "12px", fontStyle: "italic", padding: "4px" }}>
@@ -2440,42 +2664,130 @@ export default function LandingPage() {
               )}
             </div>
 
-            {/* Footer */}
+            {/* Input Area / Footer */}
             <div
               style={{
                 background: "#0f172a",
                 borderTop: "1px solid #1e293b",
-                padding: "14px 20px",
+                padding: "16px 20px",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
+                flexDirection: "column",
+                gap: "12px",
               }}
             >
-              <span style={{ fontSize: "12px", color: "#64748b" }}>
-                {deterministicIsResolved ? "Status: 100% Resolved" : "Processing deterministic rules..."}
-              </span>
-
-              {deterministicIsResolved ? (
-                <button
-                  type="button"
-                  onClick={() => setDeterministicModalOpen(false)}
-                  style={{
-                    background: "#10b981",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "8px 18px",
-                    fontSize: "12px",
-                    fontWeight: "700",
-                    cursor: "pointer",
+              {(() => {
+                const stepCount = deterministicMessages.length;
+                const isFlow1 = deterministicItem?.num === "RITM004120";
+                
+                if (stepCount === 0) {
+                  const suggestedText = isFlow1 ? "It says my dob is incorrect but I'm entering the right one." : "The portal won't accept my birthdate. It keeps giving me a validation error.";
+                  return (
+                    <button
+                      onClick={() => {
+                        setDeterministicMessages((prev) => [
+                          ...prev,
+                          { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+                        ]);
+                      }}
+                      style={{
+                        background: "rgba(59, 130, 246, 0.1)",
+                        border: "1px solid #3b82f6",
+                        color: "#60a5fa",
+                        padding: "10px 16px",
+                        borderRadius: "20px",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "all 0.2s",
+                        alignSelf: "flex-start",
+                        marginBottom: "4px"
+                      }}
+                      onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
+                      onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
+                    >
+                      {suggestedText}
+                    </button>
+                  );
+                }
+                return null;
+              })()}
+              
+              {!deterministicIsResolved ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!deterministicInputValue.trim() || deterministicAgentTyping) return;
+                    setDeterministicMessages((prev) => [
+                      ...prev,
+                      { id: prev.length + 1, sender: "user", text: deterministicInputValue.trim(), time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+                    ]);
+                    setDeterministicInputValue("");
                   }}
+                  style={{ display: "flex", gap: "10px", alignItems: "center", width: "100%" }}
                 >
-                  Close & Done
-                </button>
+                  <input
+                    type="text"
+                    value={deterministicInputValue}
+                    onChange={(e) => setDeterministicInputValue(e.target.value)}
+                    placeholder="Ask about your ticket..."
+                    disabled={deterministicAgentTyping}
+                    style={{
+                      flex: 1,
+                      background: "#1e293b",
+                      border: "1px solid #334155",
+                      color: "#f8fafc",
+                      padding: "12px 16px",
+                      borderRadius: "24px",
+                      fontSize: "14px",
+                      outline: "none",
+                      opacity: deterministicAgentTyping ? 0.6 : 1,
+                      transition: "opacity 0.2s"
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!deterministicInputValue.trim() || deterministicAgentTyping}
+                    style={{
+                      background: deterministicInputValue.trim() && !deterministicAgentTyping ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" : "#334155",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "42px",
+                      height: "42px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: deterministicInputValue.trim() && !deterministicAgentTyping ? "pointer" : "not-allowed",
+                      transition: "all 0.2s",
+                      flexShrink: 0
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  </button>
+                </form>
               ) : (
-                <span style={{ fontSize: "11px", color: "#38bdf8", background: "rgba(56, 189, 248, 0.1)", padding: "4px 10px", borderRadius: "12px" }}>
-                  Auto Validation In Progress
-                </span>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                  <span style={{ fontSize: "12px", color: "#64748b" }}>Status: 100% Resolved</span>
+                  <button
+                    type="button"
+                    onClick={() => setDeterministicModalOpen(false)}
+                    style={{
+                      background: "#10b981",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "8px 18px",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Close & Done
+                  </button>
+                </div>
               )}
             </div>
           </div>
