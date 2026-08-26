@@ -1,0 +1,58 @@
+// Theme Context - Light/Dark theme toggle backed by localStorage + data-theme attribute
+
+import { createContext, useContext, useState, useEffect } from "react";
+
+const STORAGE_KEY = "theme";
+const ThemeContext = createContext(null);
+
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
+  return context;
+};
+
+// Forces a specific theme (ignoring the user's saved preference and the toggle)
+// while the calling component is mounted, e.g. pre-login pages that should
+// always render dark. Restores the real preference on unmount.
+export const useForceTheme = (forced) => {
+  const { setForcedTheme } = useTheme();
+
+  useEffect(() => {
+    setForcedTheme(forced);
+    return () => setForcedTheme(null);
+  }, [forced, setForcedTheme]);
+};
+
+const getInitialTheme = () => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (stored === "light" || stored === "dark") return stored;
+  return "dark";
+};
+
+export const ThemeProvider = ({ children }) => {
+  const [theme, setTheme] = useState(getInitialTheme);
+  const [forcedTheme, setForcedTheme] = useState(null);
+  const effectiveTheme = forcedTheme || theme;
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", effectiveTheme);
+  }, [effectiveTheme]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  return (
+    <ThemeContext.Provider
+      value={{ theme, toggleTheme, setTheme, setForcedTheme, forcedTheme }}
+    >
+      {children}
+    </ThemeContext.Provider>
+  );
+};

@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.gitignore
+README.md
+.env.local
+\*.log
+.vscode
+.idea
+coverage
+.DS_Store
+supabase-migrations
+supabase-functions
+DASHBOARD-MIGRATION-GUIDE.md
+docs

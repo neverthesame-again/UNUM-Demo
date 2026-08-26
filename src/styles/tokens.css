@@ -1,0 +1,326 @@
+/* Design Tokens - AI Hub
+ * ─────────────────────────────────────────────────────────────────────────
+ * ALL colors live here. Components must use var(--token) — never hex codes.
+ * To change both themes: only edit this file.
+ *
+ * LIGHT THEME is sourced from the Reliability Engineer Assist reference
+ * (index.html): navy #10214c / #142654, action blue #245be8, page #f4f6fb,
+ * card #ffffff, hairline #d7deea, ink #162033, muted #657184.
+ * Badge / status / category tag colors are intentionally UNCHANGED.
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+:root {
+  /* ── Spacing & Border Radius ── */
+  --radius: 18px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  /* ── Typography ── */
+  --font-display: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* ── Transitions ── */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.45s ease;
+  --transition-base: 0.25s ease;
+
+  /* ── Z-index ── */
+  --z-nav: 200;
+  --z-modal: 999;
+  --z-notif: 500;
+
+  /* ── Breakpoints (reference only) ── */
+  --bp-xs: 576px;
+  --bp-sm: 768px;
+  --bp-md: 992px;
+  --bp-lg: 1200px;
+
+  /* ── Brand Accent Colors (same in both themes) ── */
+  --accent-blue: #009fda;
+  --accent-teal: #009fad;
+  --accent-green: #97d700;
+  --accent-orange: #f7941d;
+  --accent-red: #c62828;
+  --accent-purple: #7b5ea7;
+  --accent-gold: #f5a623;
+
+  /* Status Colors — UNCHANGED (badge palette) */
+  --color-success: #10b981;
+  --color-success-light: rgba(16, 185, 129, 0.15);
+  --color-success-mid: rgba(16, 185, 129, 0.3);
+  --color-danger: #ef4444;
+  --color-danger-light: rgba(239, 68, 68, 0.1);
+  --color-danger-border: rgba(239, 68, 68, 0.2);
+  --color-warning: #f59e0b;
+  --color-inactive: #9ca3af;
+  --color-inactive-bg: rgba(107, 114, 128, 0.15);
+
+  /* Category Tag Colors (workspace — same both themes) — UNCHANGED */
+  --cat-custom-color: #c084fc;
+  --cat-custom-bg: rgba(168, 85, 247, 0.1);
+  --cat-custom-border: rgba(168, 85, 247, 0.4);
+  --cat-specialty-color: #f472b6;
+  --cat-specialty-bg: rgba(244, 114, 182, 0.1);
+  --cat-specialty-border: rgba(244, 114, 182, 0.4);
+  --cat-service-color: #60a5fa;
+  --cat-service-bg: rgba(96, 165, 250, 0.1);
+  --cat-service-border: rgba(96, 165, 250, 0.4);
+  --cat-agentictal-color: #fbbf24;
+  --cat-agentictal-bg: rgba(251, 191, 36, 0.1);
+  --cat-agentictal-border: rgba(251, 191, 36, 0.4);
+  --cat-health-color: #34d399;
+  --cat-health-bg: rgba(52, 211, 153, 0.1);
+  --cat-health-border: rgba(52, 211, 153, 0.4);
+  --cat-erp-color: #ff6b6b;
+  --cat-erp-bg: rgba(255, 107, 107, 0.1);
+  --cat-erp-border: rgba(255, 107, 107, 0.4);
+  --cat-market-color: #ffd166;
+  --cat-market-bg: rgba(255, 209, 102, 0.1);
+  --cat-market-border: rgba(255, 209, 102, 0.4);
+
+  /* Browser Frame (decorative, dark only) */
+  --browser-bg: #0a0f22;
+  --browser-chrome-bg: linear-gradient(90deg, #111827, #0d1626);
+  --browser-content: linear-gradient(180deg, #060e28 0%, #040c20 100%);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DARK THEME  (default) — UNCHANGED
+   ═══════════════════════════════════════════════════════ */
+[data-theme='dark'] {
+  /* ── Core palette ── */
+  --navy: #050d1f;
+  --navy2: #091428;
+  --navy3: #0d1e3a;
+
+  --blue: #0a5a70;
+  --blue2: #00a0ae;
+  --blue3: #5ddaff;
+  --blue4: #29d1ff;
+  --blue5: #00b0e6;
+  --cyan: #00c4ff;
+  --cyan2: #00e5ff;
+  --gold: #f5a623;
+
+  /* RGB tuples for rgba() */
+  --blue2-rgb: 30, 107, 255;
+  --cyan-rgb: 0, 196, 255;
+  --cyan-glow-rgb: 0, 200, 255;
+  --gold-rgb: 245, 166, 35;
+  --white-rgb: 255, 255, 255;
+  --navy-rgb: 5, 13, 31;
+
+  /* ── Semantic Surface ── */
+  --surface-page: var(--navy);
+  --surface-card: rgba(255, 255, 255, 0.04);
+  --surface-card-hover: rgba(255, 255, 255, 0.08);
+  --surface-input: rgba(255, 255, 255, 0.05);
+  --surface-input-focus: rgba(255, 255, 255, 0.07);
+  --surface-select-option: #0f172a;
+  --surface-modal: var(--navy2);
+  --surface-overlay: rgba(0, 0, 0, 0.82);
+  --surface-tooltip: #111827;
+  --surface-nav: rgba(5, 13, 31, 0.88);
+  --surface-subtle: rgba(255, 255, 255, 0.02);
+
+  /* ── Semantic Border ── */
+  --border: rgba(255, 255, 255, 0.09);
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-strong: rgba(255, 255, 255, 0.15);
+  --border-input: rgba(255, 255, 255, 0.10);
+  --border-hover: rgba(255, 255, 255, 0.20);
+  --border-accent: rgba(0, 229, 255, 0.3);
+
+  /* ── Semantic Text ── */
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #8090b0;
+  --text-faint: rgba(255, 255, 255, 0.30);
+  --text-on-accent: #ffffff;
+  --text-on-nav: #ffffff;
+
+  /* ── Navbar User Profile Tokens ── */
+  --nav-user-bg: transparent;
+  --nav-user-hover: rgba(255, 255, 255, 0.08);
+  --nav-avatar-bg: var(--blue2);
+  --nav-avatar-color: #ffffff;
+  --nav-user-subtext: rgba(255, 255, 255, 0.75);
+  --select-arrow-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%2300c4ff%22 d=%22M6 9L1 4h10z%22/%3E%3C/svg%3E");
+
+  /* ── Semantic Hover ── */
+  --hover-bg: rgba(255, 255, 255, 0.08);
+
+  /* ── Semantic Shadow ── */
+  --shadow-card: none;
+  --shadow-card-hover: 0 20px 50px rgba(0, 0, 0, 0.35);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.50);
+  --shadow-nav: none;
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.40);
+
+  /* ── Alias (legacy names kept for backward compat) ── */
+  --white: #ffffff;
+  --off: #e8edf8;
+  --muted: var(--text-muted);
+  --card-bg: var(--surface-card);
+  --card-bd: var(--border);
+  --card-desc: var(--text-muted);
+  --subtitle: var(--text-muted);
+  --page-bg: var(--navy);
+  --card-blur: none;
+  --nav-bg: var(--surface-nav);
+  --nav-shadow: var(--shadow-nav);
+  --bg-primary: var(--navy);
+
+  /* ── CEN/TCS tokens ── */
+  --cen-bg-card: var(--surface-card);
+  --cen-border: var(--border);
+  --cen-border-hover: var(--border-accent);
+  --cen-text-primary: var(--text-primary);
+  --cen-text-secondary: var(--text-secondary);
+  --cen-text-muted: #64748b;
+  --cen-bg-input: var(--surface-input);
+  --cen-border-input: var(--border-strong);
+  --cen-table-header-bg: rgba(255, 255, 255, 0.02);
+  --cen-table-row-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LIGHT THEME  (Reliability Engineer Assist design language)
+   ───────────────────────────────────────────────────────
+   Ink-on-paper system. Deep navy is the authority colour
+   (nav bar, chips, headings), #245be8 is the single action
+   accent, and every neutral is tinted with navy so dense
+   telemetry panels stay quiet and the badges stay loud.
+   ═══════════════════════════════════════════════════════ */
+[data-theme='light'] {
+  /* ── Core palette ──
+     In light mode the navy* slots carry the page/paper stack,
+     and the blue* slots carry the navy → action ramp.          */
+  --navy: #f4f6fb;
+  /* page base            (index --bg)      */
+  --navy2: #ffffff;
+  /* paper / card         (index --card)    */
+  --navy3: #eef2f8;
+  /* recessed panel, foot of page gradient  */
+
+  --blue: #10214c;
+  /* deepest navy — headings, nav base      */
+  --blue2: #245be8;
+  /* action accent — links, primary CTA     */
+  --blue3: #4a7bf0;
+  /* accent lifted — hover on solid blue    */
+  --blue4: #1c47c0;
+  /* accent pressed — active state          */
+  --blue5: #142654;
+  /* chip / pill navy (index .panel-chip)   */
+  --cyan: #245be8;
+  /* alias of the action accent — no teal   */
+  --cyan2: #4a7bf0;
+  --gold: #f2aa22;
+  /* index --warning                        */
+
+  /* RGB tuples for rgba() — must track the hex values above */
+  --blue2-rgb: 36, 91, 232;
+  --cyan-rgb: 36, 91, 232;
+  --cyan-glow-rgb: 36, 91, 232;
+  --gold-rgb: 242, 170, 34;
+  --white-rgb: 255, 255, 255;
+  --navy-rgb: 16, 33, 76;
+
+  /* ── Semantic Surface ── */
+  --surface-page: var(--page-bg);
+  --surface-card: #ffffff;
+  --surface-card-hover: #f8faff;
+  --surface-input: #f4f6fb;
+  --surface-input-focus: #eaf0fd;
+  --surface-select-option: #ffffff;
+  --surface-modal: #ffffff;
+  --surface-overlay: rgba(16, 33, 76, 0.58);
+  --surface-tooltip: #142654;
+  /* white text on it = 13.6:1 */
+  --surface-nav: #142654;
+  /* index topbar navy         */
+  --surface-subtle: rgba(36, 91, 232, 0.04);
+
+  /* ── Semantic Border ──
+     Navy-tinted hairlines; --border resolves to ~#d7deea on white. */
+  --border: rgba(21, 42, 93, 0.16);
+  --border-subtle: rgba(21, 42, 93, 0.08);
+  --border-strong: rgba(21, 42, 93, 0.30);
+  --border-input: rgba(21, 42, 93, 0.22);
+  --border-hover: rgba(36, 91, 232, 0.45);
+  --border-accent: rgba(36, 91, 232, 0.60);
+
+  /* ── Semantic Text ──
+     Contrast on #ffffff card / #f4f6fb page:
+     primary 15.4:1 · secondary 7.4:1 · muted 4.9:1 (AA body)   */
+  --text-primary: #162033;
+  --text-secondary: #4a5670;
+  --text-muted: #657184;
+  --text-faint: rgba(22, 32, 51, 0.42);
+  --text-on-accent: #ffffff;
+  /* on #245be8 = 5.6:1        */
+  --text-on-nav: #ffffff;
+  /* on #142654 = 13.6:1       */
+
+  /* ── Navbar User Profile Tokens (these sit on the navy bar) ── */
+  --nav-user-bg: transparent;
+  --nav-user-hover: rgba(255, 255, 255, 0.08);
+  --nav-avatar-bg: var(--blue2);
+  --nav-avatar-color: #ffffff;
+  --nav-user-subtext: rgba(255, 255, 255, 0.7);
+  --select-arrow-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%23245be8%22 d=%22M6 9L1 4h10z%22/%3E%3C/svg%3E");
+
+  /* ── Semantic Hover ── */
+  --hover-bg: rgba(36, 91, 232, 0.09);
+
+  /* ── Semantic Shadow (index: 0 10px 28px rgba(30,43,80,.10)) ── */
+  --shadow-card: 0 2px 8px rgba(30, 43, 80, 0.07);
+  --shadow-card-hover: 0 10px 28px rgba(30, 43, 80, 0.14);
+  --shadow-modal: 0 24px 60px rgba(16, 33, 76, 0.22);
+  --shadow-nav: 0 9px 24px rgba(18, 35, 79, 0.20);
+  --shadow-dropdown: 0 8px 24px rgba(16, 33, 76, 0.16);
+
+  /* ── Alias (legacy names kept for backward compat) ── */
+  --white: #ffffff;
+  --off: #10214c;
+  /* dark-ink alias            */
+  --muted: var(--text-muted);
+  --card-bg: var(--surface-card);
+  --card-bd: var(--border);
+  --card-desc: #4a5670;
+  /* body copy inside cards    */
+  --subtitle: #4a5670;
+  --card-blur: none;
+  --nav-bg: var(--surface-nav);
+  --nav-shadow: var(--shadow-nav);
+  --bg-primary: var(--navy3);
+
+  /* Full-page background — index.html vertical wash (#fafbfe → #eef2f8)
+     with four low-opacity navy/blue pools so large empty regions do not
+     read as flat grey. Total ink stays under 7%, so every text token
+     above keeps its AA ratio on the darkest point of the gradient. */
+  --page-bg:
+    radial-gradient(ellipse 80% 60% at 0% 0%, rgba(36, 91, 232, 0.07) 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at 100% 100%, rgba(16, 33, 76, 0.06) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 50% at 55% 5%, rgba(36, 91, 232, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 40% at 15% 85%, rgba(20, 38, 84, 0.05) 0%, transparent 50%),
+    linear-gradient(180deg, #fafbfe 0%, #f4f6fb 45%, #eef2f8 100%);
+
+  /* ── CEN/TCS tokens ── */
+  --cen-bg-card: var(--surface-card);
+  --cen-border: var(--border);
+  --cen-border-hover: var(--border-accent);
+  --cen-text-primary: var(--text-primary);
+  --cen-text-secondary: var(--text-secondary);
+  --cen-text-muted: #6d7588;
+  /* index .lbl                */
+  --cen-bg-input: var(--surface-input);
+  --cen-border-input: var(--border-input);
+  --cen-table-header-bg: #f4f7fc;
+  --cen-table-row-border: rgba(21, 42, 93, 0.11);
+}

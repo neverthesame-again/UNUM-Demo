@@ -1,0 +1,1531 @@
+/**
+ * Centene Chatbot Styles
+ * Matches Centene dark theme design system
+ * Uses same color variables as centene_styles.css
+ */
+
+/* ==================== FLOATING BUTTON ==================== */
+.centene-chat-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue2), #0099dd);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 200, 255, 0.4);
+  z-index: 9998;
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.centene-chat-float:hover {
+  transform: scale(1.1);
+  box-shadow: 0 12px 32px rgba(0, 200, 255, 0.5);
+}
+
+.centene-chat-float:active {
+  transform: scale(0.95);
+}
+
+/* ==================== CHAT WINDOW ==================== */
+.centene-chat-window {
+  position: fixed !important;
+  top: 3vh !important;
+  bottom: 3vh !important;
+  left: 3vw !important;
+  right: 3vw !important;
+  width: 94vw !important;
+  max-width: 94vw !important;
+  height: 94vh !important;
+  max-height: 94vh !important;
+  margin: auto !important;
+  background: #050d1f;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  overflow: hidden;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==================== HEADER ==================== */
+.centene-chat-header {
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.15) 0%, rgba(0, 180, 181, 0.1) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ==================== CHAT BODY CONTAINER ==================== */
+.centene-chat-body {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  width: 100%;
+  height: calc(100% - 65px);
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.centene-chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ffffff;
+}
+
+.centene-chat-header-left svg {
+  color: #00c4ff;
+}
+
+.centene-chat-title {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.centene-chat-subtitle {
+  font-size: 12px;
+  color: #6b7fa3;
+  font-weight: 400;
+}
+
+.centene-chat-header-right {
+  display: flex;
+  gap: 8px;
+}
+
+.centene-chat-btn-minimize,
+.centene-chat-btn-close {
+  background: transparent;
+  border: none;
+  color: #6b7fa3;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.centene-chat-btn-minimize:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #00c4ff;
+}
+
+.centene-chat-btn-close:hover {
+  background: rgba(229, 83, 83, 0.15);
+  color: #e55353;
+}
+
+/* ==================== MESSAGES AREA ==================== */
+.centene-chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #0a1428;
+}
+
+/* ==================== PREDEFINED PROMPTS ==================== */
+.centene-predefined-prompts {
+  padding: 10px 16px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #050d1f;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.centene-prompt-item {
+  position: relative;
+  font-size: 12px;
+  padding: 7px 13px;
+  background: rgba(0, 200, 255, 0.08);
+  border: 1px solid rgba(0, 200, 255, 0.25);
+  border-radius: 20px;
+  color: #00c4ff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.centene-prompt-item:hover {
+  background: rgba(0, 200, 255, 0.16);
+  border-color: rgba(0, 200, 255, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 200, 255, 0.15);
+}
+
+.centene-prompt-item:active {
+  transform: scale(0.97);
+}
+
+/* Tooltip on hover showing full text */
+.centene-prompt-item::after {
+  content: attr(data-prompt);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0e1c38;
+  color: #e2e8f0;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 200, 255, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  white-space: normal;
+  width: max-content;
+  max-width: 260px;
+  word-wrap: break-word;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 100;
+}
+
+/* Tooltip arrow */
+.centene-prompt-item::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(0, 200, 255, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  z-index: 101;
+}
+
+.centene-prompt-item:hover::after,
+.centene-prompt-item:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+.centene-chat-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.centene-chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.centene-chat-messages::-webkit-scrollbar-thumb {
+  background: rgba(100, 120, 160, 0.3);
+  border-radius: 3px;
+}
+
+.centene-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 120, 160, 0.5);
+}
+
+/* ==================== MESSAGE BUBBLES ==================== */
+.centene-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.centene-message-user {
+  align-self: flex-end;
+}
+
+.centene-message-bot {
+  align-self: flex-start;
+}
+
+.centene-message-bubble,
+.centene-message-content {
+  padding: 12px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.centene-message-user .centene-message-bubble,
+.centene-message-user .centene-message-content {
+  background: linear-gradient(135deg, #00c4ff 0%, #0099dd 100%);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.centene-message-bot .centene-message-bubble,
+.centene-message-bot .centene-message-content {
+  background: #050d1f;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 4px;
+}
+
+
+/* Markdown content styling */
+.centene-message-bot .centene-message-content p {
+  margin: 0 0 8px 0;
+}
+
+.centene-message-bot .centene-message-content hr {
+  display: none;
+}
+
+.centene-message-bot .centene-message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.centene-message-bot .centene-message-content ul,
+.centene-message-bot .centene-message-content ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.centene-message-bot .centene-message-content code {
+  background: rgba(0, 200, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+
+.centene-message-bot .centene-message-content pre {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.centene-message-content a {
+  color: #4dabf7;
+  text-decoration: underline;
+}
+
+.centene-message-content a:hover {
+  color: #74c0fc;
+}
+
+.centene-message-user .centene-message-content a {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+.centene-message-time {
+  font-size: 11px;
+  color: #3a4a6b;
+  margin-top: 4px;
+  padding: 0 4px;
+}
+
+.centene-message-user .centene-message-time {
+  text-align: right;
+}
+
+/* ==================== TYPING INDICATOR ==================== */
+.centene-typing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #050d1f;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  max-width: 80px;
+  align-self: flex-start;
+}
+
+.centene-typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.centene-typing-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00c4ff;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.centene-typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.centene-typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.5;
+  }
+  30% {
+    transform: translateY(-10px);
+    opacity: 1;
+  }
+}
+
+/* ==================== INPUT AREA ==================== */
+.centene-chat-input-container {
+  padding: 16px 20px;
+  background: #050d1f;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.centene-chat-input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.centene-chat-input {
+  width: 100%;
+  flex: 1;
+  background: #0a1428;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 12px 16px 12px 42px;
+  color: #ffffff;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.centene-chat-input:focus {
+  border-color: #00c4ff;
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1);
+}
+
+.centene-chat-input::placeholder {
+  color: #3a4a6b;
+}
+
+.centene-chat-btn-send {
+  background: linear-gradient(135deg, #00c4ff 0%, #0099dd 100%);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.centene-chat-btn-send:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 200, 255, 0.3);
+}
+
+/* ==================== FILE ATTACHMENT STYLES ==================== */
+.centene-chat-btn-attach {
+  position: absolute;
+  left: 8px;
+  background: transparent;
+  border: none;
+  color: #6b7fa3;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.centene-chat-btn-attach:hover {
+  background: rgba(0, 200, 255, 0.15);
+  color: #00c4ff;
+}
+
+
+.centene-file-preview-bar {
+  padding: 8px 16px;
+  background: #081024;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.centene-file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 200, 255, 0.12);
+  border: 1px solid rgba(0, 200, 255, 0.3);
+  color: #00c4ff;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 16px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.centene-file-pill-remove {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.2s;
+}
+
+.centene-file-pill-remove:hover {
+  color: #ef4444;
+}
+
+.centene-chat-btn-send:active {
+  transform: scale(0.95);
+}
+
+.centene-chat-btn-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* ==================== CONFIRMATION MODAL ==================== */
+.centene-confirm-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto;
+}
+
+.centene-confirm-modal[style*="display: flex"],
+.centene-confirm-modal[style*="display: block"] {
+  display: flex !important;
+}
+
+.centene-confirm-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 21, 37, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1001;
+}
+
+.centene-confirm-dialog {
+  position: relative;
+  background: #0a1428;
+  border-radius: 12px;
+  padding: 28px 32px;
+  max-width: 340px;
+  width: 85%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 200, 255, 0.2);
+  animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1002;
+  text-align: center !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.centene-confirm-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  text-align: center !important;
+  width: 100%;
+}
+
+.centene-confirm-message {
+  font-size: 14px;
+  color: #6b7fa3;
+  margin: 0 0 24px 0;
+  text-align: center !important;
+  line-height: 1.5;
+  width: 100%;
+}
+
+.centene-confirm-buttons {
+  display: flex !important;
+  gap: 12px;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100%;
+}
+
+.centene-confirm-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  text-align: center !important;
+  display: inline-block;
+}
+
+.centene-confirm-yes {
+  background: linear-gradient(135deg, #e55353 0%, #d63c3c 100%);
+  color: white;
+}
+
+.centene-confirm-yes:hover {
+  background: linear-gradient(135deg, #f06464 0%, #e54d4d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(229, 83, 83, 0.3);
+}
+
+.centene-confirm-yes:active {
+  transform: translateY(0);
+}
+
+.centene-confirm-no {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.centene-confirm-no:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 200, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.centene-confirm-no:active {
+  transform: translateY(0);
+}
+
+/* ==================== CONFIRMATION MODAL - FORCE CENTER ALIGNMENT ==================== */
+/* High specificity overrides to ensure center alignment */
+.centene-chat-window .centene-confirm-modal[style*="display: flex"],
+.centene-chat-window .centene-confirm-modal[style*="display: block"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.centene-chat-window .centene-confirm-dialog {
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.centene-chat-window .centene-confirm-dialog * {
+  text-align: center !important;
+}
+
+.centene-chat-window .centene-confirm-title {
+  text-align: center !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.centene-chat-window .centene-confirm-message {
+  text-align: center !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.centene-chat-window .centene-confirm-buttons {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.centene-chat-window .centene-confirm-btn {
+  text-align: center !important;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 768px) {
+  .centene-chat-float {
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  .centene-chat-header {
+    padding: 14px 16px;
+  }
+
+  .centene-chat-messages {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .centene-chat-input-container {
+    padding: 12px 16px;
+  }
+
+  .centene-message {
+    max-width: 85%;
+  }
+}
+
+/* ==================== MAIN CHAT CONTAINER ==================== */
+.centene-chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==================== HAMBURGER BUTTON ==================== */
+.centene-chat-btn-hamburger {
+  background: transparent;
+  border: none;
+  color: #00c4ff;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.centene-chat-btn-hamburger:hover {
+  background: rgba(0, 200, 255, 0.15);
+  color: #ffffff;
+}
+
+/* ==================== HISTORY OVERLAY & SIDEBAR ==================== */
+.centene-history-overlay {
+  background: #050d1f;
+  display: flex;
+  flex-direction: column;
+  color: #ffffff;
+}
+
+/* Desktop Layout (>= 1024px): Permanent Sidebar Always Visible, Hide Hamburger */
+@media (min-width: 1024px) {
+  .centene-chat-window {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    height: 94vh !important;
+    max-height: 94vh !important;
+    bottom: 3vh !important;
+    right: 3vw !important;
+    flex-direction: column !important;
+  }
+
+  .centene-history-overlay {
+    display: flex !important;
+    position: relative !important;
+    width: 290px !important;
+    min-width: 290px !important;
+    height: 100% !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    z-index: 10;
+    animation: none !important;
+  }
+
+  /* Hide Hamburger icon and History close button on Desktop & iPad */
+  .centene-chat-btn-hamburger {
+    display: none !important;
+  }
+
+  .centene-history-close-btn {
+    display: none !important;
+  }
+}
+
+/* Mobile & iPad Layout (< 1024px): Show Hamburger, Hide History by default, Overlay on toggle */
+@media (max-width: 1023px) {
+  .centene-chat-btn-hamburger {
+    display: flex !important;
+  }
+
+  .centene-history-close-btn {
+    display: flex !important;
+  }
+
+  .centene-chat-window {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    height: 94vh !important;
+    max-height: 94vh !important;
+    position: fixed;
+    bottom: 3vh !important;
+    right: 3vw !important;
+    left: 3vw !important;
+    flex-direction: column !important;
+  }
+
+  .centene-history-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    animation: slideInLeft 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* History Header - Exact match to chatbot header */
+.centene-history-header {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(0, 200, 255, 0.15) 0%, rgba(0, 180, 181, 0.1) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 15px;
+  color: #ffffff;
+}
+
+.centene-history-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #6b7fa3;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.centene-history-close-btn:hover {
+  color: #00c4ff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* History Search Input - Exact match to chatbot input box */
+.centene-history-search-container {
+  padding: 12px 16px;
+  background: #050d1f;
+  position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.centene-history-search-icon {
+  position: absolute;
+  left: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7fa3;
+  pointer-events: none;
+}
+
+.centene-history-search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  background: #0a1428;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  font-size: 14px;
+  color: #ffffff;
+  outline: none;
+  transition: border-color 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.centene-history-search-input:focus {
+  border-color: #00c4ff;
+  box-shadow: 0 0 0 3px rgba(0, 200, 255, 0.1);
+}
+
+.centene-history-search-input::placeholder {
+  color: #3a4a6b;
+}
+
+/* History List & Cards - Exact match to dark chat messages stream */
+.centene-history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #0a1428;
+}
+
+.centene-history-empty {
+  text-align: center;
+  padding: 30px 16px;
+  color: #6b7fa3;
+  font-size: 14px;
+}
+
+.centene-history-card {
+  background: rgba(0, 200, 255, 0.05);
+  border: 1px solid rgba(0, 200, 255, 0.15);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.centene-history-card:hover {
+  border-color: rgba(0, 200, 255, 0.4);
+  background: rgba(0, 200, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 200, 255, 0.15);
+}
+
+.centene-history-card.active {
+  border-color: #00c4ff;
+  background: rgba(0, 200, 255, 0.18);
+  box-shadow: 0 0 14px rgba(0, 200, 255, 0.25);
+}
+
+.centene-history-card-content {
+  flex: 1;
+  overflow: hidden;
+  padding-right: 8px;
+}
+
+.centene-history-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.centene-history-card-time {
+  font-size: 12px;
+  color: #6b7fa3;
+}
+
+.centene-history-card-delete {
+  background: transparent;
+  border: none;
+  color: #6b7fa3;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.centene-history-card:hover .centene-history-card-delete {
+  opacity: 1;
+}
+
+.centene-history-card-delete:hover {
+  color: #e55353;
+  background: rgba(229, 83, 83, 0.15);
+}
+
+/* History Footer & New Chat Button - Exact match to chatbot footer input container */
+.centene-history-footer {
+  padding: 16px 20px;
+  background: #050d1f;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.centene-new-chat-btn {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #00c4ff 0%, #0099dd 100%);
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 200, 255, 0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.centene-new-chat-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 200, 255, 0.4);
+}
+
+
+
+.centene-new-chat-btn:active {
+  transform: scale(0.98);
+}
+
+
+/* ============================================================
+   AI for AD Bot Widget — Compact floating popup
+   ============================================================ */
+
+/* ── Floating trigger button ─────────────────────────────── */
+.ad-bot-float {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #0f52ba, #00c4ff);
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 196, 255, 0.35);
+  z-index: 9997;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.ad-bot-float:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 196, 255, 0.5);
+}
+
+.ad-bot-float:active {
+  transform: scale(0.96);
+}
+
+.ad-bot-float-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Popup container ─────────────────────────────────────── */
+.ad-bot-widget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 780px;
+  max-width: calc(100vw - 48px);
+  height: 680px;
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
+  background: #050d1f;
+  border: 1px solid rgba(0, 196, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 196, 255, 0.08);
+  z-index: 9997;
+  overflow: hidden;
+  animation: adBotSlideIn 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.unified-bot-large {
+  width: 780px;
+  max-width: calc(100vw - 48px);
+  height: 680px;
+  max-height: calc(100vh - 48px);
+}
+
+@keyframes adBotSlideIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.ad-bot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(0, 196, 255, 0.12) 0%, rgba(15, 82, 186, 0.1) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.ad-bot-header-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ffffff;
+}
+
+.ad-bot-header-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.ad-bot-header-subtitle {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.ad-bot-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ad-bot-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* ── Role tabs strip ─────────────────────────────────────── */
+.ad-bot-role-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ad-bot-role-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ad-bot-role-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #94a3b8;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ad-bot-role-tab:hover {
+  background: rgba(0, 196, 255, 0.08);
+  border-color: rgba(0, 196, 255, 0.3);
+  color: #cbd5e1;
+}
+
+.ad-bot-role-tab.active {
+  background: linear-gradient(135deg, rgba(0, 196, 255, 0.2), rgba(15, 82, 186, 0.2));
+  border-color: rgba(0, 196, 255, 0.5);
+  color: #00c4ff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 196, 255, 0.15);
+}
+
+.ad-bot-role-emoji {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.ad-bot-role-label {
+  letter-spacing: 0.2px;
+}
+
+/* ── Messages area ───────────────────────────────────────── */
+.ad-bot-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.ad-bot-messages::-webkit-scrollbar { width: 4px; }
+.ad-bot-messages::-webkit-scrollbar-track { background: transparent; }
+.ad-bot-messages::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
+
+/* ── Single message ──────────────────────────────────────── */
+.ad-bot-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 88%;
+}
+
+.ad-bot-message-user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.ad-bot-message-bot {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.ad-bot-bubble {
+  padding: 10px 13px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.ad-bot-message-user .ad-bot-bubble {
+  background: linear-gradient(135deg, #0f52ba, #1a69db);
+  color: #ffffff;
+  border-bottom-right-radius: 4px;
+}
+
+.ad-bot-message-bot .ad-bot-bubble {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+
+.ad-bot-bubble strong { color: #00c4ff; font-weight: 600; }
+.ad-bot-bubble code { background: rgba(0, 0, 0, 0.3); padding: 1px 5px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+.ad-bot-bubble p { margin: 0 0 6px; }
+.ad-bot-bubble p:last-child { margin-bottom: 0; }
+.ad-bot-bubble ul, .ad-bot-bubble ol { margin: 4px 0; padding-left: 18px; }
+.ad-bot-bubble li { margin-bottom: 3px; }
+.ad-bot-bubble a { color: #38bdf8; text-decoration: underline; }
+
+.ad-bot-timestamp {
+  font-size: 10px;
+  color: #475569;
+  margin-top: 3px;
+  padding: 0 2px;
+}
+
+/* ── Typing indicator ────────────────────────────────────── */
+.ad-bot-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px !important;
+  min-width: 52px;
+}
+
+.ad-bot-typing span {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00c4ff;
+  opacity: 0.4;
+  animation: adBotDot 1.2s infinite ease-in-out;
+}
+
+.ad-bot-typing span:nth-child(2) { animation-delay: 0.2s; }
+.ad-bot-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes adBotDot {
+  0%, 80%, 100% { opacity: 0.4; transform: scale(1); }
+  40% { opacity: 1; transform: scale(1.25); }
+}
+
+/* ── Input bar ───────────────────────────────────────────── */
+.ad-bot-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.ad-bot-input {
+  flex: 1;
+  padding: 9px 13px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  min-width: 0;
+}
+
+.ad-bot-input::placeholder { color: #475569; }
+
+.ad-bot-input:focus {
+  border-color: rgba(0, 196, 255, 0.4);
+  background: rgba(0, 196, 255, 0.04);
+}
+
+.ad-bot-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ad-bot-send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #0f52ba, #00c4ff);
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(0, 196, 255, 0.25);
+}
+
+.ad-bot-send-btn:hover:not(:disabled) {
+  transform: scale(1.08);
+  box-shadow: 0 5px 14px rgba(0, 196, 255, 0.4);
+}
+
+.ad-bot-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Responsive — mobile ─────────────────────────────────── */
+@media (max-width: 440px) {
+  .ad-bot-widget {
+    right: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    max-width: 100%;
+    height: calc(100vh - 24px);
+    border-radius: 14px;
+  }
+
+  .ad-bot-float {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+/* ============================================================
+   Additional styles for Gemini-grounded bot (v2)
+   ============================================================ */
+
+/* ── Context badge ───────────────────────────────────────── */
+.ad-bot-context-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  background: rgba(34, 197, 94, 0.07);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.12);
+  font-size: 11px;
+  color: #86efac;
+  flex-shrink: 0;
+}
+
+.ad-bot-context-badge strong {
+  color: #4ade80;
+}
+
+/* ── Message layout with avatar ──────────────────────────── */
+.ad-bot-message {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 7px;
+  max-width: 100%;
+}
+
+.ad-bot-message-user {
+  flex-direction: row-reverse;
+}
+
+.ad-bot-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0, 196, 255, 0.2), rgba(15, 82, 186, 0.2));
+  border: 1px solid rgba(0, 196, 255, 0.3);
+  color: #00c4ff;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ad-bot-msg-content {
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100% - 36px);
+}
+
+.ad-bot-message-user .ad-bot-msg-content {
+  align-items: flex-end;
+}
+
+.ad-bot-message-bot .ad-bot-msg-content {
+  align-items: flex-start;
+}
+
+/* ── Error bubble variant ─────────────────────────────────── */
+.ad-bot-bubble-error {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.25) !important;
+  color: #fca5a5 !important;
+}
+
+/* ── Suggestion chips ────────────────────────────────────── */
+.ad-bot-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+
+.ad-bot-suggestion-chip {
+  padding: 5px 11px;
+  border-radius: 16px;
+  border: 1px solid rgba(0, 196, 255, 0.25);
+  background: rgba(0, 196, 255, 0.06);
+  color: #7dd3fc;
+  font-size: 11.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  text-align: left;
+}
+
+.ad-bot-suggestion-chip:hover {
+  background: rgba(0, 196, 255, 0.14);
+  border-color: rgba(0, 196, 255, 0.45);
+  color: #bae6fd;
+}
+
+/* ── Gemini branding footer ──────────────────────────────── */
+.ad-bot-footer {
+  padding: 5px 14px;
+  font-size: 10px;
+  color: #334155;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+
+/* ── Override: widget height — no role tabs in v2 ─────────── */
+.ad-bot-widget {
+  height: 560px;
+}
+
+@media (max-width: 440px) {
+  .ad-bot-widget {
+    height: calc(100vh - 24px);
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/automation-agents/:path*",
+      "destination": "https://mnnb9bbkgu.ap-south-1.awsapprunner.com/api/automation-agents/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
