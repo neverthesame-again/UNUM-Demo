@@ -5,21 +5,37 @@ import { supabase } from "../lib/supabase";
 
 export const incidentsService = {
   /**
-   * Fetch the top N incidents ordered by most recent incident_date.
+   * Fetch top incidents matching filters.
    * @param {number} limit - Number of incidents to return (default 10)
+   * @param {object} filters - Optional query filters { application, priority, startDate, endDate }
    * @returns {Promise<Array>} - Array of incident records
    */
-  getTopIncidents: async (limit = 10) => {
-    const { data, error } = await supabase
+  getTopIncidents: async (limit = 10, filters = {}) => {
+    let query = supabase
       .from("incidents")
       .select(
         "id, application, business_service, short_description, impact, urgency, assigned_group, category, environment, sla_breached, age_days, mttr_hours, incident_date"
-      )
+      );
+
+    if (filters.application) {
+      query = query.ilike("application", `%${filters.application}%`);
+    }
+    if (filters.priority) {
+      query = query.or(`impact.ilike.%${filters.priority}%,urgency.ilike.%${filters.priority}%`);
+    }
+    if (filters.startDate) {
+      query = query.gte("incident_date", filters.startDate);
+    }
+    if (filters.endDate) {
+      query = query.lte("incident_date", filters.endDate);
+    }
+
+    const { data, error } = await query
       .order("incident_date", { ascending: false })
       .limit(limit);
 
     if (error) {
-      console.error("[Incidents] Error fetching top incidents:", error);
+      console.error("[Incidents] Error fetching incidents:", error);
       throw error;
     }
 

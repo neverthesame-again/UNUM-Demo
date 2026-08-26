@@ -11,7 +11,7 @@ const DEFAULT_API_URL =
 
 export const PREDEFINED_PROMPTS = [
   "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
-  "The member’s eligibility dates are different in TruCare Classic versus TruCare Cloud",
+  "The member’s eligibility dates are different in Guidewell Classic versus Guidewell Cloud",
 ];
 
 const PROMPT_CHAR_LIMIT = 44;

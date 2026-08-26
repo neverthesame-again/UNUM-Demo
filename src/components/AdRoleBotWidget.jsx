@@ -181,8 +181,8 @@ export function AdRoleBotWidget({ selectedRole, data, onOpenChange }) {
   }, [isOpen]);
 
   // ── Send message ─────────────────────────────────────────────────────────────
-  const sendMessage = async () => {
-    const text = input.trim();
+  const sendMessage = async (customText = null) => {
+    const text = (customText !== null ? customText : input).trim();
     if (!text || loading) return;
 
     setInput("");
@@ -344,10 +344,7 @@ export function AdRoleBotWidget({ selectedRole, data, onOpenChange }) {
                 <button
                   key={q}
                   className="ad-bot-suggestion-chip"
-                  onClick={() => {
-                    setInput(q);
-                    setTimeout(() => inputRef.current?.focus(), 50);
-                  }}
+                  onClick={() => sendMessage(q)}
                 >
                   {q}
                 </button>

@@ -277,7 +277,8 @@
 }
 
 .centene-message-user {
-  align-self: flex-end;
+  align-self: stretch;
+  align-items: flex-end;
 }
 
 .centene-message-bot {
@@ -290,7 +291,8 @@
   border-radius: 14px;
   font-size: 14px;
   line-height: 1.5;
-  word-wrap: break-word;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .centene-message-user .centene-message-bubble,
@@ -298,6 +300,8 @@
   background: linear-gradient(135deg, #00c4ff 0%, #0099dd 100%);
   color: #ffffff;
   border-bottom-right-radius: 4px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .centene-message-bot .centene-message-bubble,
@@ -1258,7 +1262,7 @@
 }
 
 .ad-bot-message-user {
-  align-self: flex-end;
+  align-self: stretch;
   align-items: flex-end;
 }
 
@@ -1272,13 +1276,16 @@
   border-radius: 12px;
   font-size: 13px;
   line-height: 1.55;
-  word-break: break-word;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
 .ad-bot-message-user .ad-bot-bubble {
   background: linear-gradient(135deg, #0f52ba, #1a69db);
   color: #ffffff;
   border-bottom-right-radius: 4px;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .ad-bot-message-bot .ad-bot-bubble {
@@ -1442,6 +1449,7 @@
 
 .ad-bot-message-user {
   flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 
 .ad-bot-avatar {

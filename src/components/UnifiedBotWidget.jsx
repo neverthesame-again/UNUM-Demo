@@ -4,8 +4,7 @@
 // Role is driven by the parent page — no role switcher inside the bot.
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { askGemini } from "../services/gemini.service";
-import { incidentsService, formatIncidentsAsMarkdown } from "../services/incidents.service";
+
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -14,10 +13,8 @@ const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
 // ── Role-specific suggested questions ──────────────────────────────────────────
 const ROLE_SUGGESTIONS = {
   "Support Engineer": [
-    "Provide the top 10 incident details",
-    "How many tickets have been auto-resolved today?",
-    "Which tickets are at risk of breaching SLA?",
-    "Show me the active AMS vulnerabilities and CVEs.",
+    "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
+    "The member’s eligibility dates are different in Guidewell Classic versus Guidewell Cloud",
   ],
   "Software Engineer": [
     "Provide the top 10 incident details",
@@ -117,14 +114,7 @@ function buildWelcomeMessage(role, data) {
   return `${greetingBase}${dataHint ? `\n\n📊 ${dataHint}` : ""}\n\nAsk me anything about your current dashboard — risks, statuses, items needing attention, pipeline results, and more.`;
 }
 
-// Convert UI messages array to Gemini conversation history format
-function toGeminiHistory(messages) {
-  // Skip the first bot welcome message for history (it's not a real turn)
-  return messages.slice(1).map((msg) => ({
-    role: msg.sender === "user" ? "user" : "model",
-    parts: [{ text: msg.text }],
-  }));
-}
+
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -193,8 +183,8 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
   }, [isOpen]);
 
   // ── Send message ─────────────────────────────────────────────────────────────
-  const sendMessage = async () => {
-    const text = input.trim();
+  const sendMessage = async (customText = null) => {
+    const text = (customText !== null ? customText : input).trim();
     if (!text || loading) return;
 
     setInput("");
@@ -206,30 +196,8 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
     setLoading(true);
 
     try {
-      // ── Intercept: Top 10 Incidents from Supabase ─────────────────────────
-      // Detect the intent to fetch live incidents directly from the DB.
-      const isIncidentQuery = /top\s*10\s*incident/i.test(text) ||
-        /incident details/i.test(text);
-
-      if (isIncidentQuery) {
-        const incidents = await incidentsService.getTopIncidents(10);
-        const answer = formatIncidentsAsMarkdown(incidents);
-        setMessages((prev) => [
-          ...prev,
-          { sender: "bot", text: answer, timestamp: getCurrentTime() },
-        ]);
-        return;
-      }
-
-      // ── Default: Gemini grounded to dashboard data ────────────────────────
-      const history = toGeminiHistory(messages); // messages before current user msg
-      let answer = await askGemini(selectedRole, data, text, history);
-
-      if (answer && answer.trim() === "[BACKEND_REQUIRED]") {
-        // Fallback to heavy backend GuideWell AI Hub Agent
-        const backendResponse = await callBackendAgent(text);
-        answer = backendResponse;
-      }
+      // ── Send all queries to the backend GuideWell AI Hub Agent API ─────────
+      const answer = await callBackendAgent(text);
 
       setMessages((prev) => [
         ...prev,
@@ -393,17 +361,14 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
             )}
           </div>
 
-          {/* Suggested questions — role-specific, shown only at start */}
-          {messages.length === 1 && !loading && (
+          {/* Suggested questions — role-specific, always visible */}
+          {!loading && (
             <div className="ad-bot-suggestions">
               {(ROLE_SUGGESTIONS[roleLabel] ?? DEFAULT_SUGGESTIONS).map((q) => (
                 <button
                   key={q}
                   className="ad-bot-suggestion-chip"
-                  onClick={() => {
-                    setInput(q);
-                    setTimeout(() => inputRef.current?.focus(), 50);
-                  }}
+                  onClick={() => sendMessage(q)}
                 >
                   {q}
                 </button>
