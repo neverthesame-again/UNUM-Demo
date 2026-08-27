@@ -12,6 +12,7 @@ import { AdRoleBotWidget } from "../components/AdRoleBotWidget";
 import { UnifiedBotWidget } from "../components/UnifiedBotWidget";
 import { useToast } from "../components/Toast";
 import { PipelineModal } from "../components/project-detail/PipelineModal";
+import { AppHealthModal } from "../components/project-detail/AppHealthModal";
 import { Modal } from "../components/Modal";
 import { Icon } from "../components/Icon";
 import {
@@ -41,6 +42,8 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [showPrdModal, setShowPrdModal] = useState(false);
+  const [showAppHealthModal, setShowAppHealthModal] = useState(false);
+  const [selectedHealthApp, setSelectedHealthApp] = useState(null);
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
   const [isBotOpen, setIsBotOpen] = useState(false);
@@ -1521,127 +1524,6 @@ export default function LandingPage() {
               {/* Items Card List Grid or Insights Analytics & Cards */}
               {activeTab === "insights" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  {/* 2-Column Analytics Charts */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "20px" }}>
-                    {selectedRole === "Software Engineer" ? (
-                      <>
-                        {/* Panel 1: Software Code Quality & Test Telemetry */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              📊 Software Code Quality & Test Telemetry
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Current Sprint</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                            {[
-                              { label: "Unit & Integration Test Coverage", count: "94% (Passed)", color: "#10b981", pct: 94 },
-                              { label: "Static Code Analysis & Lint Pass Rate", count: "98% (Clean)", color: "#0891b2", pct: 98 },
-                              { label: "CI/CD Build Pipeline Speed", count: "3.2 min avg", color: "#8b5cf6", pct: 85 },
-                              { label: "Zero-Day Vulnerability Scanning", count: "0 Critical", color: "#34d399", pct: 100 },
-                            ].map((cat, i) => (
-                              <div key={i}>
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                                  <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                                </div>
-                                <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                                  <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Panel 2: Hotfix & PR Engineering Velocity */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              ⚡ Hotfix & PR Engineering Velocity
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>65% Faster</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {[
-                              { name: "PR Code Review Lead Time", execs: "1.4h avg", success: "65% Faster", time: "Approved" },
-                              { name: "Hotfix Patch Merge Reliability", execs: "42 merges", success: "99.2%", time: "Passed" },
-                              { name: "Automated Regression Test Suite", execs: "142 tests", success: "100% Pass", time: "Verified" },
-                              { name: "Software Code Complexity Index", execs: "Low Risk", success: "Grade A", time: "Passed" },
-                            ].map((rb, i) => (
-                              <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <div>
-                                  <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                                </div>
-                                <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {/* Panel 1: Resolution Category Breakdown */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              📊 Incident Resolution Category Distribution
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                            {[
-                              { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
-                              { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
-                              { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
-                              { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
-                            ].map((cat, i) => (
-                              <div key={i}>
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                                  <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                                </div>
-                                <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                                  <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Panel 2: Top Autonomous AI Runbooks Executed */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              ⚡ Top Autonomous Runbooks Executed
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {[
-                              { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
-                              { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
-                              { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
-                              { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
-                            ].map((rb, i) => (
-                              <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <div>
-                                  <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                                </div>
-                                <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
                   {/* Simple Insight Cards Grid */}
                   <div
                     style={{
@@ -1651,10 +1533,7 @@ export default function LandingPage() {
                     }}
                   >
                     {activeTabData.items && activeTabData.items.map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                        style={{
-                          background: "rgba(255, 255, 255, 0.03)",
+                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{ cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
                           border: "1px solid var(--border)",
                           borderRadius: "12px",
                           padding: "16px",
@@ -2229,6 +2108,16 @@ export default function LandingPage() {
           onClose={() => setShowClaimsModal(false)}
           title="Member Portal Observability - Claims"
           videoUrl="https://ismartams.tcsapps.com/member-portal-observability/"
+        />
+      )}
+
+      
+      {/* App Health Modal */}
+      {showAppHealthModal && (
+        <AppHealthModal
+          isOpen={showAppHealthModal}
+          onClose={() => setShowAppHealthModal(false)}
+          app={selectedHealthApp}
         />
       )}
 
