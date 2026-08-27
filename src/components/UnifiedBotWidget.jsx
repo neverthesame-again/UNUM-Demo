@@ -203,6 +203,7 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
     setMessages(nextMessages);
     setLoading(true);
 
+    try {
       const history = toGeminiHistory(messages);
       let answer = await askGemini(selectedRole, data, text, history);
 

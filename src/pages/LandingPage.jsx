@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+﻿/* eslint-disable react-hooks/set-state-in-effect */
 // Domain & Role Dynamic Landing Page Component with Multi-Tab Mock Views
 
 import { useState, useEffect } from "react";
@@ -280,7 +280,7 @@ export default function LandingPage() {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I understand—thank you for confirming you've checked Spam/Junk and it's not there.\n\nWhat email address are you using to request the password reset verification code?");
+            addMsg("agent", "I understandâ€”thank you for confirming you've checked Spam/Junk and it's not there.\n\nWhat email address are you using to request the password reset verification code?");
           }, 7000);
         } else if (stepCount === 8) {
           const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
@@ -292,14 +292,14 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `I've got it — you're using ${targetEmail} for the password reset.\n\nI checked the status for that email and found it's suppressed (hard bounce), which means our verification/OTP emails are being blocked and won't deliver. I've removed the suppression and cleared the stale verification attempts, so the system is ready to send a new code.\n\nPlease follow these steps:\n\n1. Clear your browser cache and cookies (or open a Private/Incognito window).\n2. Go back to the portal sign-in page and select "Change Password" / "Forgot Password."\n3. Request a new verification code (use only the most recent code).\n4. Check your Inbox (and Spam/Junk again, just in case).\n5. The email will come from no-reply@mail.entrykeyid.com.\n6. Your verification code expires in about 5 minutes—if it expires, wait for it to fully expire before requesting another.\n\nYou should now be able to receive the code and reset your password successfully.`
+              `I've got it â€” you're using ${targetEmail} for the password reset.\n\nI checked the status for that email and found it's suppressed (hard bounce), which means our verification/OTP emails are being blocked and won't deliver. I've removed the suppression and cleared the stale verification attempts, so the system is ready to send a new code.\n\nPlease follow these steps:\n\n1. Clear your browser cache and cookies (or open a Private/Incognito window).\n2. Go back to the portal sign-in page and select "Change Password" / "Forgot Password."\n3. Request a new verification code (use only the most recent code).\n4. Check your Inbox (and Spam/Junk again, just in case).\n5. The email will come from no-reply@mail.entrykeyid.com.\n6. Your verification code expires in about 5 minutesâ€”if it expires, wait for it to fully expire before requesting another.\n\nYou should now be able to receive the code and reset your password successfully.`
             );
           }, 8000);
         } else if (stepCount === 9) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+              { id: prev.length + 1, sender: "system", text: "ðŸŽ‰ Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
             ]);
             setDeterministicIsRunning(false);
             setDeterministicIsResolved(true);
@@ -318,13 +318,13 @@ export default function LandingPage() {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I'm sorry you're running into that—I'd like to help get you logged in. Are you trying to register for a new account or log in to an existing account?");
+            addMsg("agent", "I'm sorry you're running into thatâ€”I'd like to help get you logged in. Are you trying to register for a new account or log in to an existing account?");
           }, 6000);
         } else if (stepCount === 4) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I understand—thanks for confirming you're registering for a new account.\n\nWhat exact date of birth are you entering (please type it exactly as you're inputting it, including any dashes or slashes)?");
+            addMsg("agent", "I understandâ€”thanks for confirming you're registering for a new account.\n\nWhat exact date of birth are you entering (please type it exactly as you're inputting it, including any dashes or slashes)?");
           }, 7000);
         } else if (stepCount === 6) {
           const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
@@ -336,14 +336,14 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks—yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format (October 25, 1990), so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
+              `Thanksâ€”yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format (October 25, 1990), so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
             );
           }, 8000);
         } else if (stepCount === 7) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+              { id: prev.length + 1, sender: "system", text: "ðŸŽ‰ Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
             ]);
             setDeterministicIsRunning(false);
             setDeterministicIsResolved(true);
@@ -387,14 +387,14 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thank you for confirming. I've checked the records available to me, and ${targetEmail} is not showing as an Active/Inactive/Blocked account in the current list—so there isn't an inactive legacy account I can delete on my side based on this data.\n\nTo get you registered successfully, please try these quick steps:\n\n1. Use "Sign in / Forgot password" (since the system is indicating an account already exists) and attempt a password reset for ${targetEmail}.\n2. If you don't receive the reset email, check Spam/Junk and confirm there are no typos or extra spaces in the email.`
+              `Thank you for confirming. I've checked the records available to me, and ${targetEmail} is not showing as an Active/Inactive/Blocked account in the current listâ€”so there isn't an inactive legacy account I can delete on my side based on this data.\n\nTo get you registered successfully, please try these quick steps:\n\n1. Use "Sign in / Forgot password" (since the system is indicating an account already exists) and attempt a password reset for ${targetEmail}.\n2. If you don't receive the reset email, check Spam/Junk and confirm there are no typos or extra spaces in the email.`
             );
           }, 8000);
         } else if (stepCount === 7) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
-              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+              { id: prev.length + 1, sender: "system", text: "ðŸŽ‰ Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
             ]);
             setDeterministicIsRunning(false);
             setDeterministicIsResolved(true);
@@ -833,12 +833,12 @@ export default function LandingPage() {
             <div>
               <div className="re-summary-title">
                 {selectedArea === "AI for AD" && selectedRole === "Product Owner"
-                  ? `Good morning, Product Owner — ${activeApp.name} Backlog & Sprint 42 Summary`
+                  ? `Good morning, Product Owner â€” ${activeApp.name} Backlog & Sprint 42 Summary`
                   : summary.greeting}
               </div>
               <div className="re-summary-sub">
                 {selectedArea === "AI for AD" && selectedRole === "Product Owner"
-                  ? `${activeApp.name} active workspace · ${currentAppData?.epics?.length || 3} Epics · ${currentAppData?.user_stories?.length || 8} User Stories · ${currentAppData?.acceptance_criteria?.length || 3} Acceptance Criteria ready`
+                  ? `${activeApp.name} active workspace Â· ${currentAppData?.epics?.length || 3} Epics Â· ${currentAppData?.user_stories?.length || 8} User Stories Â· ${currentAppData?.acceptance_criteria?.length || 3} Acceptance Criteria ready`
                   : summary.subtext}
               </div>
             </div>
@@ -912,7 +912,7 @@ export default function LandingPage() {
                     >
                       Applications
                       {tab.badge && <span className="re-badge">{tab.badge}</span>}
-                      <span style={{ fontSize: "10px", marginLeft: "2px" }}>▾</span>
+                      <span style={{ fontSize: "10px", marginLeft: "2px" }}>â–¾</span>
                     </span>
 
                     {/* Applications Dropdown Menu */}
@@ -1158,7 +1158,7 @@ export default function LandingPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                Clear ✕
+                Clear âœ•
               </button>
             </div>
           </div>
@@ -1311,13 +1311,13 @@ export default function LandingPage() {
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            📊 <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
+                            ðŸ“Š <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
                           </span>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            📝 <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
+                            ðŸ“ <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
                           </span>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            ⚡ <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
+                            âš¡ <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
                           </span>
                         </div>
                       </div>
@@ -1707,7 +1707,7 @@ export default function LandingPage() {
                       fontWeight: "700",
                     }}
                   >
-                    {selectedRole} · {selectedArea}
+                    {selectedRole} Â· {selectedArea}
                   </span>
                 </div>
                 <p style={{ margin: "4px 0 0 0", fontSize: "13px", color: "var(--text-secondary)" }}>
@@ -1716,73 +1716,8 @@ export default function LandingPage() {
               </div>
 
               {/* Items Card List Grid or Insights Analytics & Cards */}
-              {activeTab === "insights" ? (
-                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  {/* Top Two Analytics Panels */}
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
-                      gap: "16px",
-                    }}
-                  >
-                    {/* Panel 1: Resolution Category Breakdown */}
-                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                          📊 Incident Resolution Category Distribution
-                        </h3>
-                        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                        {[
-                          { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
-                          { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
-                          { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
-                          { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
-                        ].map((cat, i) => (
-                          <div key={i}>
-                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                              <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                            </div>
-                            <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                              <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Panel 2: Top Autonomous AI Runbooks Executed */}
-                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                          ⚡ Top Autonomous Runbooks Executed
-                        </h3>
-                        <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                        {[
-                          { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
-                          { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
-                          { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
-                          { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
-                        ].map((rb, i) => (
-                          <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <div>
-                              <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                            </div>
-                            <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
+              {activeTab === "insights" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "24px", marginBottom: "24px" }}>
                   {/* Simple Insight Cards Grid */}
                   <div
                     style={{
@@ -1856,16 +1791,18 @@ export default function LandingPage() {
                             </div>
                           )}
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
-                            {item.batchTag && <span style={{ background: "rgba(139,92,246,0.15)", color: "#c084fc", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📦 {item.batchTag}</span>}
-                            {item.category && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🏷️ {item.category}</span>}
-                            {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 {item.confidence}</span>}
+                            {item.batchTag && <span style={{ background: "rgba(139,92,246,0.15)", color: "#c084fc", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>ðŸ“¦ {item.batchTag}</span>}
+                            {item.category && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>ðŸ·ï¸ {item.category}</span>}
+                            {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>ðŸ¤– {item.confidence}</span>}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-              ) : (!activeTabData.items || activeTabData.items.length === 0) ? (
+              )}
+
+              {(!activeTabData.items || activeTabData.items.length === 0) && (
                 <div
                   style={{
                     minHeight: "280px",
@@ -1881,15 +1818,17 @@ export default function LandingPage() {
                     width: "100%",
                   }}
                 >
-                  <div style={{ fontSize: "32px", marginBottom: "12px", opacity: 0.6 }}>💡</div>
+                  <div style={{ fontSize: "32px", marginBottom: "12px", opacity: 0.6 }}>ðŸ’¡</div>
                   <div style={{ fontSize: "15px", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                    Insights Workspace
+                    Workspace Empty
                   </div>
                   <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                    This workspace is currently blank and ready for custom insights metrics.
+                    This workspace is currently blank and ready for custom metrics.
                   </div>
                 </div>
-              ) : (
+              )}
+              
+              {activeTab !== "insights" && activeTabData.items && activeTabData.items.length > 0 && (
                 <>
                   <div
                     style={{
@@ -1908,7 +1847,9 @@ export default function LandingPage() {
                       .map((item, idx) => (
                         <div
                           key={item.id || idx}
+                          onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }}
                           style={{
+                            cursor: item.category === "Application Health" ? "pointer" : "default",
                             background: "rgba(255, 255, 255, 0.03)",
                             border: "1px solid var(--border)",
                             boxShadow: "var(--shadow-card)",
@@ -1979,19 +1920,19 @@ export default function LandingPage() {
 
                               {/* Key-Value Tag List */}
                               <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
-                                {item.target && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🎯 Target: {item.target}</span>}
-                                {item.points && <span style={{ background: "rgba(0,159,218,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⭐ {item.points} Points</span>}
-                                {item.priority && <span style={{ background: "rgba(247,148,29,0.15)", color: "#f7941d", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⚡ {item.priority}</span>}
-                                {item.progress !== undefined && <span style={{ background: "rgba(151,215,0,0.15)", color: "#97d700", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📊 {item.progress}% Complete</span>}
-                                {item.valueScore && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>💎 Value: {item.valueScore}</span>}
-                                {item.duration && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>⏱️ {item.duration}</span>}
-                                {item.checks && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>✅ {item.checks}</span>}
-                                {item.reviewScore && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🤖 Score: {item.reviewScore}</span>}
-                                {item.passRate && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🎯 Pass: {item.passRate}</span>}
-                                {item.slaTimer && <span style={{ background: "rgba(229,83,83,0.15)", color: "#e55353", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⏳ SLA: {item.slaTimer}</span>}
-                                {item.kbMatch && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>📚 KB Match: {item.kbMatch}</span>}
-                                {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 Confidence: {item.confidence}</span>}
-                                {item.tokensUsed && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🪙 Tokens: {item.tokensUsed}</span>}
+                                {item.target && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>ðŸŽ¯ Target: {item.target}</span>}
+                                {item.points && <span style={{ background: "rgba(0,159,218,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>â­ {item.points} Points</span>}
+                                {item.priority && <span style={{ background: "rgba(247,148,29,0.15)", color: "#f7941d", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>âš¡ {item.priority}</span>}
+                                {item.progress !== undefined && <span style={{ background: "rgba(151,215,0,0.15)", color: "#97d700", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>ðŸ“Š {item.progress}% Complete</span>}
+                                {item.valueScore && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>ðŸ’Ž Value: {item.valueScore}</span>}
+                                {item.duration && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>â±ï¸ {item.duration}</span>}
+                                {item.checks && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>âœ… {item.checks}</span>}
+                                {item.reviewScore && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>ðŸ¤– Score: {item.reviewScore}</span>}
+                                {item.passRate && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>ðŸŽ¯ Pass: {item.passRate}</span>}
+                                {item.slaTimer && <span style={{ background: "rgba(229,83,83,0.15)", color: "#e55353", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>â³ SLA: {item.slaTimer}</span>}
+                                {item.kbMatch && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>ðŸ“š KB Match: {item.kbMatch}</span>}
+                                {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>ðŸ¤– Confidence: {item.confidence}</span>}
+                                {item.tokensUsed && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>ðŸª™ Tokens: {item.tokensUsed}</span>}
                               </div>
 
                               {/* Application & Ticket Tag */}
@@ -1999,7 +1940,7 @@ export default function LandingPage() {
                                 <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                                   {activeApp?.name ? (
                                     <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
-                                      🚀 Application: <strong>{activeApp.name}</strong>
+                                      ðŸš€ Application: <strong>{activeApp.name}</strong>
                                     </span>
                                   ) : <div />}
                                   <span
@@ -2119,7 +2060,7 @@ export default function LandingPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", color: "var(--cyan)", fontWeight: "700" }}>
-                📄 AI-Generated PRD Document · {selectedPrdItem?.prbCode || "PRB003210"}
+                ðŸ“„ AI-Generated PRD Document Â· {selectedPrdItem?.prbCode || "PRB003210"}
               </h3>
               <button
                 onClick={() => setShowPrdModal(false)}
@@ -2131,7 +2072,7 @@ export default function LandingPage() {
                   cursor: "pointer",
                 }}
               >
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -2184,7 +2125,7 @@ export default function LandingPage() {
                   cursor: "pointer",
                 }}
               >
-                Sync with AD Development Backlog →
+                Sync with AD Development Backlog â†’
               </button>
             </div>
           </div>
@@ -2194,12 +2135,12 @@ export default function LandingPage() {
       <Footer />
       {/* Deprecated: <Chatbot hideFloat={!isChatbotEnabled(selectedArea, selectedRole)} /> */}
 
-      {/* Unified Bot Widget — shown for AMS Support / Software Engineers */}
+      {/* Unified Bot Widget â€” shown for AMS Support / Software Engineers */}
       {isChatbotEnabled(selectedArea, selectedRole) && data && (
         <UnifiedBotWidget selectedRole={selectedRole} data={data} onOpenChange={setIsBotOpen} />
       )}
 
-      {/* AI for AD Role Bot Widget — shown when "AI for AD" domain is selected */}
+      {/* AI for AD Role Bot Widget â€” shown when "AI for AD" domain is selected */}
       {selectedArea === "AI for AD" && data && (
         <AdRoleBotWidget selectedRole={selectedRole} data={data} onOpenChange={setIsBotOpen} />
       )}
@@ -2231,7 +2172,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="pd-ai-tools-title" style={{ marginTop: "12px", marginBottom: "8px" }}>Invoke SEL Nexus</h3>
                 <p className="pd-ai-tools-desc" style={{ marginBottom: "24px" }}>
-                  Run SEL Nexus for &quot;{selectedRole === "L3 Support Engineer" ? "L3 Deep Engineering & Hotfix" : selectedRole === "Product Owner" ? "Product Owner Backlog & AC" : selectedRole === "Developer" ? "AD Developer Workspace" : "L4 Support Platform"}&quot; — governed, autonomous
+                  Run SEL Nexus for &quot;{selectedRole === "L3 Support Engineer" ? "L3 Deep Engineering & Hotfix" : selectedRole === "Product Owner" ? "Product Owner Backlog & AC" : selectedRole === "Developer" ? "AD Developer Workspace" : "L4 Support Platform"}&quot; â€” governed, autonomous
                   delivery from requirements through implementation.
                 </p>
 
@@ -2373,7 +2314,7 @@ export default function LandingPage() {
                     Automated AI Remediation
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                    Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "Automated Incident Remediation"}
+                    Target: <strong>{ignioItem?.num || "INC009405"}</strong> â€” {ignioItem?.subject || "Automated Incident Remediation"}
                   </div>
                 </div>
               </div>
@@ -2383,7 +2324,7 @@ export default function LandingPage() {
                 onClick={() => setIgnioModalOpen(false)}
                 style={{ background: "transparent", border: "none", color: "#94a3b8", fontSize: "18px", cursor: "pointer" }}
               >
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -2480,7 +2421,7 @@ export default function LandingPage() {
                           marginTop: "2px",
                         }}
                       >
-                        {isDone ? "✓" : isCurrent ? "⚙️" : s.step}
+                        {isDone ? "âœ“" : isCurrent ? "âš™ï¸" : s.step}
                       </div>
 
                       <div style={{ flex: 1 }}>
@@ -2635,7 +2576,7 @@ export default function LandingPage() {
                     {deterministicItem?.num || "Automated Resolution Assistant"}
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                    Ticket: <strong>{deterministicItem?.subject?.split(" — ")[0] || deterministicItem?.subject || "Support Ticket"}</strong>
+                    Ticket: <strong>{deterministicItem?.subject?.split(" â€” ")[0] || deterministicItem?.subject || "Support Ticket"}</strong>
                   </div>
                 </div>
               </div>
@@ -2645,7 +2586,7 @@ export default function LandingPage() {
                 onClick={() => setDeterministicModalOpen(false)}
                 style={{ background: "transparent", border: "none", color: "#94a3b8", fontSize: "18px", cursor: "pointer" }}
               >
-                ✕
+                âœ•
               </button>
             </div>
 

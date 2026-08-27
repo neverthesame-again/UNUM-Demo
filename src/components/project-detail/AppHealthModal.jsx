@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+﻿import React, { useMemo } from "react";
 import { Modal } from "../Modal";
 
 // Color helpers based on statusType
@@ -28,7 +28,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     }
     const seed = Math.abs(hash);
 
-    // Good: 99–100%, Slow: 92–97%, Down: 65–80% with sharp drops
+    // Good: 99ΓÇô100%, Slow: 92ΓÇô97%, Down: 65ΓÇô80% with sharp drops
     const isGood = app.statusType === 'good';
     const isWarn = app.statusType === 'warn';
 
@@ -44,7 +44,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
       return parseFloat(Math.min(100, Math.max(0, val)).toFixed(1));
     });
 
-    // Good: 0–3 errors, Slow: 5–18 errors, Down: 30–60 errors, spike at end
+    // Good: 0ΓÇô3 errors, Slow: 5ΓÇô18 errors, Down: 30ΓÇô60 errors, spike at end
     const maxErr = isGood ? 3 : isWarn ? 18 : 60;
     const errors = Array(7).fill(0).map((_, i) => {
       let val = Math.floor(((seed * (i + 3) * 23) % 100) / 100 * maxErr);
@@ -55,7 +55,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     return { uptime, errors };
   }, [app.title, app.statusType]);
 
-  // SVG polyline coords: Y-axis 50–100 for good/slow, 0–100 for down
+  // SVG polyline coords: Y-axis 50ΓÇô100 for good/slow, 0ΓÇô100 for down
   const yMin = app.statusType === 'danger' ? 40 : 85;
   const yMax = 100;
   const yRange = yMax - yMin;
