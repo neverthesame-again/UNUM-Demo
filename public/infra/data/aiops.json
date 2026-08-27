@@ -1,0 +1,66 @@
+{
+  "source": "mock",
+  "window": { "label": "Autonomous · last 12h", "from": "2026-07-29T19:00:00Z", "to": "2026-07-30T07:00:00Z" },
+  "summary": {
+    "autonomousActions": 31,
+    "autoRemediations": 14,
+    "servicesRestarted": 8,
+    "incidentEnrichments": 4,
+    "ticketsAutoDocumented": 3,
+    "knowledgeArticlesDrafted": 2,
+    "engineerHoursSaved": 9.4,
+    "policyBlocks": 2,
+    "humanApprovalsRequested": 7,
+    "rollbacksTriggered": 0
+  },
+  "agents": [
+    { "id": "observability", "name": "Observability Agent", "icon": "🔍", "status": "active", "statusLabel": "Active", "actions12h": 7, "successRate": 100, "autonomyLevel": "read-only", "model": "claude-sonnet-4-6", "avgLatencyMs": 1840, "description": "Correlates alerts, enriches incidents with CMDB dependency maps, validates post-change state." },
+    { "id": "remediation", "name": "Remediation Agent", "icon": "🛠", "status": "active", "statusLabel": "Active", "actions12h": 14, "successRate": 100, "autonomyLevel": "policy-gated write", "model": "claude-sonnet-4-6", "avgLatencyMs": 2260, "description": "Executes approved runbooks — disk cleanup, pod restarts, app pool recycles, session host failover." },
+    { "id": "capacity", "name": "Capacity Agent", "icon": "📈", "status": "active", "statusLabel": "Active", "actions12h": 3, "successRate": 100, "autonomyLevel": "read-only", "model": "claude-opus-5", "avgLatencyMs": 3410, "description": "Forecasts storage and pool runway, models remediation outcomes before they are approved." },
+    { "id": "patch", "name": "Patch & Compliance Agent", "icon": "🛡", "status": "blocked", "statusLabel": "Awaiting approval", "actions12h": 1, "successRate": 100, "autonomyLevel": "approval required", "model": "claude-sonnet-4-6", "avgLatencyMs": 1520, "description": "Stages cumulative updates, classifies patch failures, drafts retry jobs. Cannot reboot without human approval." },
+    { "id": "knowledge", "name": "Knowledge / ITSM Agent", "icon": "🧾", "status": "active", "statusLabel": "Active", "actions12h": 4, "successRate": 100, "autonomyLevel": "policy-gated write", "model": "claude-opus-5", "avgLatencyMs": 4120, "description": "Auto-documents incidents with RCA drafts, publishes KB articles, prepares handovers." },
+    { "id": "backup", "name": "Backup & DR Agent", "icon": "📦", "status": "running", "statusLabel": "Running test", "actions12h": 2, "successRate": 100, "autonomyLevel": "policy-gated write", "model": "claude-sonnet-4-6", "avgLatencyMs": 1990, "description": "Verifies restore integrity, measures RTO/RPO, maintains contingency-plan evidence." }
+  ],
+  "actions": [
+    { "time": "06:52", "agent": "Remediation", "action": "Cleared /var/log on 4 Olive app nodes — disk 94% → 61%", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "olive-claims" },
+    { "time": "06:20", "agent": "Observability", "action": "Correlated 23 alerts into INC0104915, suppressed 19 duplicates", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "INC0104915" },
+    { "time": "05:47", "agent": "Remediation", "action": "Restarted hung RJ Health feed listener on RJH-FEED-02, queue drained", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "rj-health-pricing" },
+    { "time": "05:31", "agent": "Knowledge", "action": "Auto-documented INC0104870 with RCA draft + linked KB0014422", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "INC0104870" },
+    { "time": "04:58", "agent": "Capacity", "action": "Reclaimed 640 GB orphaned snapshots on the Solera Tier-1 array", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "CAP-0071" },
+    { "time": "04:12", "agent": "Remediation", "action": "Failed over stuck Citrix session host CTX-B-14, 38 sessions preserved", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "citrix-vdi" },
+    { "time": "03:55", "agent": "Observability", "action": "Enriched INC0104882 with CMDB dependency map (41 CIs)", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "INC0104882" },
+    { "time": "03:12", "agent": "Remediation", "action": "Restarted olive-worker pods 3 & 5 after OOM kill", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "olive-claims" },
+    { "time": "02:40", "agent": "Patch", "action": "Staged July CU on 118 servers — pending reboot approval", "outcome": "blocked", "autonomous": false, "reversible": true, "linkedTo": "PATCH-JUL" },
+    { "time": "02:05", "agent": "Backup", "action": "Verified restore integrity for 6 of 7 protection groups", "outcome": "partial", "autonomous": true, "reversible": true, "linkedTo": "INC0104903" },
+    { "time": "01:33", "agent": "Remediation", "action": "Recycled IIS app pool on TELADOC-EDGE-04, 502s cleared", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "teladoc-virtual" },
+    { "time": "01:10", "agent": "Knowledge", "action": "Raised KB draft for FSLogix profile contention pattern", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "citrix-vdi" },
+    { "time": "00:44", "agent": "Observability", "action": "Detected anomalous egress on VLAN 340 — benign, backup traffic", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "platform" },
+    { "time": "00:15", "agent": "Remediation", "action": "Extended tablespace on PG-OLIVE-PRD-02 by 200 GB", "outcome": "success", "autonomous": true, "reversible": true, "linkedTo": "olive-claims" }
+  ],
+  "models": [
+    { "name": "claude-opus-5", "role": "Reasoning — RCA, forecasting, narrative", "requests": 412, "tokensIn": 3840000, "tokensOut": 286000, "costUsd": 61.4, "latencyP50Ms": 2180, "latencyP95Ms": 4380, "errorRatePct": 0.2 },
+    { "name": "claude-sonnet-4-6", "role": "Execution — correlation, runbook steps, enrichment", "requests": 2864, "tokensIn": 9120000, "tokensOut": 612000, "costUsd": 38.7, "latencyP50Ms": 940, "latencyP95Ms": 2260, "errorRatePct": 0.1 },
+    { "name": "claude-haiku-4-5", "role": "Classification — alert triage, dedup, routing", "requests": 18420, "tokensIn": 14200000, "tokensOut": 340000, "costUsd": 12.9, "latencyP50Ms": 210, "latencyP95Ms": 480, "errorRatePct": 0.05 }
+  ],
+  "quality": [
+    { "id": "groundedness", "name": "Groundedness against source telemetry", "value": 97.8, "target": 95, "unit": "%", "direction": "higher", "status": "ok", "detail": "Every claim in an agent summary is checked back against the ITSM record, metric series or CMDB entry it cites." },
+    { "id": "citation-coverage", "name": "Citation coverage on RCA drafts", "value": 94.1, "target": 90, "unit": "%", "direction": "higher", "status": "ok", "detail": "Share of assertions in generated RCAs that carry a traceable source reference." },
+    { "id": "hallucination", "name": "Unsupported-claim rate", "value": 0.7, "target": 2, "unit": "%", "direction": "lower", "status": "ok", "detail": "Claims flagged by the evaluator as unsupported by retrieved context. Sampled at 20% of generations." },
+    { "id": "action-precision", "name": "Remediation action precision", "value": 99.2, "target": 98, "unit": "%", "direction": "higher", "status": "ok", "detail": "Executed actions that matched the approved runbook step exactly, with no drift." },
+    { "id": "false-correlation", "name": "False alert-correlation rate", "value": 3.4, "target": 5, "unit": "%", "direction": "lower", "status": "ok", "detail": "Alerts grouped into an incident that a human later separated." },
+    { "id": "human-override", "name": "Human override rate", "value": 8.1, "target": 15, "unit": "%", "direction": "lower", "status": "ok", "detail": "Agent recommendations rejected or materially edited by the on-call engineer." }
+  ],
+  "guardrails": [
+    { "id": "GR-01", "name": "No unapproved production writes", "triggered": 2, "detail": "Patch Agent blocked from rebooting 19 staged servers — reboot requires explicit human approval." },
+    { "id": "GR-02", "name": "Change freeze respected", "triggered": 1, "detail": "Patch wave held back from 22 Olive servers under the release freeze expiring 2 Aug." },
+    { "id": "GR-03", "name": "Blast radius ceiling", "triggered": 0, "detail": "No runbook attempted to touch more than 2 of 6 app nodes concurrently." },
+    { "id": "GR-04", "name": "Retention policy enforcement", "triggered": 0, "detail": "Storage reclaim cross-checked against the 7-year claims records mandate before any deletion." },
+    { "id": "GR-05", "name": "PHI redaction on model input", "triggered": 41, "detail": "Member identifiers stripped from 41 log excerpts before they were sent to a model." }
+  ],
+  "audit": {
+    "entries": 31,
+    "retentionYears": 6,
+    "immutable": true,
+    "note": "Every agent action is written to an immutable log with approver identity, timestamp, justification and rollback handle."
+  }
+}

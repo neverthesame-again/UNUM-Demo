@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Sign In — Co-Worker Login</title>
+<link rel="stylesheet" href="/css/app.css"/>
+<link rel="stylesheet" href="/css/login.css"/>
+</head>
+<body class="login-body">
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-brand">
+      <h1> Co-Worker Login </h1>
+      <div class="sub">Sign in with your credentials</div>
+    </div>
+
+    <form id="loginForm" class="login-form" autocomplete="off">
+      <label class="login-label" for="role">Agent Role</label>
+      <select class="login-input" id="role" name="role" required>
+        <option value="Service Desk Agent Assist">Service Desk Agent Assist</option>
+        <option value="EUC Engineer Assist">EUC Engineer Assist</option>
+        <option value="ITSM Process Co-Worker">ITSM Process Co-Worker</option>
+        <option value="Reliability Engineer Assist" selected>Reliability Engineer Assist</option>
+        <option value="Shift Intelligence Co-Worker">Shift Intelligence Co-Worker</option>
+        <option value="Compute Engineer Assist">Compute Engineer Assist</option>
+        <option value="Backup &amp; Recovery Engineer Assist">Backup &amp; Recovery Engineer Assist</option>
+        <option value="End Point &amp; Compliance Assist">End Point &amp; Compliance Assist</option>
+        <option value="Capacity Engineer Assist">Capacity Engineer Assist</option>
+      </select>
+
+      <label class="login-label" for="username">Username</label>
+      <input class="login-input" id="username" name="username" placeholder="" autocomplete="username" required/>
+
+      <label class="login-label" for="password">Password</label>
+      <input class="login-input" id="password" name="password" type="password" placeholder="" autocomplete="current-password" required/>
+
+      <div class="login-error" id="loginError" hidden></div>
+
+      <button class="login-btn" id="loginBtn" type="submit">Sign In</button>
+    </form>
+
+    <div class="login-demo" hidden>
+      <div class="login-demo-t">Demo engineer accounts <span class="login-demo-hint2">(click a row to autofill)</span></div>
+      <table class="login-demo-tbl" id="demoTbl">
+        <tr data-username="j.alvarez" data-password="Reliability#2026">
+          <td class="mono">j.alvarez</td><td class="mono">Reliability#2026</td><td><span class="pill grn">Senior SRE</span></td>
+        </tr>
+        <tr data-username="m.chen" data-password="OnCall#Shift9">
+          <td class="mono">m.chen</td><td class="mono">OnCall#Shift9</td><td><span class="pill blu">SRE II</span></td>
+        </tr>
+        <tr data-username="temp.contractor" data-password="Temp#Access24">
+          <td class="mono">temp.contractor</td><td class="mono">Temp#Access24</td><td><span class="pill amb">Temporary</span></td>
+        </tr>
+      </table>
+      <div class="login-demo-hint">The temporary account expires automatically and is limited to a shorter, 2-hour session.</div>
+    </div>
+  </div>
+</div>
+<script type="module" src="/js/login.js"></script>
+</body>
+</html>

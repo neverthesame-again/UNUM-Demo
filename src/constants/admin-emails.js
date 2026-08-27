@@ -8,7 +8,7 @@ export const SUPER_ADMIN_EMAILS = [
   'lavanya.tetakali@tcs.com',
   'vishnu.kosuru@tcs.com',
   'test3@tcs.com',
-  'saiteja.kolluru@tcs.com',
+  'vishnu4916@gmail.com',
   'dinesh.kottakota@tcs.com',
   'sreeja.biswas2@tcs.com',
   'praveen.katta1@tcs.com'
