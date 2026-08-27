@@ -11,48 +11,46 @@ import { askGemini } from "../services/gemini.service";
 
 const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
 
-// ── Role-specific suggested questions ──────────────────────────────────────────
+// ── Role-specific suggested questions (2 per role, generic section-level) ──────
 const ROLE_SUGGESTIONS = {
+  "Product Owner": [
+    "What is the current status of our active epics and sprint backlog items?",
+    "Which user stories have pending BDD acceptance criteria or require my review?",
+  ],
+  "Developer": [
+    "What are the open pull requests and their current AI review scores?",
+    "Are there any active build blockers or unit test coverage gaps I need to address?",
+  ],
   "Support Engineer": [
-    "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
-    "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
+    "What are the active incident tickets that need triage and what are their current SLA statuses?",
+    "What security vulnerabilities are detected in the environment and what is the remediation status for each?",
   ],
   "Software Engineer": [
-    "Provide the architectural risk analysis and deployment status for the PostgreSQL Row Lock Clearance Patch (HF-892).",
-    "What are the root cause findings for INC-9920 regarding the database deadlock, and which kernel patch is required to resolve it?",
+    "What are the current code hotfixes and patches under review, and what are their deployment statuses?",
+    "What root cause analysis findings are available and what are the recommended engineering fixes?",
   ],
   "L1 Support Engineer": [
-    "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
-    "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
-    "Which tickets are approaching their SLA deadline?",
-    "How many tickets were auto-resolved by the chatbot today?",
+    "Which incoming tickets are approaching their SLA deadline and what automated resolutions are available?",
+    "What security vulnerabilities are active and what is the patch confidence level for each finding?",
   ],
   "L2 Support Engineer": [
-    "What are the current escalated P2/P3 incidents?",
-    "What root cause analysis results are available?",
-    "Which PRD documents are ready for review?",
-    "Show me the recurring problem tickets.",
+    "What are the escalated incidents under investigation and what root cause findings does the AI have?",
+    "Which PRD documents are ready for review and what problem tickets are mapped to recurring clusters?",
   ],
   "L3 Support Engineer": [
-    "What is the status of the core hotfixes in staging?",
-    "Which database queries need kernel-level tuning?",
-    "Are there any infrastructure patches ready for deployment?",
-    "What are the database lock contention risks?",
+    "What are the core hotfixes currently in staging and what database queries need kernel-level optimization?",
+    "What infrastructure patches are ready for deployment and what architecture risks are currently flagged?",
   ],
   "L4 Support Engineer": [
-    "What is the current vendor SLA compliance status?",
-    "Are there any cloud infrastructure warnings or alerts?",
-    "What is the status of active vendor escalation tickets?",
-    "Is there any upcoming maintenance window I should know about?",
+    "What is the current vendor SLA compliance status and are there any active escalation tickets?",
+    "What are the cloud infrastructure health metrics and is there any upcoming maintenance window to plan for?",
   ],
 };
 
 // Fallback for unknown roles
 const DEFAULT_SUGGESTIONS = [
-  "What are the current risks?",
-  "What needs my attention?",
-  "What is the overall status?",
-  "Summarise my dashboard.",
+  "What are the current risks on my dashboard?",
+  "What needs my immediate attention right now?",
 ];
 
 
@@ -133,7 +131,7 @@ function toGeminiHistory(messages) {
  *   selectedRole {string}  – the active AD role from LandingPage
  *   data         {object}  – the live role data object from LandingPage (dynamic)
  */
-export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
+export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = (state) => {
@@ -250,6 +248,7 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
       body: JSON.stringify({
         message: messageText,
         sessionId: backendSessionIdRef.current,
+        domain: domain || "",
       }),
     });
 

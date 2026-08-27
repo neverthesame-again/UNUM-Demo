@@ -1,4 +1,4 @@
-﻿/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/set-state-in-effect */
 // Domain & Role Dynamic Landing Page Component with Multi-Tab Mock Views
 
 import { useState, useEffect } from "react";
@@ -2137,7 +2137,7 @@ export default function LandingPage() {
 
       {/* Unified Bot Widget - shown for AMS Support / Software Engineers */}
       {isChatbotEnabled(selectedArea, selectedRole) && data && (
-        <UnifiedBotWidget selectedRole={selectedRole} data={data} onOpenChange={setIsBotOpen} />
+        <UnifiedBotWidget selectedRole={selectedRole} data={data} domain={selectedArea} onOpenChange={setIsBotOpen} />
       )}
 
       {/* AI for AD Role Bot Widget - shown when "AI for AD" domain is selected */}
