@@ -7,6 +7,7 @@ import { landingPageService } from "../services/landing-page.service";
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { Footer } from "../components/Footer";
 import { Chatbot } from "../components/chatbot";
+import InfraPage from "./InfraPage";
 import { AdRoleBotWidget } from "../components/AdRoleBotWidget";
 import { UnifiedBotWidget } from "../components/UnifiedBotWidget";
 import { useToast } from "../components/Toast";
@@ -233,9 +234,17 @@ export default function LandingPage() {
     setDeterministicItem(item);
     setDeterministicIsRunning(true);
     setDeterministicIsResolved(false);
-    setDeterministicMessages([]);
     setDeterministicInputValue("");
     setDeterministicAgentTyping(false);
+
+    setDeterministicMessages([
+      {
+        id: 1,
+        sender: "agent",
+        text: "Hi, how can I help you?",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+      }
+    ]);
     setDeterministicModalOpen(true);
   };
 
@@ -243,8 +252,10 @@ export default function LandingPage() {
     let timer;
     if (deterministicIsRunning && deterministicModalOpen) {
       const stepCount = deterministicMessages.length;
-      const isFlow1 = deterministicItem?.num === "RITM004120";
-      
+      const isVerificationFlow = deterministicItem?.id === "ar1" || deterministicItem?.num?.includes("Member Portal") || !deterministicItem?.id;
+      const isDobFlow = deterministicItem?.id === "ar2" || deterministicItem?.num?.includes("Data Validation");
+      const isAccountConflictFlow = deterministicItem?.id === "ar3" || deterministicItem?.num?.includes("Account Identity");
+
       const addMsg = (sender, text) => {
         setDeterministicMessages((prev) => [
           ...prev,
@@ -252,45 +263,151 @@ export default function LandingPage() {
         ]);
       };
 
-      if (stepCount === 1) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          addMsg("agent", isFlow1 ? "I'm sorry to hear you're experiencing trouble with this. Are you trying to register for an account?" : "I understand how frustrating that can be, and I'd be happy to help. Are you trying to register for an account?");
-        }, 2000);
-      } else if (stepCount === 3) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          addMsg("agent", isFlow1 ? "Thank you. Could you please provide the exact date of birth you are attempting to enter?" : "Got it. Could you please share the exact date of birth you are typing into the field?");
-        }, 2000);
-      } else if (stepCount === 5) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          addMsg("agent", isFlow1 
-            ? "Thank you for sharing that. Your information is perfectly correct! However, our system strictly accepts dates in the MM-DD-YYYY format using dashes instead of slashes. For example: 08-14-1992. Could you please try entering it this way so we can proceed?" 
-            : "Thank you. Your information is correct, but it looks like the month and day are reversed. Our system requires the month first in the MM-DD-YYYY format (e.g. 10-25-1988). Can you please try entering it in that specific format?");
-        }, 3000);
-      } else if (stepCount === 7) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          setDeterministicMessages((prev) => [
-            ...prev,
-            { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
-          ]);
-          setDeterministicIsRunning(false);
-          setDeterministicIsResolved(true);
-          if (deterministicItem) {
-            deterministicItem.status = "Resolved (Deterministic)";
-            deterministicItem.statusType = "good";
-            deterministicItem.resolution = "Validated & Corrected";
-            deterministicItem.timeToResolve = "12 seconds";
-            deterministicItem.csat = "5/5 Stars";
-            deterministicItem.isResolved = true;
-          }
-        }, 2000);
+      if (isVerificationFlow) {
+        if (stepCount === 2) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I'm sorry you're having trouble logging in because the verification code email isn't coming through.\n\nAre you trying to log in, reset your password, or register a new account?");
+          }, 6000);
+        } else if (stepCount === 4) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I can help you reset your password and get the verification code email delivered.\n\nHave you checked your Spam/Junk (and Promotions, if you use Gmail) folders for the verification code email?");
+          }, 7000);
+        } else if (stepCount === 6) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I understand—thank you for confirming you've checked Spam/Junk and it's not there.\n\nWhat email address are you using to request the password reset verification code?");
+          }, 7000);
+        } else if (stepCount === 8) {
+          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
+          const emailMatch = lastUserMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+          const targetEmail = emailMatch ? emailMatch[0] : (lastUserMsg.trim() || "supriya@yahoo.com");
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `I've got it — you're using ${targetEmail} for the password reset.\n\nI checked the status for that email and found it's suppressed (hard bounce), which means our verification/OTP emails are being blocked and won't deliver. I've removed the suppression and cleared the stale verification attempts, so the system is ready to send a new code.\n\nPlease follow these steps:\n\n1. Clear your browser cache and cookies (or open a Private/Incognito window).\n2. Go back to the portal sign-in page and select "Change Password" / "Forgot Password."\n3. Request a new verification code (use only the most recent code).\n4. Check your Inbox (and Spam/Junk again, just in case).\n5. The email will come from no-reply@mail.entrykeyid.com.\n6. Your verification code expires in about 5 minutes—if it expires, wait for it to fully expire before requesting another.\n\nYou should now be able to receive the code and reset your password successfully.`
+            );
+          }, 8000);
+        } else if (stepCount === 9) {
+          timer = setTimeout(() => {
+            setDeterministicMessages((prev) => [
+              ...prev,
+              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            ]);
+            setDeterministicIsRunning(false);
+            setDeterministicIsResolved(true);
+            if (deterministicItem) {
+              deterministicItem.status = "Resolved";
+              deterministicItem.statusType = "good";
+              deterministicItem.resolution = "Suppression Removed & Verification Reset";
+              deterministicItem.timeToResolve = "14 seconds";
+              deterministicItem.csat = "5/5 Stars";
+              deterministicItem.isResolved = true;
+            }
+          }, 2000);
+        }
+      } else if (isDobFlow) {
+        if (stepCount === 2) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I'm sorry you're running into that—I'd like to help get you logged in. Are you trying to register for a new account or log in to an existing account?");
+          }, 6000);
+        } else if (stepCount === 4) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I understand—thanks for confirming you're registering for a new account.\n\nWhat exact date of birth are you entering (please type it exactly as you're inputting it, including any dashes or slashes)?");
+          }, 7000);
+        } else if (stepCount === 6) {
+          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
+          const dobMatch = lastUserMsg.match(/\d{2}[-/]\d{2}[-/]\d{4}/);
+          const typedDob = dobMatch ? dobMatch[0] : (lastUserMsg.trim() || "10-25-1990");
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `Thanks—yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format (October 25, 1990), so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
+            );
+          }, 8000);
+        } else if (stepCount === 7) {
+          timer = setTimeout(() => {
+            setDeterministicMessages((prev) => [
+              ...prev,
+              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            ]);
+            setDeterministicIsRunning(false);
+            setDeterministicIsResolved(true);
+            if (deterministicItem) {
+              deterministicItem.status = "Resolved";
+              deterministicItem.statusType = "good";
+              deterministicItem.resolution = "DOB Format Validated & Account Match Verified";
+              deterministicItem.timeToResolve = "12 seconds";
+              deterministicItem.csat = "5/5 Stars";
+              deterministicItem.isResolved = true;
+            }
+          }, 2000);
+        }
+      } else if (isAccountConflictFlow) {
+        if (stepCount === 2) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I understand how frustrating that can be. To help me check whether there's an existing, inactive, or blocked account tied to your details, please share the email address you're using to register (the exact one you entered on the sign-up page).");
+          }, 6000);
+        } else if (stepCount === 4) {
+          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
+          const emailMatch = lastUserMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+          const targetEmail = emailMatch ? emailMatch[0] : (lastUserMsg.trim() || "supriya@yahoo.com");
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `Thanks, Supriya. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
+            );
+          }, 7000);
+        } else if (stepCount === 6) {
+          const emailMsg = deterministicMessages.find((m) => m.sender === "user" && m.text.includes("@"))?.text || "supriya@yahoo.com";
+          const emailMatch = emailMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+          const targetEmail = emailMatch ? emailMatch[0] : "supriya@yahoo.com";
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `Thank you for confirming. I've checked the records available to me, and ${targetEmail} is not showing as an Active/Inactive/Blocked account in the current list—so there isn't an inactive legacy account I can delete on my side based on this data.\n\nTo get you registered successfully, please try these quick steps:\n\n1. Use "Sign in / Forgot password" (since the system is indicating an account already exists) and attempt a password reset for ${targetEmail}.\n2. If you don't receive the reset email, check Spam/Junk and confirm there are no typos or extra spaces in the email.`
+            );
+          }, 8000);
+        } else if (stepCount === 7) {
+          timer = setTimeout(() => {
+            setDeterministicMessages((prev) => [
+              ...prev,
+              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            ]);
+            setDeterministicIsRunning(false);
+            setDeterministicIsResolved(true);
+            if (deterministicItem) {
+              deterministicItem.status = "Resolved";
+              deterministicItem.statusType = "good";
+              deterministicItem.resolution = "Account Existence Verified & Reset Guidance Provided";
+              deterministicItem.timeToResolve = "11 seconds";
+              deterministicItem.csat = "5/5 Stars";
+              deterministicItem.isResolved = true;
+            }
+          }, 2000);
+        }
       }
     }
     return () => clearTimeout(timer);
@@ -301,20 +418,20 @@ export default function LandingPage() {
     if (ignioIsRunning && ignioCurrentStep > 0 && ignioCurrentStep < 4) {
       timer = setTimeout(() => {
         setIgnioCurrentStep((prev) => prev + 1);
-      }, 2200);
+      }, 4500);
     } else if (ignioIsRunning && ignioCurrentStep === 4) {
       timer = setTimeout(() => {
         setIgnioIsRunning(false);
         setIgnioIsResolved(true);
         if (ignioItem) {
-          ignioItem.status = "Resolved (ignio)";
+          ignioItem.status = "Resolved";
           ignioItem.statusType = "good";
-          ignioItem.resolution = ignioItem.resolution || "ignio Autonomous Healing Executed (100% Success)";
-          ignioItem.timeToResolve = "8 seconds";
+          ignioItem.resolution = ignioItem.resolution || "Autonomous Healing Executed (100% Success)";
+          ignioItem.timeToResolve = "18 seconds";
           ignioItem.csat = "5/5 Stars";
           ignioItem.isResolved = true;
         }
-      }, 1800);
+      }, 4000);
     }
     return () => clearTimeout(timer);
   }, [ignioIsRunning, ignioCurrentStep, ignioItem]);
@@ -392,6 +509,9 @@ export default function LandingPage() {
       appBadge: "BSPOKE",
       badgeColor: "cyan",
       projects: 5,
+      inProgress: 4,
+      completed: 1,
+      avgProgress: 58,
       members: 14,
       includeL3Pipeline: true,
     },
@@ -403,6 +523,9 @@ export default function LandingPage() {
       appBadge: "SNOW",
       badgeColor: "green",
       projects: 3,
+      inProgress: 2,
+      completed: 1,
+      avgProgress: 72,
       members: 8,
       includeL3Pipeline: true,
     },
@@ -414,6 +537,9 @@ export default function LandingPage() {
       appBadge: "ORCL",
       badgeColor: "orange",
       projects: 4,
+      inProgress: 3,
+      completed: 1,
+      avgProgress: 58,
       members: 12,
       includeL3Pipeline: false,
     },
@@ -425,6 +551,9 @@ export default function LandingPage() {
       appBadge: "SFDC",
       badgeColor: "blue",
       projects: 6,
+      inProgress: 4,
+      completed: 2,
+      avgProgress: 65,
       members: 18,
       includeL3Pipeline: false,
     },
@@ -436,6 +565,9 @@ export default function LandingPage() {
       appBadge: "PEGA",
       badgeColor: "red",
       projects: 2,
+      inProgress: 2,
+      completed: 0,
+      avgProgress: 60,
       members: 6,
       includeL3Pipeline: true,
     },
@@ -447,6 +579,9 @@ export default function LandingPage() {
       appBadge: "CC",
       badgeColor: "purple",
       projects: 3,
+      inProgress: 2,
+      completed: 1,
+      avgProgress: 75,
       members: 10,
       includeL3Pipeline: false,
     },
@@ -458,6 +593,9 @@ export default function LandingPage() {
       appBadge: "CLM",
       badgeColor: "cyan",
       projects: 8,
+      inProgress: 5,
+      completed: 3,
+      avgProgress: 82,
       members: 22,
       includeL3Pipeline: true,
     },
@@ -509,11 +647,7 @@ export default function LandingPage() {
     tabData,
   } = data;
 
-  let currentAvailableRoles = getRolesForBusinessArea(selectedArea);
-  if (user?.activeRole) {
-    const matched = currentAvailableRoles.filter((r) => r.value === user.activeRole);
-    currentAvailableRoles = matched.length > 0 ? matched : [{ value: user.activeRole, label: user.activeRole }];
-  }
+  const currentAvailableRoles = getRolesForBusinessArea(selectedArea);
   const isPOPage = selectedArea === "AI for AD" && selectedRole === "Product Owner";
   const activeApp = selectedApp || DEFAULT_APP;
   const currentAppData = APPLICATION_DATA_MAP[activeApp.name] || APPLICATION_DATA_MAP["BSpoke Application"];
@@ -552,11 +686,7 @@ export default function LandingPage() {
     }
   }
 
-  return (
-    <>
-      <main className="re-landing-page fade-in">
-        {/* Domain & Role Context Selector Bar */}
-        {!selectedWorkspace && (
+  const contextSelectorBar = !selectedWorkspace && (
           <div
             style={{
               display: "flex",
@@ -574,17 +704,17 @@ export default function LandingPage() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
-                🎯 Role Context Switcher:
+                Active Workspace:
               </span>
               <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Viewing as <strong>{selectedRole}</strong> under <strong>{selectedArea}</strong>
+                Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
               </span>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                  {selectedArea === "AI for AMS" ? "L1 Classification:" : "Domain:"}
+                  {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
                 </label>
                 <select
                   value={selectedArea === "AI for AMS" ? "Acquisition" : selectedArea}
@@ -631,7 +761,6 @@ export default function LandingPage() {
                 </label>
                 <select
                   value={selectedRole}
-                  disabled={!!user?.activeRole}
                   onChange={(e) => {
                     sessionStorage.removeItem("landing_active_tab");
                     sessionStorage.removeItem("landing_selected_workspace");
@@ -645,8 +774,7 @@ export default function LandingPage() {
                     padding: "6px 12px",
                     fontSize: "12px",
                     fontWeight: "600",
-                    cursor: user?.activeRole ? "default" : "pointer",
-                    opacity: user?.activeRole ? 0.95 : 1,
+                    cursor: "pointer",
                   }}
                 >
                   {currentAvailableRoles.map((r) => (
@@ -662,7 +790,22 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        )}
+  );
+
+  if (selectedArea === "AI for Infra") {
+    return (
+      <main className="re-landing-page fade-in">
+        {contextSelectorBar}
+        <InfraPage />
+      </main>
+    );
+  }
+
+  return (
+    <>
+      <main className="re-landing-page fade-in">
+        {/* Domain & Role Context Selector Bar */}
+        {contextSelectorBar}
 
         {/* Top Header Bar */}
         <header className="re-topbar">
@@ -700,14 +843,50 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="re-chips">
-              {summary.chips.map((chip) => (
-                <span
-                  key={chip.id}
-                  className={`re-pill ${chip.type === "warn" || chip.type === "danger" ? "warn" : ""}`}
-                >
-                  {chip.text}
-                </span>
-              ))}
+              {(() => {
+                const ROLE_STATS = {
+                  "AI for AD": {
+                    "Admin":          [{ label: "SPRINT VELOCITY", value: "94%",    color: "var(--cyan)" }, { label: "CODE QUALITY",    value: "88.5%",  color: "#50c878" }],
+                    "Product Owner":  [{ label: "EPIC READINESS",  value: "92%",    color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%",    color: "#50c878" }],
+                    "Developer":      [{ label: "CODE COVERAGE",   value: "91.2%",  color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%",  color: "#50c878" }],
+                    "Tester":         [{ label: "PASS RATE",       value: "96.8%",  color: "var(--cyan)" }, { label: "API COVERAGE",   value: "94.5%",  color: "#50c878" }],
+                  },
+                  "AI for AMS": {
+                    "Support Engineer":   [{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
+                    "Software Engineer":  [{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "PATCH SUCCESS",   value: "98.8%",  color: "var(--cyan)" }],
+                    "L1 Support Engineer":[{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
+                    "L2 Support Engineer":[{ label: "RCA CONFIDENCE",  value: "92%",    color: "var(--cyan)" }, { label: "SLA REMAINING",   value: "2h 45m", color: "var(--gold)" }],
+                    "L3 Support Engineer":[{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "ZERO-DAY VULNS", value: "0",      color: "var(--cyan)" }],
+                    "L4 Support Engineer":[{ label: "VENDOR SLA",      value: "99.9%",  color: "#50c878"      }, { label: "COST VARIANCE",  value: "-4.2%",  color: "var(--cyan)" }],
+                  },
+                };
+                const stats = ROLE_STATS[selectedArea]?.[selectedRole];
+                if (!stats) return summary.chips.map((chip) => (
+                  <span key={chip.id} className={`re-pill ${chip.type === "warn" || chip.type === "danger" ? "warn" : ""}`}>{chip.text}</span>
+                ));
+                return stats.map((s) => (
+                  <div
+                    key={s.label}
+                    style={{
+                      background: "var(--surface-card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "10px",
+                      padding: "8px 16px",
+                      minWidth: "130px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "2px",
+                    }}
+                  >
+                    <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                      {s.label}
+                    </span>
+                    <span style={{ fontSize: "22px", fontWeight: "800", color: s.color, lineHeight: 1.1 }}>
+                      {s.value}
+                    </span>
+                  </div>
+                ));
+              })()}
             </div>
           </section>
         )}
@@ -817,7 +996,7 @@ export default function LandingPage() {
         )}
 
         {/* Second Row: Application Sub-Tabs Bar (Appears in a row below when an application is selected from dropdown) */}
-        {!selectedWorkspace && isPOPage && selectedApp && currentAppData && (
+        {!selectedWorkspace && isPOPage && selectedApp && currentAppData && activeTab !== "overview" && (
           <div
             style={{
               display: "flex",
@@ -933,6 +1112,27 @@ export default function LandingPage() {
                   {currentAppData.acceptance_criteria?.length || 0}
                 </span>
               </button>
+              {/* Overall Status tab */}
+              <button
+                type="button"
+                onClick={() => handleTabClick("overall_status")}
+                style={{
+                  background: activeTab === "overall_status" ? "var(--blue)" : "var(--surface-input)",
+                  color: activeTab === "overall_status" ? "#ffffff" : "var(--text-primary)",
+                  border: activeTab === "overall_status" ? "none" : "1px solid var(--border)",
+                  borderRadius: "20px",
+                  padding: "8px 18px",
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span>Overall Status</span>
+              </button>
             </div>
 
             {/* Active Application Status & Clear Button */}
@@ -964,9 +1164,57 @@ export default function LandingPage() {
           </div>
         )}
 
+        {/* Application Info Panel - shown only when Overall Status tab is active */}
+        {isPOPage && selectedApp && activeTab === "overall_status" && (() => {
+          const wsMatch = DEFAULT_DEVELOPER_WORKSPACES.find(w => w.name === selectedApp.name);
+          const totalProjects = wsMatch?.projects ?? 0;
+          const inProgress = wsMatch?.inProgress ?? 0;
+          const completed = wsMatch?.completed ?? 0;
+          const avgProgress = wsMatch?.avgProgress ?? 0;
+
+          const stats = [
+            { label: "TOTAL PROJECTS", value: totalProjects, color: "var(--cyan)" },
+            { label: "IN PROGRESS", value: inProgress, color: "var(--gold)" },
+            { label: "COMPLETED", value: completed, color: "#50c878" },
+            { label: "AVG PROGRESS", value: `${avgProgress}%`, color: "#b446ff" },
+          ];
+
+          return (
+            <div
+              className="fade-in"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "12px",
+                marginBottom: "4px",
+              }}
+            >
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  style={{
+                    background: "var(--surface-card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "10px",
+                    padding: "16px 20px",
+                    boxShadow: "var(--shadow-card)",
+                  }}
+                >
+                  <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
+                    {s.label}
+                  </div>
+                  <div style={{ fontSize: "30px", fontWeight: "800", color: s.color, lineHeight: 1 }}>
+                    {s.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* Tab View 1: Overview Grid View */}
         {activeTab === "overview" && (
-          selectedArea === "AI for AMS" ? (
+          selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
             <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
               {/* 1. Middle 3 Columns Section */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
@@ -1010,8 +1258,8 @@ export default function LandingPage() {
                         padding: "14px 16px",
                         color: "var(--text-primary)",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
+                        flexDirection: "column",
+                        gap: "12px",
                         cursor: "pointer",
                         fontWeight: "700",
                         fontSize: "13px",
@@ -1030,27 +1278,48 @@ export default function LandingPage() {
                         e.currentTarget.style.transform = "none";
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Claims</span>
+                      {/* Top Row: Title + Active Badge + Redirect Icon */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Experience</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              color: "#ef4444",
+                              background: "rgba(239, 68, 68, 0.12)",
+                              padding: "3px 8px",
+                              borderRadius: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
+                            Active
+                          </span>
+                          <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
+                        </div>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            fontWeight: "600",
-                            color: "#ef4444",
-                            background: "rgba(239, 68, 68, 0.12)",
-                            padding: "3px 8px",
-                            borderRadius: "12px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
-                          Active
-                        </span>
-                        <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
+
+                      {/* Impacted Parameters Grid */}
+                      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px", fontSize: "11px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "700", color: "#ef4444", letterSpacing: "0.4px" }}>
+                          IMPACTS TO:
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            📊 <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
+                          </span>
+                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            📝 <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
+                          </span>
+                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            ⚡ <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
+                          </span>
+                        </div>
                       </div>
                     </button>
 
@@ -1422,69 +1691,6 @@ export default function LandingPage() {
                 boxShadow: "var(--shadow-card)",
               }}
             >
-              {/* Active Application Status Banner */}
-              {selectedApp && currentAppData && (
-                <div
-                  style={{
-                    background: "var(--surface-input)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "10px",
-                    padding: "12px 16px",
-                    marginBottom: "20px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div
-                      style={{
-                        background: "var(--cyan)",
-                        color: "#ffffff",
-                        borderRadius: "50%",
-                        width: "26px",
-                        height: "26px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon name="check" size={14} />
-                    </div>
-                    <div>
-                      <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary)" }}>
-                        Active Application: {selectedApp.name}
-                      </span>
-                      <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>
-                        Displaying application-specific Epics ({currentAppData.epics?.length || 0}), User Stories ({currentAppData.user_stories?.length || 0}) & Acceptance Criteria ({currentAppData.acceptance_criteria?.length || 0})
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedApp(null);
-                      handleTabClick("overview");
-                    }}
-                    style={{
-                      background: "rgba(8, 145, 178, 0.15)",
-                      border: "1px solid rgba(8, 145, 178, 0.4)",
-                      color: "var(--cyan)",
-                      padding: "6px 12px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      fontWeight: "700",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    Clear Selection ✕
-                  </button>
-                </div>
-              )}
-
               <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <h2 style={{ margin: 0, fontSize: "18px", color: "var(--text-primary)", fontWeight: "700" }}>
@@ -1512,6 +1718,71 @@ export default function LandingPage() {
               {/* Items Card List Grid or Insights Analytics & Cards */}
               {activeTab === "insights" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                  {/* Top Two Analytics Panels */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+                      gap: "16px",
+                    }}
+                  >
+                    {/* Panel 1: Resolution Category Breakdown */}
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                          📊 Incident Resolution Category Distribution
+                        </h3>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                        {[
+                          { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
+                          { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
+                          { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
+                          { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
+                        ].map((cat, i) => (
+                          <div key={i}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
+                              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
+                              <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
+                            </div>
+                            <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
+                              <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Panel 2: Top Autonomous AI Runbooks Executed */}
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                          ⚡ Top Autonomous Runbooks Executed
+                        </h3>
+                        <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
+                      </div>
+
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {[
+                          { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
+                          { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
+                          { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
+                          { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
+                        ].map((rb, i) => (
+                          <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div>
+                              <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
+                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
+                            </div>
+                            <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Simple Insight Cards Grid */}
                   <div
                     style={{
@@ -1550,7 +1821,7 @@ export default function LandingPage() {
                                 wordBreak: "break-word",
                               }}
                             >
-                              {item.code || item.num || item.title || `Item #${idx + 1}`}
+                              {activeTab === "agent_resolve" ? (item.subject || item.name || item.title || item.code || item.num) : (item.code || item.num || item.title || `Item #${idx + 1}`)}
                             </span>
                             {item.status && (
                               <span
@@ -1585,6 +1856,7 @@ export default function LandingPage() {
                             </div>
                           )}
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
+                            {item.batchTag && <span style={{ background: "rgba(139,92,246,0.15)", color: "#c084fc", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📦 {item.batchTag}</span>}
                             {item.category && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🏷️ {item.category}</span>}
                             {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 {item.confidence}</span>}
                           </div>
@@ -1619,63 +1891,6 @@ export default function LandingPage() {
                 </div>
               ) : (
                 <>
-                  {activeTab === "agent_resolve" && (
-                    <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                      <button
-                        type="button"
-                        onClick={() => setAgentResolveFilter("all")}
-                        style={{
-                          background: agentResolveFilter === "all" ? "var(--text-primary)" : "transparent",
-                          color: agentResolveFilter === "all" ? "var(--bg-primary)" : "var(--text-secondary)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "20px",
-                          padding: "6px 16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        All Items
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAgentResolveFilter("ignio")}
-                        style={{
-                          background: agentResolveFilter === "ignio" ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)" : "transparent",
-                          color: agentResolveFilter === "ignio" ? "#fff" : "var(--text-secondary)",
-                          border: "1px solid",
-                          borderColor: agentResolveFilter === "ignio" ? "transparent" : "var(--border)",
-                          borderRadius: "20px",
-                          padding: "6px 16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        ignio
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAgentResolveFilter("deterministic")}
-                        style={{
-                          background: agentResolveFilter === "deterministic" ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "transparent",
-                          color: agentResolveFilter === "deterministic" ? "#fff" : "var(--text-secondary)",
-                          border: "1px solid",
-                          borderColor: agentResolveFilter === "deterministic" ? "transparent" : "var(--border)",
-                          borderRadius: "20px",
-                          padding: "6px 16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        Deterministic
-                      </button>
-                    </div>
-                  )}
                   <div
                     style={{
                       display: "grid",
@@ -1691,186 +1906,163 @@ export default function LandingPage() {
                         return true;
                       })
                       .map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.03)",
-                        border: activeTab === "agent_resolve" ? `1px solid ${item.isIgnio ? "rgba(8,145,178,0.5)" : item.isDeterministic ? "rgba(139,92,246,0.5)" : "var(--border)"}` : "1px solid var(--border)",
-                        boxShadow: activeTab === "agent_resolve" ? (item.isIgnio ? "0 4px 12px rgba(8,145,178,0.1)" : item.isDeterministic ? "0 4px 12px rgba(139,92,246,0.1)" : "none") : "none",
-                        borderRadius: "12px",
-                        padding: "16px",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        gap: "12px",
-                        transition: "transform 0.2s ease, border-color 0.2s ease",
-                      }}
-                    >
-                      <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                        {/* Agent Resolve Workflow Badge */}
-                        {activeTab === "agent_resolve" && (item.isIgnio || item.isDeterministic) && (
-                          <div style={{ marginBottom: "12px", display: "flex", alignItems: "center" }}>
-                            <span style={{
-                              background: item.isIgnio ? "linear-gradient(135deg, rgba(8,145,178,0.2) 0%, rgba(37,99,235,0.2) 100%)" : "linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(6,182,212,0.2) 100%)",
-                              border: `1px solid ${item.isIgnio ? "rgba(8,145,178,0.5)" : "rgba(139,92,246,0.5)"}`,
-                              color: item.isIgnio ? "#38bdf8" : "#c084fc",
-                              padding: "4px 10px",
-                              borderRadius: "12px",
-                              fontSize: "11px",
-                              fontWeight: "800",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px"
-                            }}>
-                              {item.isIgnio ? "ignio" : "Deterministic"}
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Card Header Row */}
                         <div
+                          key={item.id || idx}
                           style={{
+                            background: "rgba(255, 255, 255, 0.03)",
+                            border: "1px solid var(--border)",
+                            boxShadow: "var(--shadow-card)",
+                            borderRadius: "12px",
+                            padding: "16px",
                             display: "flex",
-                            alignItems: "center",
+                            flexDirection: "column",
                             justifyContent: "space-between",
-                            gap: "8px",
-                            marginBottom: "8px",
+                            gap: "12px",
+                            transition: "transform 0.2s ease, border-color 0.2s ease",
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "700",
-                              color: "var(--text-primary)",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {item.code || item.num || item.build || item.name || item.title || item.subject || item.metric || item.query || item.suite || item.vendor || item.prbCode || item.patch || item.area || `Item #${idx + 1}`}
-                          </span>
+                          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
 
-                          {(item.status || item.severity || item.health || item.acStatus) && (
-                            <span
-                              className={`re-tag ${(item.statusType === "danger" || item.severity === "Critical" || item.severity === "P1 Blocker" || item.status === "Failed Gate")
-                                ? "danger"
-                                : (item.statusType === "warn" || item.severity === "High" || item.severity === "Review" || item.status === "At Risk" || item.status === "Warning")
-                                  ? "warn"
-                                  : "watch"
-                                }`}
+
+                            {/* Card Header Row */}
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "8px",
+                                marginBottom: "8px",
+                              }}
                             >
-                              {item.status || item.severity || item.health || item.acStatus}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Card Sub-title / Main Name if different */}
-                        {(item.name || item.title) && (item.code || item.num || item.build || item.prbCode) && (
-                          <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--cyan)", marginBottom: "6px" }}>
-                            {item.name || item.title}
-                          </div>
-                        )}
-
-                        {/* Item Details Grid */}
-                        <div style={{ fontSize: "12px", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-                          {item.desc && <p style={{ margin: "4px 0", lineHeight: "1.4", flex: 1 }}>{item.desc}</p>}
-                          {item.format && <p style={{ margin: "4px 0", fontStyle: "italic", background: "rgba(0,0,0,0.2)", padding: "8px", borderRadius: "6px", borderLeft: "3px solid var(--cyan)", flex: 1 }}>"{item.format}"</p>}
-                          {item.snippet && <pre style={{ margin: "4px 0", background: "#0a1120", padding: "8px", borderRadius: "6px", fontSize: "11px", color: "#38bdf8", overflowX: "auto", flex: 1 }}>{item.snippet}</pre>}
-                          {item.rcaSummary && <p style={{ margin: "4px 0" }}><strong>RCA:</strong> {item.rcaSummary}</p>}
-                          {item.recommendation && <p style={{ margin: "4px 0", color: "#34d399" }}><strong>Fix:</strong> {item.recommendation}</p>}
-
-                          {activeTab === "agent_resolve" && item.system && (
-                            <div style={{ background: "var(--surface-card)", borderLeft: "3px solid var(--blue)", padding: "10px 12px", margin: "6px 0", borderRadius: "0 8px 8px 0", border: "1px solid var(--border)", borderLeftWidth: "3px" }}>
-                              <strong style={{ color: "var(--blue)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Impacted System:</strong>
-                              <div style={{ marginTop: "4px", fontSize: "13px", color: "var(--text-primary)", fontWeight: "500" }}>{item.system}</div>
-                            </div>
-                          )}
-
-
-                          {/* Key-Value Tag List */}
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
-                            {item.target && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🎯 Target: {item.target}</span>}
-                            {item.points && <span style={{ background: "rgba(0,159,218,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⭐ {item.points} Points</span>}
-                            {item.priority && <span style={{ background: "rgba(247,148,29,0.15)", color: "#f7941d", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⚡ {item.priority}</span>}
-                            {item.progress !== undefined && <span style={{ background: "rgba(151,215,0,0.15)", color: "#97d700", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📊 {item.progress}% Complete</span>}
-                            {item.valueScore && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>💎 Value: {item.valueScore}</span>}
-                            {item.duration && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>⏱️ {item.duration}</span>}
-                            {item.checks && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>✅ {item.checks}</span>}
-                            {item.reviewScore && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🤖 Score: {item.reviewScore}</span>}
-                            {item.passRate && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🎯 Pass: {item.passRate}</span>}
-                            {item.slaTimer && <span style={{ background: "rgba(229,83,83,0.15)", color: "#e55353", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⏳ SLA: {item.slaTimer}</span>}
-                            {item.kbMatch && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>📚 KB Match: {item.kbMatch}</span>}
-                            {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 Confidence: {item.confidence}</span>}
-                            {item.tokensUsed && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🪙 Tokens: {item.tokensUsed}</span>}
-                          </div>
-
-                          {/* Application & Ticket Tag */}
-                          {(item.code || item.story || item.num) && activeTab !== "agent_resolve" && (
-                            <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              {activeApp?.name ? (
-                                <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
-                                  🚀 Application: <strong>{activeApp.name}</strong>
-                                </span>
-                              ) : <div />}
                               <span
                                 style={{
-                                  fontSize: "11px",
+                                  fontSize: "14px",
                                   fontWeight: "700",
-                                  color: "#38bdf8",
-                                  background: "rgba(56, 189, 248, 0.12)",
-                                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                                  borderRadius: "6px",
-                                  padding: "4px 10px",
+                                  color: "var(--text-primary)",
+                                  wordBreak: "break-word",
                                 }}
                               >
-                                {item.code || item.story}
+                                {activeTab === "agent_resolve" ? (item.subject || item.name || item.title || item.code || item.num) : (item.code || item.num || item.build || item.name || item.title || item.subject || item.metric || item.query || item.suite || item.vendor || item.prbCode || item.patch || item.area || `Item #${idx + 1}`)}
                               </span>
-                            </div>
-                          )}
 
-                          {/* Action Button for Agent Resolve Incidents */}
-                          {activeTab === "agent_resolve" && (
-                            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              {item.isResolved ? (
-                                <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
-                                  <Icon name="check" size={16} /> Issue Resolved Successfully via {item.isIgnio ? "ignio" : "Deterministic AI"}
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (item.isIgnio) {
-                                      startIgnioAutoResolve(item);
-                                    } else {
-                                      startDeterministicAutoResolve(item);
-                                    }
-                                  }}
-                                  style={{
-                                    background: item.isIgnio 
-                                      ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)" 
-                                      : "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
-                                    color: "#ffffff",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    padding: "8px 16px",
-                                    fontWeight: "700",
-                                    fontSize: "12px",
-                                    cursor: "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "6px",
-                                    boxShadow: "0 4px 12px rgba(8, 145, 178, 0.3)",
-                                    transition: "all 0.2s ease",
-                                  }}
+                              {(item.status || item.severity || item.health || item.acStatus) && (
+                                <span
+                                  className={`re-tag ${(item.statusType === "danger" || item.severity === "Critical" || item.severity === "P1 Blocker" || item.status === "Failed Gate")
+                                    ? "danger"
+                                    : (item.statusType === "warn" || item.severity === "High" || item.severity === "Review" || item.status === "At Risk" || item.status === "Warning")
+                                      ? "warn"
+                                      : "watch"
+                                    }`}
                                 >
-                                  <Icon name="zap" size={14} /> {item.isIgnio ? "Auto Resolve" : "Agent Resolve"}
-                                </button>
+                                  {item.status || item.severity || item.health || item.acStatus}
+                                </span>
                               )}
                             </div>
-                          )}
+
+                            {/* Card Sub-title / Main Name if different */}
+                            {(item.name || item.title) && (item.code || item.num || item.build || item.prbCode) && (
+                              <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--cyan)", marginBottom: "6px" }}>
+                                {item.name || item.title}
+                              </div>
+                            )}
+
+                            {/* Item Details Grid */}
+                            <div style={{ fontSize: "12px", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+                              {item.desc && <p style={{ margin: "4px 0", lineHeight: "1.4", flex: 1 }}>{item.desc}</p>}
+                              {item.format && <p style={{ margin: "4px 0", fontStyle: "italic", background: "rgba(0,0,0,0.2)", padding: "8px", borderRadius: "6px", borderLeft: "3px solid var(--cyan)", flex: 1 }}>"{item.format}"</p>}
+                              {item.snippet && <pre style={{ margin: "4px 0", background: "#0a1120", padding: "8px", borderRadius: "6px", fontSize: "11px", color: "#38bdf8", overflowX: "auto", flex: 1 }}>{item.snippet}</pre>}
+                              {item.rcaSummary && <p style={{ margin: "4px 0" }}><strong>RCA:</strong> {item.rcaSummary}</p>}
+                              {item.recommendation && <p style={{ margin: "4px 0", color: "#34d399" }}><strong>Fix:</strong> {item.recommendation}</p>}
+
+
+
+
+                              {/* Key-Value Tag List */}
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
+                                {item.target && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🎯 Target: {item.target}</span>}
+                                {item.points && <span style={{ background: "rgba(0,159,218,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⭐ {item.points} Points</span>}
+                                {item.priority && <span style={{ background: "rgba(247,148,29,0.15)", color: "#f7941d", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⚡ {item.priority}</span>}
+                                {item.progress !== undefined && <span style={{ background: "rgba(151,215,0,0.15)", color: "#97d700", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📊 {item.progress}% Complete</span>}
+                                {item.valueScore && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>💎 Value: {item.valueScore}</span>}
+                                {item.duration && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>⏱️ {item.duration}</span>}
+                                {item.checks && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>✅ {item.checks}</span>}
+                                {item.reviewScore && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🤖 Score: {item.reviewScore}</span>}
+                                {item.passRate && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🎯 Pass: {item.passRate}</span>}
+                                {item.slaTimer && <span style={{ background: "rgba(229,83,83,0.15)", color: "#e55353", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⏳ SLA: {item.slaTimer}</span>}
+                                {item.kbMatch && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>📚 KB Match: {item.kbMatch}</span>}
+                                {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 Confidence: {item.confidence}</span>}
+                                {item.tokensUsed && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🪙 Tokens: {item.tokensUsed}</span>}
+                              </div>
+
+                              {/* Application & Ticket Tag */}
+                              {(item.code || item.story || item.num) && activeTab !== "agent_resolve" && (
+                                <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                  {activeApp?.name ? (
+                                    <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      🚀 Application: <strong>{activeApp.name}</strong>
+                                    </span>
+                                  ) : <div />}
+                                  <span
+                                    style={{
+                                      fontSize: "11px",
+                                      fontWeight: "700",
+                                      color: "#38bdf8",
+                                      background: "rgba(56, 189, 248, 0.12)",
+                                      border: "1px solid rgba(56, 189, 248, 0.3)",
+                                      borderRadius: "6px",
+                                      padding: "4px 10px",
+                                    }}
+                                  >
+                                    {item.code || item.story}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Action Button for Agent Resolve Incidents */}
+                              {activeTab === "agent_resolve" && (
+                                <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                  {item.isResolved ? (
+                                    <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+                                      <Icon name="check" size={16} /> Issue Resolved Successfully
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (item.isIgnio) {
+                                          startIgnioAutoResolve(item);
+                                        } else {
+                                          startDeterministicAutoResolve(item);
+                                        }
+                                      }}
+                                      style={{
+                                        background: item.isIgnio
+                                          ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)"
+                                          : "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "8px",
+                                        padding: "8px 16px",
+                                        fontWeight: "700",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "6px",
+                                        boxShadow: "0 4px 12px rgba(8, 145, 178, 0.3)",
+                                        transition: "all 0.2s ease",
+                                      }}
+                                    >
+                                      <Icon name="zap" size={14} /> {item.actionLabel || (item.isIgnio ? "Auto Resolve" : "Agent Resolve")}
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
                   </div>
                 </>
               )}
@@ -2016,92 +2208,92 @@ export default function LandingPage() {
       {(selectedRole === "L3 Support Engineer" ||
         selectedRole === "L4 Support Engineer" ||
         (selectedArea === "AI for AD" && (selectedRole === "Developer" || selectedRole === "Product Owner"))) && (
-        <>
-          {!selNexusOpen && (
-            <div
-              className="sel-nexus-float"
-              onClick={() => setSelNexusOpen(true)}
-              title="Open SEL Nexus Autonomous Pipeline"
+          <>
+            {!selNexusOpen && (
+              <div
+                className="sel-nexus-float"
+                onClick={() => setSelNexusOpen(true)}
+                title="Open SEL Nexus Autonomous Pipeline"
+              >
+                <Icon name="zap" size={18} />
+                <span>SEL Nexus</span>
+              </div>
+            )}
+
+            <Modal
+              isOpen={selNexusOpen}
+              onClose={() => setSelNexusOpen(false)}
+              title="Automation Pipeline"
             >
-              <Icon name="zap" size={18} />
-              <span>SEL Nexus</span>
-            </div>
-          )}
+              <div className="pd-ai-tools-card" style={{ border: "none", background: "transparent", padding: 0, boxShadow: "none", margin: "0 auto", maxWidth: "640px" }}>
+                <div className="pd-ai-tools-icon">
+                  <Icon name="zap" size={32} />
+                </div>
+                <h3 className="pd-ai-tools-title" style={{ marginTop: "12px", marginBottom: "8px" }}>Invoke SEL Nexus</h3>
+                <p className="pd-ai-tools-desc" style={{ marginBottom: "24px" }}>
+                  Run SEL Nexus for &quot;{selectedRole === "L3 Support Engineer" ? "L3 Deep Engineering & Hotfix" : selectedRole === "Product Owner" ? "Product Owner Backlog & AC" : selectedRole === "Developer" ? "AD Developer Workspace" : "L4 Support Platform"}&quot; — governed, autonomous
+                  delivery from requirements through implementation.
+                </p>
 
-          <Modal
-            isOpen={selNexusOpen}
-            onClose={() => setSelNexusOpen(false)}
-            title="Automation Pipeline"
-          >
-            <div className="pd-ai-tools-card" style={{ border: "none", background: "transparent", padding: 0, boxShadow: "none", margin: "0 auto", maxWidth: "640px" }}>
-              <div className="pd-ai-tools-icon">
-                <Icon name="zap" size={32} />
+                <div className="pd-ai-tools-actions">
+                  <a
+                    href={GREENFIELD_PIPELINE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pd-ai-tools-action greenfield"
+                    data-tooltip="Invoke Greenfield L3 Autonomous Pipeline"
+                    aria-label="Invoke Greenfield L3 Autonomous Pipeline"
+                  >
+                    <Icon name="externalLink" size={20} />
+                    <span className="pd-ai-tools-action-text">
+                      <span className="pd-ai-tools-action-title">Green Field</span>
+                      <span className="pd-ai-tools-action-subtitle">
+                        L3 Autonomous Pipeline
+                      </span>
+                    </span>
+                  </a>
+
+                  <button
+                    type="button"
+                    className="pd-ai-tools-action brownfield"
+                    onClick={() => {
+                      setSelNexusOpen(false);
+                      setPipelineModalOpen(true);
+                    }}
+                    data-tooltip="Invoke Application Enhancements L3 Pipeline"
+                    aria-label="Invoke Application Enhancements L3 Pipeline"
+                  >
+                    <Icon name="play" size={20} />
+                    <span className="pd-ai-tools-action-text">
+                      <span className="pd-ai-tools-action-title">
+                        Application Enhancements
+                      </span>
+                      <span className="pd-ai-tools-action-subtitle">
+                        L3 Autonomous Pipeline
+                      </span>
+                    </span>
+                  </button>
+                </div>
               </div>
-              <h3 className="pd-ai-tools-title" style={{ marginTop: "12px", marginBottom: "8px" }}>Invoke SEL Nexus</h3>
-              <p className="pd-ai-tools-desc" style={{ marginBottom: "24px" }}>
-                Run SEL Nexus for &quot;{selectedRole === "L3 Support Engineer" ? "L3 Deep Engineering & Hotfix" : selectedRole === "Product Owner" ? "Product Owner Backlog & AC" : selectedRole === "Developer" ? "AD Developer Workspace" : "L4 Support Platform"}&quot; — governed, autonomous
-                delivery from requirements through implementation.
-              </p>
+            </Modal>
 
-              <div className="pd-ai-tools-actions">
-                <a
-                  href={GREENFIELD_PIPELINE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pd-ai-tools-action greenfield"
-                  data-tooltip="Invoke Greenfield L3 Autonomous Pipeline"
-                  aria-label="Invoke Greenfield L3 Autonomous Pipeline"
-                >
-                  <Icon name="externalLink" size={20} />
-                  <span className="pd-ai-tools-action-text">
-                    <span className="pd-ai-tools-action-title">Green Field</span>
-                    <span className="pd-ai-tools-action-subtitle">
-                      L3 Autonomous Pipeline
-                    </span>
-                  </span>
-                </a>
-
-                <button
-                  type="button"
-                  className="pd-ai-tools-action brownfield"
-                  onClick={() => {
-                    setSelNexusOpen(false);
-                    setPipelineModalOpen(true);
-                  }}
-                  data-tooltip="Invoke Application Enhancements L3 Pipeline"
-                  aria-label="Invoke Application Enhancements L3 Pipeline"
-                >
-                  <Icon name="play" size={20} />
-                  <span className="pd-ai-tools-action-text">
-                    <span className="pd-ai-tools-action-title">
-                      Application Enhancements
-                    </span>
-                    <span className="pd-ai-tools-action-subtitle">
-                      L3 Autonomous Pipeline
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </Modal>
-
-          <PipelineModal
-            isOpen={pipelineModalOpen}
-            onClose={() => setPipelineModalOpen(false)}
-            appSlug="SEL Nexus"
-            featureDescription={`${selectedRole} autonomous hotfix & enhancements pipeline execution`}
-            endpoint={BROWNFIELD_PIPELINE_ENDPOINT}
-            onStarted={() => { }}
-          />
-        </>
-      )}
+            <PipelineModal
+              isOpen={pipelineModalOpen}
+              onClose={() => setPipelineModalOpen(false)}
+              appSlug="SEL Nexus"
+              featureDescription={`${selectedRole} autonomous hotfix & enhancements pipeline execution`}
+              endpoint={BROWNFIELD_PIPELINE_ENDPOINT}
+              onStarted={() => { }}
+            />
+          </>
+        )}
 
       {/* Claims Observability Dashboard Modal */}
       {showClaimsModal && (
         <Modal
           isOpen={showClaimsModal}
           onClose={() => setShowClaimsModal(false)}
-          title="Member Portal Observability - Claims"
+          title="Member Portal Observability - Member Experience"
           videoUrl="https://ismartams.tcsapps.com/member-portal-observability/"
         />
       )}
@@ -2178,10 +2370,10 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#f8fafc" }}>
-                    ignio
+                    Automated AI Remediation
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                    Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "ignio Automated Incident Remediation"}
+                    Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "Automated Incident Remediation"}
                   </div>
                 </div>
               </div>
@@ -2220,39 +2412,39 @@ export default function LandingPage() {
                 {[
                   {
                     step: 1,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Connecting to ignio AIOps Engine & Fetching FHIR API Gateway Metrics"
-                      : "Connecting to ignio AIOps Engine & Fetching Incident Diagnostics",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Establishing secure telemetry stream to Interoperability Gateway node."
-                      : "Establishing secure channel to ignio core telemetry node."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "1. Ingest & Connect: Member Ingestion Queue"
+                      : "1. Ingest & Connect: Batch Scheduler Telemetry",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Connecting to HR Connect ingestion service and checking file transfer queue status."
+                      : "Connecting to Control-M Batch Scheduler and fetching worker thread status logs."
                   },
                   {
                     step: 2,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Analyzing API Traffic Logs & Identifying 429 Rate-Limit Throttling Spike"
-                      : "Analyzing Logs & Executing Automated Root Cause Analysis (RCA)",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Correlating client request bursts with Token Bucket exhaustion & tripped circuit breaker."
-                      : "Parsing application stack traces & correlated metric anomalies."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "2. Observe & Detect: File Lock & Stream Stall"
+                      : "2. Observe & Detect: Stalled Batch Job Identification",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Identifying file read-lock on enrollment batch feed and unreleased stream handle."
+                      : "Detecting thread memory deadlock, unreleased database locks, and batch job failure."
                   },
                   {
                     step: 3,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Running ignio Rate-Limit Auto-Expansion & Circuit Breaker Reset Payload"
-                      : "Running ignio Automated Remediation & Self-Healing Payload",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Expanding throughput ceiling by 2.5x and executing automatic circuit breaker state reset."
-                      : "Applying system patch, clearing locks, and recycling target worker threads."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "3. Auto-Resume & Self-Heal: Releasing Lock & Resuming Stream"
+                      : "3. Auto-Restart & Self-Heal: Clearing Locks & Resuming Job",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Clearing file lock, resetting staging pointer, and issuing automated stream resume."
+                      : "Releasing stale database locks, clearing worker cache, and issuing automated job restart."
                   },
                   {
                     step: 4,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Verifying FHIR Gateway Telemetry & Confirming Zero Throttling Drops"
-                      : "Verifying System Health Telemetry & Signing Off Resolution",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Executing synthetic HL7/FHIR payload test suite; updating ITSM ticket status."
-                      : "Executing synthetic health check suite and updating ITSM ticket status."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "4. Govern & Verify: Confirming HR Data Flow & Sign-off"
+                      : "4. Govern & Verify: Confirming Successful Execution",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Verifying member enrollment records processed successfully and setting ticket status to Resolved."
+                      : "Verifying batch job resumed successfully, all records ingested, and setting ticket status to Resolved."
                   },
                 ].map((s) => {
                   const isDone = ignioCurrentStep > s.step || ignioIsResolved;
@@ -2331,7 +2523,7 @@ export default function LandingPage() {
                       Issue is resolved successfully!
                     </h4>
                     <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>
-                      ignio automated remediation completed. Incident status has been updated to <strong>Resolved</strong> with 100% health confirmation.
+                      Automated remediation completed. Incident status has been updated to <strong>Resolved</strong> with 100% health confirmation.
                     </p>
                   </div>
                   <button
@@ -2440,10 +2632,10 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#f8fafc" }}>
-                    Deterministic
+                    {deterministicItem?.num || "Automated Resolution Assistant"}
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                    Ticket: <strong>{deterministicItem?.num || "RITM004120"}</strong> • Application Data Issue
+                    Ticket: <strong>{deterministicItem?.subject?.split(" — ")[0] || deterministicItem?.subject || "Support Ticket"}</strong>
                   </div>
                 </div>
               </div>
@@ -2552,12 +2744,7 @@ export default function LandingPage() {
                 </div>
               )}
 
-              {deterministicIsRunning && (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#38bdf8", fontSize: "12px", fontStyle: "italic", padding: "4px" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#38bdf8", animation: "pulse 1s infinite" }} />
-                  Deterministic agent is executing validation rules...
-                </div>
-              )}
+
             </div>
 
             {/* Input Area / Footer */}
@@ -2573,41 +2760,51 @@ export default function LandingPage() {
             >
               {(() => {
                 const stepCount = deterministicMessages.length;
-                const isFlow1 = deterministicItem?.num === "RITM004120";
-                
-                if (stepCount === 0) {
-                  const suggestedText = isFlow1 ? "It says my dob is incorrect but I'm entering the right one." : "The portal won't accept my birthdate. It keeps giving me a validation error.";
-                  return (
-                    <button
-                      onClick={() => {
-                        setDeterministicMessages((prev) => [
-                          ...prev,
-                          { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-                        ]);
-                      }}
-                      style={{
-                        background: "rgba(59, 130, 246, 0.1)",
-                        border: "1px solid #3b82f6",
-                        color: "#60a5fa",
-                        padding: "10px 16px",
-                        borderRadius: "20px",
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        transition: "all 0.2s",
-                        alignSelf: "flex-start",
-                        marginBottom: "4px"
-                      }}
-                      onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
-                      onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
-                    >
-                      {suggestedText}
-                    </button>
-                  );
+
+                if (stepCount === 1) {
+                  let suggestedText = "";
+                  if (deterministicItem?.id === "ar1" || deterministicItem?.num?.includes("Member Portal")) {
+                    suggestedText = "I'm unable to log in to the member portal. It keeps asking for a verification code, but I'm not receiving any email";
+                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.num?.includes("Data Validation")) {
+                    suggestedText = "It says my date of birth is incorrect, but I'm entering the right one. I can't log in";
+                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.num?.includes("Account Identity")) {
+                    suggestedText = "I'm trying to create an account, but it keeps saying I already have one";
+                  }
+
+                  if (suggestedText) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeterministicMessages((prev) => [
+                            ...prev,
+                            { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+                          ]);
+                        }}
+                        style={{
+                          background: "rgba(59, 130, 246, 0.1)",
+                          border: "1px solid #3b82f6",
+                          color: "#60a5fa",
+                          padding: "10px 16px",
+                          borderRadius: "20px",
+                          fontSize: "13px",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.2s",
+                          alignSelf: "flex-start",
+                          marginBottom: "4px"
+                        }}
+                        onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
+                        onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
+                      >
+                        {suggestedText}
+                      </button>
+                    );
+                  }
                 }
                 return null;
               })()}
-              
+
               {!deterministicIsResolved ? (
                 <form
                   onSubmit={(e) => {

@@ -14,17 +14,17 @@ const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
 // ── Role-specific suggested questions ──────────────────────────────────────────
 const ROLE_SUGGESTIONS = {
   "Support Engineer": [
-    "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
-    "The member’s eligibility dates are different in Guidewell Classic versus Guidewell Cloud",
+    "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
+    "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
   ],
   "Software Engineer": [
     "Provide the architectural risk analysis and deployment status for the PostgreSQL Row Lock Clearance Patch (HF-892).",
     "What are the root cause findings for INC-9920 regarding the database deadlock, and which kernel patch is required to resolve it?",
   ],
   "L1 Support Engineer": [
-    "Provide the top 10 incident details",
+    "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
+    "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
     "Which tickets are approaching their SLA deadline?",
-    "What tickets need my triage action right now?",
     "How many tickets were auto-resolved by the chatbot today?",
   ],
   "L2 Support Engineer": [

@@ -10,8 +10,8 @@ const DEFAULT_API_URL =
   "https://iscbfcgkfmzswnmarlbe.supabase.co/functions/v1/chatbot-agent";
 
 export const PREDEFINED_PROMPTS = [
-  "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
-  "The member’s eligibility dates are different in Guidewell Classic versus Guidewell Cloud",
+  "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
+  "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
 ];
 
 const PROMPT_CHAR_LIMIT = 44;
@@ -428,6 +428,9 @@ export function useChatbot() {
     setMessages((prev) => [...prev, userMsg]);
     syncMessageToSupabase(activeSessionId, userMsg, currentTitle);
     setLoading(true);
+
+    // Wait 5 to 7 seconds before generating the response
+    await new Promise((resolve) => setTimeout(resolve, 6000));
 
     try {
       const response = await callAgentApi(textToSend);
