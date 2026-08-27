@@ -8,7 +8,7 @@ import { useForceTheme } from "../context/ThemeContext";
 
 // Page content
 const content = {
-  introBadge: "One GuideWell Knowledge HUB",
+  introBadge: "GuideWell AI Platform",
   title: "Welcome to the Future of Enterprise AI",
   subtitle:
     "Sign in to access personalized AI workspaces and co-pilots tailored for your domain and role across GuideWell Enterprise AI.",
@@ -27,7 +27,7 @@ const content = {
     },
   ],
   form: {
-    title: "GuideWell Knowledge\u00a0Hub",
+    title: "GuideWell AI Platform",
     subtitle: "Sign in using your tcs credentials",
     emailLabel: "Email Address",
     emailPlaceholder: "your.name@tcs.com",

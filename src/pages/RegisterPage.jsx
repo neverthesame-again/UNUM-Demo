@@ -135,14 +135,14 @@ export default function RegisterPage() {
       <div className="orb orb-2" style={{ opacity: 0.1 }} />
       <div className="login-split">
         <div className="login-left">
-          <div className="login-badge">Join One GuideWell AI HUB</div>
+          <div className="login-badge">GuideWell AI Platform</div>
           <h2>Create Your Account</h2>
           <p>
             Get started with role-based enterprise AI designed for innovation. Select your domain and role to unlock dedicated AI agents and project workspaces
           </p>
           <div className="login-feature">
             <div className="login-feature-icon">💻</div>
-            <div className="login-feature-text">AI for AD: Workspaces for Admin, Product Owner, Developer & Tester</div>
+            <div className="login-feature-text">AI for AD: Workspaces for Product Owner & Developer</div>
           </div>
           <div className="login-feature">
             <div className="login-feature-icon">🛠️</div>
@@ -151,12 +151,8 @@ export default function RegisterPage() {
             </div>
           </div>
           <div className="login-feature">
-            <div className="login-feature-icon">📈</div>
-            <div className="login-feature-text">AI for Business: Analytics for MedTech, Clinical & HealthCare Business Analysts</div>
-          </div>
-          <div className="login-feature">
-            <div className="login-feature-icon">🔒</div>
-            <div className="login-feature-text">Secure TCS-verified role-based access & HIPAA compliance governance</div>
+            <div className="login-feature-icon">📊</div>
+            <div className="login-feature-text">AI for Infra: Intelligence for Infra Engineer, SRE Lead & NOC Lead</div>
           </div>
         </div>
         <div className="login-right">
