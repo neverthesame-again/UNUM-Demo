@@ -1,0 +1,32 @@
+.login-body{min-height:100vh;margin:0;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg,#0b1120,#16203a 55%,#0b1120);padding:20px}
+.login-wrap{width:100%;max-width:420px}
+.login-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  padding:28px 26px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.login-brand h1{margin:0 0 4px;font-size:19px;color:var(--txt)}
+.login-brand .sub{font-size:12.5px;color:var(--muted);margin-bottom:22px}
+
+.login-form{display:flex;flex-direction:column}
+.login-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:12px;margin-bottom:5px}
+.login-input{background:#fff;border:1px solid var(--line);color:var(--txt);border-radius:9px;
+  padding:10px 12px;font-size:13.5px;font-family:inherit;outline:none}
+.login-input:focus{border-color:var(--accent2)}
+
+.login-error{background:#fef2f2;border:1px solid #fca5a5;color:#b91c1c;border-radius:8px;
+  padding:9px 11px;font-size:12.3px;margin-top:14px;line-height:1.4}
+
+.login-btn{margin-top:18px;width:100%;background:var(--accent2);border:none;color:#fff;
+  border-radius:9px;padding:11px 15px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s}
+.login-btn:hover{filter:brightness(1.1)}
+.login-btn:disabled{opacity:.6;cursor:not-allowed}
+
+.login-demo{margin-top:22px;padding-top:18px;border-top:1px dashed var(--line)}
+.login-demo-t{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:8px}
+.login-demo-hint2{text-transform:none;letter-spacing:0;font-size:10.5px;color:#93a0bd}
+.login-demo-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.login-demo-tbl tr{cursor:pointer}
+.login-demo-tbl td{padding:6px;border-bottom:1px dashed #dbe2ef}
+.login-demo-tbl tr:last-child td{border-bottom:none}
+.login-demo-tbl tr:hover td{background:#f2f5fb}
+.login-demo-tbl .mono{font-family:ui-monospace,Consolas,monospace;color:var(--txt)}
+.login-demo-hint{font-size:11px;color:var(--muted);margin-top:9px;line-height:1.5}

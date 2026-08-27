@@ -708,7 +708,7 @@ export function Chatbot({ hideFloat }) {
                     title={promptText}
                     onClick={() => selectPredefinedPrompt(promptText)}
                   >
-                    {truncatePromptText(promptText)}
+                    {promptText}
                   </div>
                 ))}
               </div>

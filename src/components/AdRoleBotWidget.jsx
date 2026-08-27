@@ -189,6 +189,9 @@ export function AdRoleBotWidget({ selectedRole, data, onOpenChange }) {
     setMessages(nextMessages);
     setLoading(true);
 
+    // Wait 5 to 7 seconds before generating the response
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
     try {
       // ── Hardcoded Mock Intercept for Developer Prompt ───────────────────────
       if (text.includes("failing unit tests") && text.includes("hotfix strategies")) {

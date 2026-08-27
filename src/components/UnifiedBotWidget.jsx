@@ -14,17 +14,17 @@ const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
 // ── Role-specific suggested questions ──────────────────────────────────────────
 const ROLE_SUGGESTIONS = {
   "Support Engineer": [
-    "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
-    "The member’s eligibility dates are different in Guidewell Classic versus Guidewell Cloud",
+    "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
+    "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
   ],
   "Software Engineer": [
     "Provide the architectural risk analysis and deployment status for the PostgreSQL Row Lock Clearance Patch (HF-892).",
     "What are the root cause findings for INC-9920 regarding the database deadlock, and which kernel patch is required to resolve it?",
   ],
   "L1 Support Engineer": [
-    "Provide the top 10 incident details",
+    "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
+    "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
     "Which tickets are approaching their SLA deadline?",
-    "What tickets need my triage action right now?",
     "How many tickets were auto-resolved by the chatbot today?",
   ],
   "L2 Support Engineer": [
@@ -203,7 +203,70 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
     setMessages(nextMessages);
     setLoading(true);
 
+    // Wait 5 to 7 seconds before generating the response
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+
     try {
+      // ── Hardcoded Mock Intercept for Vulnerabilities Prompt ───────────────
+      if (text.toLowerCase().includes("vulnerabilit") || (text.toLowerCase().includes("security") && text.toLowerCase().includes("patch"))) {
+        const mockVuln = `### 🛡️ Active AMS Vulnerabilities & Security Findings
+
+Here is the current security risk assessment from the **Vulnerabilities** dashboard:
+
+1. **CVE-2026-104 · Member Portal Authentication Token Expiry Vulnerability**
+   - **Category**: Security & Auth / Auth & Identity
+   - **Status**: **Critical / Patch Ready** (Confidence: 98%)
+   - **Impact**: Short-lived JWT expiry tokens require automated rotation via Redis token cache.
+
+2. **CVE-2026-210 · Claims Gateway SQL Connection Parameter Exposure**
+   - **Category**: Database Security / BI & Analytics
+   - **Status**: **Moderate / Mitigated** (Confidence: 85%)
+   - **Impact**: Parameterized query bindings and TLS connection encryption enforced.
+
+3. **CVE-2026-901 · EDI 837 Batch Parser Buffer Overflow Risk**
+   - **Category**: Pipeline Security
+   - **Status**: **Warning / Scanning In Progress** (Confidence: 62%)
+   - **Impact**: Strict JSON/X12 schema boundary enforcement active on ingestion endpoints.
+
+**Recommended Action**: Deploy patch package for **CVE-2026-104** to Staging Cluster for automated verification.`;
+
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: mockVuln, timestamp: getCurrentTime() },
+        ]);
+        return;
+      }
+
+      // ── Hardcoded Mock Intercept for Insights Prompt ────────────────────────
+      if (text.toLowerCase().includes("insights") || text.toLowerCase().includes("telemetry")) {
+        const mockInsights = `### 📊 AMS Insights & Telemetry Analytics Summary
+
+Key intelligence and operational metrics from the **Insights** workspace:
+
+#### 1. Incident Resolution Category Distribution (Last 30 Days)
+- **Data Validation & Schema Errors**: 68 tickets (38%)
+- **Authentication & Identity Management**: 48 tickets (27%)
+- **Database Connection Pool & Latency**: 36 tickets (20%)
+- **API Gateway & Integration Timeouts**: 27 tickets (15%)
+
+#### 2. Top Autonomous AI Runbooks Executed (99.4% Avg Success)
+- **ignio™ Autonomous Healing Payload #89**: 142 runs · 100% success · 8s avg latency
+- **Deterministic Data Validation Reconciler**: 98 runs · 99.2% success · 6s avg latency
+- **OAuth Token Cache Flusher & Key Rotator**: 64 runs · 98.4% success · 12s avg latency
+- **DB Pool Auto-Scaler & Session Drainer**: 41 runs · 100% success · 10s avg latency
+
+#### 3. Key Telemetry Findings
+- **EDI Ingestion**: 34% spike in batch validation timeouts on Mondays between 08:00–10:00 EST (**INS-901**).
+- **Password Self-Service ROI**: Chatbot deflection has reduced L1 support volume by **42%** (**INS-902**).
+- **Gateway Efficiency**: Redis token caching improved API latency from 120ms to 8ms for 95% of requests (**INS-904**).`;
+
+        setMessages((prev) => [
+          ...prev,
+          { sender: "bot", text: mockInsights, timestamp: getCurrentTime() },
+        ]);
+        return;
+      }
+
       // ── Hardcoded Mock Intercept for SWE Prompt ───────────────────────────
       if (text.includes("INC-9920") && text.includes("deadlock")) {
         const mockRCA = `### Root Cause Analysis: INC-9920 (Database Deadlock)

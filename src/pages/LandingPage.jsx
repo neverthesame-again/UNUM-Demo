@@ -7,10 +7,12 @@ import { landingPageService } from "../services/landing-page.service";
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { Footer } from "../components/Footer";
 import { Chatbot } from "../components/chatbot";
+import InfraPage from "./InfraPage";
 import { AdRoleBotWidget } from "../components/AdRoleBotWidget";
 import { UnifiedBotWidget } from "../components/UnifiedBotWidget";
 import { useToast } from "../components/Toast";
 import { PipelineModal } from "../components/project-detail/PipelineModal";
+import { AppHealthModal } from "../components/project-detail/AppHealthModal";
 import { Modal } from "../components/Modal";
 import { Icon } from "../components/Icon";
 import {
@@ -40,6 +42,8 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [showPrdModal, setShowPrdModal] = useState(false);
+  const [showAppHealthModal, setShowAppHealthModal] = useState(false);
+  const [selectedHealthApp, setSelectedHealthApp] = useState(null);
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
   const [isBotOpen, setIsBotOpen] = useState(false);
@@ -389,6 +393,9 @@ export default function LandingPage() {
       appBadge: "BSPOKE",
       badgeColor: "cyan",
       projects: 5,
+      inProgress: 4,
+      completed: 1,
+      avgProgress: 58,
       members: 14,
       includeL3Pipeline: true,
     },
@@ -400,6 +407,9 @@ export default function LandingPage() {
       appBadge: "SNOW",
       badgeColor: "green",
       projects: 3,
+      inProgress: 2,
+      completed: 1,
+      avgProgress: 72,
       members: 8,
       includeL3Pipeline: true,
     },
@@ -411,6 +421,9 @@ export default function LandingPage() {
       appBadge: "ORCL",
       badgeColor: "orange",
       projects: 4,
+      inProgress: 3,
+      completed: 1,
+      avgProgress: 58,
       members: 12,
       includeL3Pipeline: false,
     },
@@ -422,6 +435,9 @@ export default function LandingPage() {
       appBadge: "SFDC",
       badgeColor: "blue",
       projects: 6,
+      inProgress: 4,
+      completed: 2,
+      avgProgress: 65,
       members: 18,
       includeL3Pipeline: false,
     },
@@ -433,6 +449,9 @@ export default function LandingPage() {
       appBadge: "PEGA",
       badgeColor: "red",
       projects: 2,
+      inProgress: 2,
+      completed: 0,
+      avgProgress: 60,
       members: 6,
       includeL3Pipeline: true,
     },
@@ -444,6 +463,9 @@ export default function LandingPage() {
       appBadge: "CC",
       badgeColor: "purple",
       projects: 3,
+      inProgress: 2,
+      completed: 1,
+      avgProgress: 75,
       members: 10,
       includeL3Pipeline: false,
     },
@@ -455,6 +477,9 @@ export default function LandingPage() {
       appBadge: "CLM",
       badgeColor: "cyan",
       projects: 8,
+      inProgress: 5,
+      completed: 3,
+      avgProgress: 82,
       members: 22,
       includeL3Pipeline: true,
     },
@@ -506,11 +531,7 @@ export default function LandingPage() {
     tabData,
   } = data;
 
-  let currentAvailableRoles = getRolesForBusinessArea(selectedArea);
-  if (user?.activeRole) {
-    const matched = currentAvailableRoles.filter((r) => r.value === user.activeRole);
-    currentAvailableRoles = matched.length > 0 ? matched : [{ value: user.activeRole, label: user.activeRole }];
-  }
+  const currentAvailableRoles = getRolesForBusinessArea(selectedArea);
   const isPOPage = selectedArea === "AI for AD" && selectedRole === "Product Owner";
   const activeApp = selectedApp || DEFAULT_APP;
   const currentAppData = APPLICATION_DATA_MAP[activeApp.name] || APPLICATION_DATA_MAP["BSpoke Application"];
@@ -549,11 +570,7 @@ export default function LandingPage() {
     }
   }
 
-  return (
-    <>
-      <main className="re-landing-page fade-in">
-        {/* Domain & Role Context Selector Bar */}
-        {!selectedWorkspace && (
+  const contextSelectorBar = !selectedWorkspace && (
           <div
             style={{
               display: "flex",
@@ -574,7 +591,7 @@ export default function LandingPage() {
                 Active Workspace:
               </span>
               <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Viewing as <strong>{selectedRole}</strong> under <strong>{selectedArea}</strong>
+                Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
               </span>
             </div>
 
@@ -628,7 +645,6 @@ export default function LandingPage() {
                 </label>
                 <select
                   value={selectedRole}
-                  disabled={!!user?.activeRole}
                   onChange={(e) => {
                     sessionStorage.removeItem("landing_active_tab");
                     sessionStorage.removeItem("landing_selected_workspace");
@@ -642,8 +658,7 @@ export default function LandingPage() {
                     padding: "6px 12px",
                     fontSize: "12px",
                     fontWeight: "600",
-                    cursor: user?.activeRole ? "default" : "pointer",
-                    opacity: user?.activeRole ? 0.95 : 1,
+                    cursor: "pointer",
                   }}
                 >
                   {currentAvailableRoles.map((r) => (
@@ -659,7 +674,22 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        )}
+  );
+
+  if (selectedArea === "AI for Infra") {
+    return (
+      <main className="re-landing-page fade-in">
+        {contextSelectorBar}
+        <InfraPage />
+      </main>
+    );
+  }
+
+  return (
+    <>
+      <main className="re-landing-page fade-in">
+        {/* Domain & Role Context Selector Bar */}
+        {contextSelectorBar}
 
         {/* Top Header Bar */}
         <header className="re-topbar">
@@ -697,14 +727,50 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="re-chips">
-              {summary.chips.map((chip) => (
-                <span
-                  key={chip.id}
-                  className={`re-pill ${chip.type === "warn" || chip.type === "danger" ? "warn" : ""}`}
-                >
-                  {chip.text}
-                </span>
-              ))}
+              {(() => {
+                const ROLE_STATS = {
+                  "AI for AD": {
+                    "Admin":          [{ label: "SPRINT VELOCITY", value: "94%",    color: "var(--cyan)" }, { label: "CODE QUALITY",    value: "88.5%",  color: "#50c878" }],
+                    "Product Owner":  [{ label: "EPIC READINESS",  value: "92%",    color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%",    color: "#50c878" }],
+                    "Developer":      [{ label: "CODE COVERAGE",   value: "91.2%",  color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%",  color: "#50c878" }],
+                    "Tester":         [{ label: "PASS RATE",       value: "96.8%",  color: "var(--cyan)" }, { label: "API COVERAGE",   value: "94.5%",  color: "#50c878" }],
+                  },
+                  "AI for AMS": {
+                    "Support Engineer":   [{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
+                    "Software Engineer":  [{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "PATCH SUCCESS",   value: "98.8%",  color: "var(--cyan)" }],
+                    "L1 Support Engineer":[{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
+                    "L2 Support Engineer":[{ label: "RCA CONFIDENCE",  value: "92%",    color: "var(--cyan)" }, { label: "SLA REMAINING",   value: "2h 45m", color: "var(--gold)" }],
+                    "L3 Support Engineer":[{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "ZERO-DAY VULNS", value: "0",      color: "var(--cyan)" }],
+                    "L4 Support Engineer":[{ label: "VENDOR SLA",      value: "99.9%",  color: "#50c878"      }, { label: "COST VARIANCE",  value: "-4.2%",  color: "var(--cyan)" }],
+                  },
+                };
+                const stats = ROLE_STATS[selectedArea]?.[selectedRole];
+                if (!stats) return summary.chips.map((chip) => (
+                  <span key={chip.id} className={`re-pill ${chip.type === "warn" || chip.type === "danger" ? "warn" : ""}`}>{chip.text}</span>
+                ));
+                return stats.map((s) => (
+                  <div
+                    key={s.label}
+                    style={{
+                      background: "var(--surface-card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "10px",
+                      padding: "8px 16px",
+                      minWidth: "130px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "2px",
+                    }}
+                  >
+                    <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                      {s.label}
+                    </span>
+                    <span style={{ fontSize: "22px", fontWeight: "800", color: s.color, lineHeight: 1.1 }}>
+                      {s.value}
+                    </span>
+                  </div>
+                ));
+              })()}
             </div>
           </section>
         )}
@@ -814,7 +880,7 @@ export default function LandingPage() {
         )}
 
         {/* Second Row: Application Sub-Tabs Bar (Appears in a row below when an application is selected from dropdown) */}
-        {!selectedWorkspace && isPOPage && selectedApp && currentAppData && (
+        {!selectedWorkspace && isPOPage && selectedApp && currentAppData && activeTab !== "overview" && (
           <div
             style={{
               display: "flex",
@@ -930,6 +996,27 @@ export default function LandingPage() {
                   {currentAppData.acceptance_criteria?.length || 0}
                 </span>
               </button>
+              {/* Overall Status tab */}
+              <button
+                type="button"
+                onClick={() => handleTabClick("overall_status")}
+                style={{
+                  background: activeTab === "overall_status" ? "var(--blue)" : "var(--surface-input)",
+                  color: activeTab === "overall_status" ? "#ffffff" : "var(--text-primary)",
+                  border: activeTab === "overall_status" ? "none" : "1px solid var(--border)",
+                  borderRadius: "20px",
+                  padding: "8px 18px",
+                  fontSize: "13px",
+                  fontWeight: "700",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span>Overall Status</span>
+              </button>
             </div>
 
             {/* Active Application Status & Clear Button */}
@@ -960,6 +1047,54 @@ export default function LandingPage() {
             </div>
           </div>
         )}
+
+        {/* Application Info Panel - shown only when Overall Status tab is active */}
+        {isPOPage && selectedApp && activeTab === "overall_status" && (() => {
+          const wsMatch = DEFAULT_DEVELOPER_WORKSPACES.find(w => w.name === selectedApp.name);
+          const totalProjects = wsMatch?.projects ?? 0;
+          const inProgress = wsMatch?.inProgress ?? 0;
+          const completed = wsMatch?.completed ?? 0;
+          const avgProgress = wsMatch?.avgProgress ?? 0;
+
+          const stats = [
+            { label: "TOTAL PROJECTS", value: totalProjects, color: "var(--cyan)" },
+            { label: "IN PROGRESS", value: inProgress, color: "var(--gold)" },
+            { label: "COMPLETED", value: completed, color: "#50c878" },
+            { label: "AVG PROGRESS", value: `${avgProgress}%`, color: "#b446ff" },
+          ];
+
+          return (
+            <div
+              className="fade-in"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(4, 1fr)",
+                gap: "12px",
+                marginBottom: "4px",
+              }}
+            >
+              {stats.map((s) => (
+                <div
+                  key={s.label}
+                  style={{
+                    background: "var(--surface-card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "10px",
+                    padding: "16px 20px",
+                    boxShadow: "var(--shadow-card)",
+                  }}
+                >
+                  <div style={{ fontSize: "10px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
+                    {s.label}
+                  </div>
+                  <div style={{ fontSize: "30px", fontWeight: "800", color: s.color, lineHeight: 1 }}>
+                    {s.value}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Tab View 1: Overview Grid View */}
         {activeTab === "overview" && (
@@ -1440,69 +1575,6 @@ export default function LandingPage() {
                 boxShadow: "var(--shadow-card)",
               }}
             >
-              {/* Active Application Status Banner */}
-              {selectedApp && currentAppData && (
-                <div
-                  style={{
-                    background: "var(--surface-input)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "10px",
-                    padding: "12px 16px",
-                    marginBottom: "20px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div
-                      style={{
-                        background: "var(--cyan)",
-                        color: "#ffffff",
-                        borderRadius: "50%",
-                        width: "26px",
-                        height: "26px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Icon name="check" size={14} />
-                    </div>
-                    <div>
-                      <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--text-primary)" }}>
-                        Active Application: {selectedApp.name}
-                      </span>
-                      <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>
-                        Displaying application-specific Epics ({currentAppData.epics?.length || 0}), User Stories ({currentAppData.user_stories?.length || 0}) & Acceptance Criteria ({currentAppData.acceptance_criteria?.length || 0})
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedApp(null);
-                      handleTabClick("overview");
-                    }}
-                    style={{
-                      background: "rgba(8, 145, 178, 0.15)",
-                      border: "1px solid rgba(8, 145, 178, 0.4)",
-                      color: "var(--cyan)",
-                      padding: "6px 12px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      fontWeight: "700",
-                      transition: "all 0.2s ease",
-                    }}
-                  >
-                    Clear Selection ✕
-                  </button>
-                </div>
-              )}
-
               <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <h2 style={{ margin: 0, fontSize: "18px", color: "var(--text-primary)", fontWeight: "700" }}>
@@ -1530,125 +1602,69 @@ export default function LandingPage() {
               {/* Items Card List Grid or Insights Analytics & Cards */}
               {activeTab === "insights" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  {/* 2-Column Analytics Charts */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "20px" }}>
-                    {selectedRole === "Software Engineer" ? (
-                      <>
-                        {/* Panel 1: Software Code Quality & Test Telemetry */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              📊 Software Code Quality & Test Telemetry
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Current Sprint</span>
-                          </div>
+                  {/* Top Two Analytics Panels */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+                      gap: "16px",
+                    }}
+                  >
+                    {/* Panel 1: Resolution Category Breakdown */}
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                          📊 Incident Resolution Category Distribution
+                        </h3>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
+                      </div>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                            {[
-                              { label: "Unit & Integration Test Coverage", count: "94% (Passed)", color: "#10b981", pct: 94 },
-                              { label: "Static Code Analysis & Lint Pass Rate", count: "98% (Clean)", color: "#0891b2", pct: 98 },
-                              { label: "CI/CD Build Pipeline Speed", count: "3.2 min avg", color: "#8b5cf6", pct: 85 },
-                              { label: "Zero-Day Vulnerability Scanning", count: "0 Critical", color: "#34d399", pct: 100 },
-                            ].map((cat, i) => (
-                              <div key={i}>
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                                  <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                                </div>
-                                <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                                  <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                                </div>
-                              </div>
-                            ))}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                        {[
+                          { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
+                          { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
+                          { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
+                          { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
+                        ].map((cat, i) => (
+                          <div key={i}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
+                              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
+                              <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
+                            </div>
+                            <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
+                              <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
+                            </div>
                           </div>
-                        </div>
+                        ))}
+                      </div>
+                    </div>
 
-                        {/* Panel 2: Hotfix & PR Engineering Velocity */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              ⚡ Hotfix & PR Engineering Velocity
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>65% Faster</span>
-                          </div>
+                    {/* Panel 2: Top Autonomous AI Runbooks Executed */}
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                          ⚡ Top Autonomous Runbooks Executed
+                        </h3>
+                        <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
+                      </div>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {[
-                              { name: "PR Code Review Lead Time", execs: "1.4h avg", success: "65% Faster", time: "Approved" },
-                              { name: "Hotfix Patch Merge Reliability", execs: "42 merges", success: "99.2%", time: "Passed" },
-                              { name: "Automated Regression Test Suite", execs: "142 tests", success: "100% Pass", time: "Verified" },
-                              { name: "Software Code Complexity Index", execs: "Low Risk", success: "Grade A", time: "Passed" },
-                            ].map((rb, i) => (
-                              <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <div>
-                                  <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                                </div>
-                                <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                              </div>
-                            ))}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {[
+                          { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
+                          { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
+                          { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
+                          { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
+                        ].map((rb, i) => (
+                          <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div>
+                              <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
+                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
+                            </div>
+                            <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
                           </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {/* Panel 1: Resolution Category Breakdown */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              📊 Incident Resolution Category Distribution
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                            {[
-                              { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
-                              { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
-                              { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
-                              { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
-                            ].map((cat, i) => (
-                              <div key={i}>
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                                  <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                                </div>
-                                <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                                  <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Panel 2: Top Autonomous AI Runbooks Executed */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              ⚡ Top Autonomous Runbooks Executed
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {[
-                              { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
-                              { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
-                              { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
-                              { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
-                            ].map((rb, i) => (
-                              <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <div>
-                                  <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                                </div>
-                                <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Simple Insight Cards Grid */}
@@ -1660,10 +1676,7 @@ export default function LandingPage() {
                     }}
                   >
                     {activeTabData.items && activeTabData.items.map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                        style={{
-                          background: "rgba(255, 255, 255, 0.03)",
+                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{ cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
                           border: "1px solid var(--border)",
                           borderRadius: "12px",
                           padding: "16px",
@@ -1701,10 +1714,17 @@ export default function LandingPage() {
                                   fontWeight: "700",
                                   padding: "3px 10px",
                                   borderRadius: "12px",
-                                  background: item.statusType === "good" ? "rgba(16, 185, 129, 0.15)" : item.statusType === "warn" ? "rgba(245, 158, 11, 0.15)" : "rgba(8, 145, 178, 0.15)",
-                                  color: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#38bdf8",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  background: item.statusType === "good" ? "rgba(16, 185, 129, 0.15)" : item.statusType === "warn" ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                                  color: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#ef4444",
                                 }}
                               >
+                                <span style={{
+                                  width: "7px", height: "7px", borderRadius: "50%", display: "inline-block", flexShrink: 0,
+                                  background: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#ef4444",
+                                }} />
                                 {item.status}
                               </span>
                             )}
@@ -2159,6 +2179,16 @@ export default function LandingPage() {
           onClose={() => setShowClaimsModal(false)}
           title="Member Portal Observability - Member Experience"
           videoUrl="https://ismartams.tcsapps.com/member-portal-observability/"
+        />
+      )}
+
+      
+      {/* App Health Modal */}
+      {showAppHealthModal && (
+        <AppHealthModal
+          isOpen={showAppHealthModal}
+          onClose={() => setShowAppHealthModal(false)}
+          app={selectedHealthApp}
         />
       )}
 

@@ -1,0 +1,541 @@
+{
+  "source": "mock",
+  "summary": {
+    "shift": "19:00–07:00",
+    "counts": {
+      "P1": 2,
+      "P2": 6,
+      "P3": 18,
+      "P4": 34
+    },
+    "total": 60,
+    "autoResolvedPct": 61,
+    "mttaMinutes": 4.2,
+    "mttrMinutes": 38,
+    "awaitingValidation": [
+      {
+        "label": "Incidents awaiting user confirmation",
+        "count": 5,
+        "tone": "info"
+      },
+      {
+        "label": "Changes awaiting validation",
+        "count": 2,
+        "tone": "warning"
+      },
+      {
+        "label": "Backup recovery test pending",
+        "count": 1,
+        "tone": "purple"
+      },
+      {
+        "label": "Vendor responses pending (Dell / Cisco)",
+        "count": 3,
+        "tone": "info"
+      },
+      {
+        "label": "Olive product owner sign-off",
+        "count": 1,
+        "tone": "warning"
+      }
+    ]
+  },
+  "priorityDetail": {
+    "P1": {
+      "title": "2 P1 incidents last shift",
+      "sections": [
+        {
+          "heading": "INC0104812 — Olive claims gateway total outage",
+          "body": "Duration 41m · Restored 21:47 · Cause: F5 VIP misconfiguration after a failover test. Problem record PRB0004411 raised."
+        },
+        {
+          "heading": "INC0104839 — Teladoc virtual visit join failures",
+          "body": "Duration 27m · Restored 02:14 · Cause: SAN path flap on fabric B affecting the media edge tier. Vendor case open with Dell (SR-88231)."
+        }
+      ],
+      "note": {
+        "tone": "warning",
+        "text": "Both P1s carry a mandatory 5-day RCA delivery to the GuideWell service board."
+      }
+    },
+    "P2": {
+      "title": "6 P2 incidents last shift",
+      "sections": [
+        {
+          "heading": "Open (2)",
+          "body": "INC0104882 Olive prior-auth latency · INC0104915 RJ Health pricing queue depth"
+        },
+        {
+          "heading": "Resolved (4)",
+          "body": "Teladoc edge 502 errors (auto) · Citrix Farm B logon latency (auto) · Exchange transport queue · VPN concentrator CPU"
+        }
+      ],
+      "note": {
+        "tone": "info",
+        "text": "4 of 6 resolved autonomously with zero human touch. Mean time to restore 22 minutes."
+      }
+    },
+    "P3": {
+      "title": "18 P3 incidents last shift",
+      "sections": [
+        {
+          "heading": "Disposition",
+          "body": "11 auto-resolved by the Remediation Agent · 4 assigned to L2 queues · 2 awaiting user confirmation · 1 escalated to P2 (INC0104915)"
+        },
+        {
+          "heading": "Top categories",
+          "body": "Disk space (5) · Certificate expiry warnings (3) · Print services (3) · Backup job failures (3) · Misc (4)"
+        }
+      ]
+    },
+    "P4": {
+      "title": "34 P4 incidents last shift",
+      "sections": [
+        {
+          "heading": "Disposition",
+          "body": "29 auto-resolved · 5 in the service desk queue. Dominated by password resets, mailbox quota and VDI profile resets — all handled by the End User Computing agent with no engineer involvement."
+        }
+      ],
+      "note": {
+        "tone": "info",
+        "text": "P4 auto-resolution at 85% is above the 75% contractual target."
+      }
+    }
+  },
+  "incidents": [
+    {
+      "id": "INC0104882",
+      "priority": "P2",
+      "title": "Olive prior-auth API latency increasing",
+      "service": "olive-claims",
+      "serviceName": "Olive — Claims/Prior Auth",
+      "state": "In Progress",
+      "openedAt": "2026-07-30T03:12:00Z",
+      "slaDueAt": "2026-07-30T11:18:00Z",
+      "slaRemaining": "4h 06m",
+      "slaRiskPct": 78,
+      "breachProbability": 72,
+      "assignee": "Unassigned",
+      "severity": "critical",
+      "runbook": "RB-OLV-014",
+      "signal": "p95 API latency on olive-authsvc rose from 240ms → 1,180ms over 6 hours. EDI 278 prior-auth intake queue backing up at 2,300 msg/min against a 1,850 drain rate.",
+      "analysis": [
+        "Connection pool saturation on PG-OLIVE-PRD-02 (198/200 in use).",
+        "Correlates with the nightly prior-auth reconciliation job, which overran its window by 47 min.",
+        "Same signature as INC0102117 (14 May) — resolved by pool resize + job reschedule."
+      ],
+      "businessImpact": "Prior-auth decisioning throughput down ~34%. If sustained past 11:15 this breaches the 4-hour P2 restore SLA and delays roughly 18,000 authorization requests.",
+      "recommendation": "Approve pre-staged automation RB-OLV-014: raise pool to 320, rolling recycle of app nodes, reschedule the recon job to 01:00.",
+      "note": {
+        "tone": "info",
+        "text": "Blast radius: 2 of 6 app nodes at a time. Estimated member-facing impact: none. Rollback: 90 seconds."
+      },
+      "actions": [
+        [
+          "ok",
+          "Approve Automation RB-OLV-014"
+        ],
+        [
+          "pri",
+          "Assign to me"
+        ],
+        [
+          "no",
+          "Snooze 1h"
+        ]
+      ],
+      "slaOffsetMinutes": 246
+    },
+    {
+      "id": "INC0104903",
+      "priority": "P3",
+      "title": "Backup validation overdue — Olive claims DB",
+      "service": "olive-claims",
+      "serviceName": "Data Protection",
+      "state": "Open",
+      "openedAt": "2026-07-29T05:10:00Z",
+      "slaDueAt": "2026-07-30T22:00:00Z",
+      "slaRemaining": "Overdue 26h",
+      "slaRiskPct": 55,
+      "breachProbability": 40,
+      "assignee": "Backup & DR Agent",
+      "severity": "warning",
+      "runbook": "RB-BKP-003",
+      "signal": "Restore-verification job for OLIVE-CLAIMS-DB has not completed a successful integrity check in 26 hours (policy: every 24h).",
+      "analysis": [
+        "Last full backup succeeded at 02:10; the verification worker pool was exhausted by concurrent Solera data-lake jobs.",
+        "No data-loss risk detected — this is a verification gap, not a backup failure."
+      ],
+      "businessImpact": "Contingency-plan evidence under HIPAA §164.308(a)(7) requires demonstrable restore testing. A gap beyond 48h becomes an audit finding against the GuideWell service contract.",
+      "recommendation": "Launch off-peak verification into the isolated recovery VLAN and pin worker priority above the Solera batch.",
+      "note": {
+        "tone": "governance",
+        "text": "Compliance evidence gap — not data loss. Closes on successful verification."
+      },
+      "actions": [
+        [
+          "ok",
+          "Launch Verification Now"
+        ],
+        [
+          "pri",
+          "Schedule 22:00"
+        ],
+        [
+          "no",
+          "Acknowledge"
+        ]
+      ],
+      "slaOffsetMinutes": -1560
+    },
+    {
+      "id": "CAP-0071",
+      "priority": "P3",
+      "title": "Storage consumption trend exceeds threshold — Solera Tier-1",
+      "service": "solera-data",
+      "serviceName": "Storage",
+      "state": "Open",
+      "openedAt": "2026-07-30T01:02:00Z",
+      "slaDueAt": null,
+      "slaRemaining": "21 days to full",
+      "slaRiskPct": 88,
+      "breachProbability": 60,
+      "assignee": "Capacity Agent",
+      "severity": "warning",
+      "runbook": "RB-STG-007",
+      "signal": "Solera care/claims data platform Tier-1 storage at 88.4%, growing 1.9 TB/week against 46 TB free.",
+      "analysis": [
+        "90% threshold crossed in ~6 days; hard-full in ~21 days.",
+        "Driver: new care-program cohort onboarded 12 July (+38% claims-event volume into Solera).",
+        "2.1 TB reclaimable from orphaned snapshots and expired extract cache."
+      ],
+      "businessImpact": "Options — Now: reclaim 2.1 TB (buys ~8 days), zero risk, automated. Short term: tier 14 TB of extracts older than 18 months to Azure archive. Structural: expansion shelf, 12-week vendor lead time, needs a PO.",
+      "recommendation": "Run the reclaim today and start the expansion PO in parallel.",
+      "actions": [
+        [
+          "ok",
+          "Run Reclaim (2.1 TB)"
+        ],
+        [
+          "pri",
+          "Draft Capacity RFC"
+        ],
+        [
+          "no",
+          "Dismiss"
+        ]
+      ],
+      "slaOffsetMinutes": null
+    },
+    {
+      "id": "INC0104915",
+      "priority": "P2",
+      "title": "RJ Health drug-pricing feed queue depth rising",
+      "service": "rj-health-pricing",
+      "serviceName": "RJ Health — Drug Pricing",
+      "state": "In Progress",
+      "openedAt": "2026-07-30T06:14:00Z",
+      "slaDueAt": "2026-07-30T14:14:00Z",
+      "slaRemaining": "6h 40m",
+      "slaRiskPct": 64,
+      "breachProbability": 35,
+      "assignee": "Unassigned",
+      "severity": "warning",
+      "runbook": "STD0091",
+      "signal": "Inbound NDC pricing-update queue on RJH-FEED-01 at 8,412 messages (normal < 900).",
+      "analysis": [
+        "The feed processor is healthy; the downstream Pricing Reference API is returning intermittent 503s (7.2% error rate).",
+        "The consumer is the bottleneck, not the ingest."
+      ],
+      "businessImpact": "Drug price updates lagging ~11 minutes into the pricing reference store. Not yet materially affecting claim adjudication, but escalates past 30 min — stale pricing risks incorrect member cost share.",
+      "recommendation": "Scale the Pricing Reference API from 6 → 10 pods and enable the circuit breaker. Pre-approved standard change.",
+      "actions": [
+        [
+          "ok",
+          "Scale API Pods"
+        ],
+        [
+          "pri",
+          "Page App Team"
+        ],
+        [
+          "no",
+          "Monitor 30m"
+        ]
+      ],
+      "slaOffsetMinutes": 400
+    },
+    {
+      "id": "CHG0032118",
+      "priority": "P3",
+      "title": "2 changes awaiting CAB validation before 14:00",
+      "service": "platform",
+      "serviceName": "Change Mgmt",
+      "state": "Awaiting Approval",
+      "openedAt": "2026-07-29T16:00:00Z",
+      "slaDueAt": "2026-07-30T14:00:00Z",
+      "slaRemaining": "CAB 14:00",
+      "slaRiskPct": 40,
+      "breachProbability": 20,
+      "assignee": "Change Agent",
+      "severity": "warning",
+      "runbook": null,
+      "signal": "Two RFCs need validation before the 14:00 CAB.",
+      "analysis": [
+        "CHG0032118 — Quarterly firmware uplift on 6 core switches, DC-East. Risk: Medium. Window Sat 02:00–06:00.",
+        "CHG0032124 — Windows Server July cumulative patch, 214 servers including 22 in the Olive production tier.",
+        "Both have complete rollback plans and validated test evidence.",
+        "CHG0032124 conflicts with the Olive release freeze covering those 22 servers — agent recommends splitting the wave."
+      ],
+      "businessImpact": "Missing the CAB pushes both changes a week and holds 22 servers out of patch compliance.",
+      "recommendation": "Approve CHG0032118 and split the CHG0032124 wave to exclude frozen Olive servers.",
+      "actions": [
+        [
+          "ok",
+          "Approve Both"
+        ],
+        [
+          "pri",
+          "Split Olive Wave"
+        ],
+        [
+          "no",
+          "Defer to CAB"
+        ]
+      ],
+      "slaOffsetMinutes": 300
+    },
+    {
+      "id": "PATCH-JUL",
+      "priority": "P3",
+      "title": "Patch compliance below target — 91.3% vs 95%",
+      "service": "platform",
+      "serviceName": "Security",
+      "state": "Open",
+      "openedAt": "2026-07-28T09:00:00Z",
+      "slaDueAt": "2026-08-02T00:00:00Z",
+      "slaRemaining": "63 servers",
+      "slaRiskPct": 91,
+      "breachProbability": 55,
+      "assignee": "Patch & Compliance Agent",
+      "severity": "warning",
+      "runbook": "RB-PCH-022",
+      "signal": "91.3% compliant across 726 servers. 63 non-compliant, of which 11 carry critical CVEs.",
+      "analysis": [
+        "22 servers held under the Olive release freeze (expires 2 Aug).",
+        "19 awaiting reboot window — patched but not activated.",
+        "14 legacy Server 2012 R2 — remediation plan in flight.",
+        "8 genuine failures — agent has drafted retry jobs."
+      ],
+      "businessImpact": "The contractual security KPI is 95% within 30 days of release. Currently amber for the July service review.",
+      "recommendation": "Approve the 8 retry jobs and book a reboot wave — that alone reaches 95.1%.",
+      "note": {
+        "tone": "warning",
+        "text": "11 servers carry critical CVEs and are the priority within the 63."
+      },
+      "actions": [
+        [
+          "ok",
+          "Approve Retry Jobs (8)"
+        ],
+        [
+          "pri",
+          "Schedule Reboot Wave"
+        ],
+        [
+          "no",
+          "Export Report"
+        ]
+      ],
+      "slaOffsetMinutes": 4320
+    },
+    {
+      "id": "INC0104870",
+      "priority": "P2",
+      "title": "High incident recurrence — Citrix logon storms",
+      "service": "citrix-vdi",
+      "serviceName": "End User Computing",
+      "state": "Open",
+      "openedAt": "2026-07-30T07:04:00Z",
+      "slaDueAt": "2026-07-30T15:04:00Z",
+      "slaRemaining": "9 repeats/14d",
+      "slaRiskPct": 70,
+      "breachProbability": 45,
+      "assignee": "Unassigned",
+      "severity": "critical",
+      "runbook": "RB-EUC-011",
+      "signal": "9 incidents in 14 days, all between 07:00–07:45, all logon latency >45s on Citrix Farm B — the farm serving Care Navigator care managers and member service advocates.",
+      "analysis": [
+        "Profile-load contention against the FSLogix share; the storage IOPS ceiling is hit at 6,200 concurrent logons.",
+        "Restarting session hosts resolves the symptom, not the cause — a classic problem-management candidate."
+      ],
+      "businessImpact": "~2,700 advocate-minutes lost per incident. Across 9 incidents that is roughly 405 hours of care-team and service-centre productivity.",
+      "recommendation": "Create a Problem Record with the pre-drafted RCA and the FSLogix cloud-cache remediation plan.",
+      "actions": [
+        [
+          "ok",
+          "Create Problem Ticket"
+        ],
+        [
+          "pri",
+          "Open RCA Draft"
+        ],
+        [
+          "no",
+          "Dismiss"
+        ]
+      ],
+      "slaOffsetMinutes": 480
+    }
+  ],
+  "changes": [
+    {
+      "id": "CHG0032118",
+      "title": "Quarterly firmware uplift — 6 core switches, DC-East",
+      "type": "Normal",
+      "risk": "Medium",
+      "state": "Awaiting CAB",
+      "window": "Sat 02:00–06:00",
+      "ci": "6 core switches",
+      "approvers": [
+        "You",
+        "Network lead"
+      ],
+      "conflicts": []
+    },
+    {
+      "id": "CHG0032124",
+      "title": "Windows Server July cumulative update — 214 servers",
+      "type": "Normal",
+      "risk": "Medium",
+      "state": "Awaiting CAB",
+      "window": "Sun 01:00–05:00",
+      "ci": "214 servers",
+      "approvers": [
+        "You",
+        "Platform lead"
+      ],
+      "conflicts": [
+        "Olive release freeze covers 22 of the 214 servers"
+      ]
+    },
+    {
+      "id": "CHG0032131",
+      "title": "Olive prior-auth DB connection pool uplift",
+      "type": "Normal",
+      "risk": "Medium",
+      "state": "Draft",
+      "window": "Tonight 22:00–23:30",
+      "ci": "PG-OLIVE-PRD-02 + 6 app nodes",
+      "approvers": [
+        "You",
+        "DBA lead",
+        "Olive product owner"
+      ],
+      "conflicts": []
+    }
+  ],
+  "problems": [
+    {
+      "id": "PRB0004411",
+      "title": "Olive claims gateway F5 VIP misconfiguration",
+      "state": "RCA in progress",
+      "linkedIncidents": [
+        "INC0104812"
+      ],
+      "rcaDue": "2026-08-03"
+    },
+    {
+      "id": "PRB0004418",
+      "title": "Citrix Farm B logon latency (proposed)",
+      "state": "Proposed",
+      "linkedIncidents": [
+        "INC0104870"
+      ],
+      "rcaDue": "2026-08-03",
+      "recurrenceCount": 9
+    }
+  ],
+  "recurrenceClusters": [
+    {
+      "id": "CLU-01",
+      "title": "Citrix logon storms",
+      "count": 9,
+      "windowDays": 14,
+      "service": "citrix-vdi",
+      "rootCause": "FSLogix profile IOPS contention"
+    },
+    {
+      "id": "CLU-02",
+      "title": "Olive PG connection pool exhaustion",
+      "count": 5,
+      "windowDays": 21,
+      "service": "olive-claims",
+      "rootCause": "Pool sized for pre-cohort volume"
+    },
+    {
+      "id": "CLU-03",
+      "title": "RJ Health pricing API 503s",
+      "count": 4,
+      "windowDays": 10,
+      "service": "rj-health-pricing",
+      "rootCause": "Consumer under-scaled, no circuit breaker"
+    }
+  ],
+  "risks": [
+    {
+      "id": "RISK-SLA-01",
+      "title": "Potential SLA breach in 4h 06m",
+      "subtitle": "INC0104882 · Olive prior-auth · P2 restore clock",
+      "severity": "critical",
+      "detail": "P2 restore SLA expires 11:18. Elapsed 3h 54m. Agent gives a 72% probability of breach if no action is taken by 09:30. A second P2 breach this month triggers the service-credit clause under the GuideWell MSA. Fastest path: approve RB-OLV-014, estimated restore 22 minutes."
+    },
+    {
+      "id": "RISK-REC-01",
+      "title": "High incident recurrence — 3 clusters detected",
+      "subtitle": "Citrix logon · Olive pool exhaustion · RJ Health 503s",
+      "severity": "warning",
+      "detail": "All three are symptom-treated, not root-caused. Together they account for 41% of P2/P3 volume. Consolidating them into 3 problem records is the highest-leverage move available this month."
+    },
+    {
+      "id": "RISK-DB-01",
+      "title": "Database latency pattern increasing",
+      "subtitle": "PG-OLIVE-PRD-02 · +38% p95 week-over-week",
+      "severity": "warning",
+      "detail": "p95 query latency 62ms → 86ms week over week. Checkpoint frequency up 3x; autovacuum falling behind on auth_request_line (1.2B rows). At current growth this breaches the 150ms application timeout in roughly 5 weeks. The agent has drafted the DBA change."
+    },
+    {
+      "id": "RISK-DR-01",
+      "title": "DR replication lag — Azure East US 2 secondary",
+      "subtitle": "RPO 15m target · currently 22m",
+      "severity": "warning",
+      "detail": "Async replication lag is 22 minutes against a 15-minute RPO commitment covering Olive and Teladoc, caused by bandwidth contention with the nightly Solera archive tier-out job. A disaster declared right now would lose up to 22 minutes of claims and virtual-visit transactions — outside contracted RPO. Throttle the archive job and move it outside the replication peak."
+    }
+  ],
+  "priorities": [
+    [
+      "Olive prior-auth risk",
+      "Restore latency before the 11:18 SLA clock. Owner: you. Agent has RB-OLV-014 staged."
+    ],
+    [
+      "Database performance trend",
+      "Review the autovacuum/partition change draft with the DBA before Thursday CAB."
+    ],
+    [
+      "Infrastructure capacity review",
+      "Solera Tier-1 at 88%. Decide reclaim vs. tier-out vs. expansion PO today."
+    ],
+    [
+      "Backup & recovery validation",
+      "Close the 26h verification gap before it becomes an audit finding."
+    ],
+    [
+      "Patch compliance recovery",
+      "Approve 8 retry jobs and book the reboot wave to move 91.3% → 95%."
+    ],
+    [
+      "Shift handover",
+      "Generate handover at 18:30 — agent will pre-fill from today's activity."
+    ]
+  ]
+}

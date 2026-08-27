@@ -1,7 +1,8 @@
 // Dynamic Mock Data Provider for Landing Page across Domains, Roles & Navigation Tabs
-// Domains: AI for AD, AI for AMS
+// Domains: AI for AD, AI for AMS, AI for Infra
 // Roles: Admin, Product Owner, Developer, Tester (AI for AD)
-//        L1 Support Engineer, L2 Support Engineer, L3 Support Engineer, L4 Support Engineer (AI for AMS)
+//        Support Engineer, Software Engineer, L1–L4 Support Engineer (AI for AMS)
+//        Infra Engineer, SRE / NOC Lead (AI for Infra)
 
 export const roleMockData = {
   "AI for AD": {
@@ -11,7 +12,7 @@ export const roleMockData = {
         subtitle: "Enterprise AD Governance, Agent Mesh Telemetry & Pipeline Orchestration",
         platform: "AD-Admin",
         shift: "Sprint 42 Governance | AD Domain · Active",
-        shiftProgress: "85%",
+        shiftProgress: "38%",
         statusBadge: "● AD AGENT MESH · LIVE",
       },
       summary: {
@@ -167,7 +168,7 @@ export const roleMockData = {
         subtitle: "GenAI Requirements Workbench, User Story Synthesizer & Epic Backlog Engine",
         platform: "AD-PO",
         shift: "Sprint 42 Backlog Refinement | Active",
-        shiftProgress: "90%",
+        shiftProgress: "42%",
         statusBadge: "● BACKLOG AI ENGINE · LIVE",
       },
       summary: {
@@ -336,7 +337,7 @@ export const roleMockData = {
         subtitle: "GenAI Code Generation, Unit Test Synthesizer & Code Review Engine",
         platform: "AD-Dev",
         shift: "Active Development | Branch: `feature/claims-v2`",
-        shiftProgress: "100%",
+        shiftProgress: "35%",
         statusBadge: "● CODE AI AGENT · LIVE",
       },
       summary: {
@@ -491,7 +492,7 @@ export const roleMockData = {
         subtitle: "GenAI Test Case Generator, Playwright Auto-Healing & Regression Suite Engine",
         platform: "AD-QA",
         shift: "Release Regression Suite | Target: Staging",
-        shiftProgress: "95%",
+        shiftProgress: "40%",
         statusBadge: "● QA AUTOMATION ENGINE · LIVE",
       },
       summary: {
@@ -648,7 +649,7 @@ export const roleMockData = {
         subtitle: "GenAI First-Response Assistant, Triage Automation & Customer Query Desk",
         platform: "AMS-SE",
         shift: "Support Operations Shift | Day · 08:00 - 16:00 ET",
-        shiftProgress: "30%",
+        shiftProgress: "33%",
         statusBadge: "● SUPPORT BOT MESH · LIVE",
       },
       summary: {
@@ -734,7 +735,7 @@ export const roleMockData = {
         subtitle: "GenAI Core Patching, DB Kernel Tuning & Complex Code Hotfix Workbench",
         platform: "AMS-SWE",
         shift: "Software Engineering Shift | Active",
-        shiftProgress: "30%",
+        shiftProgress: "45%",
         statusBadge: "● HOTFIX AGENT MESH · LIVE",
       },
       summary: {
@@ -783,12 +784,11 @@ export const roleMockData = {
         },
         insights: {
           title: "Software Engineering Insights Workspace",
-          sub: "Engineering velocity metrics, patch reliability & system optimization telemetry",
+          sub: "Engineering intelligence & hotfix performance desk",
           items: [
-            { id: "ins801", code: "INS-801", title: "Hotfix Lead Time Reduced by 65% with AI Assistance", category: "Engineering Velocity", confidence: "65% Faster", status: "High Impact", statusType: "good", desc: "Average hotfix deployment time dropped from 4.2 hours to 1.2 hours across all AMS services." },
-            { id: "ins802", code: "INS-802", title: "Zero Memory Leaks Detected in Staging Regression Runs", category: "Quality Assurance", confidence: "100% Pass Rate", status: "Verified", statusType: "good", desc: "Heap dump analysis confirms zero memory growth over 24-hour continuous load testing." },
-            { id: "ins803", code: "INS-803", title: "Database Query Index Efficiency Report", category: "DB Tuning", confidence: "78% Scan Cut", status: "Optimized", statusType: "good", desc: "Composite index addition reduced claims table full scan times by 78% during peak hours." },
-            { id: "ins804", code: "INS-804", title: "Automated Regression Test Suite Coverage Spike", category: "Test Coverage", confidence: "94% Coverage", status: "High Quality", statusType: "good", desc: "Automated Playwright & Jest regression suites now cover 94% of core AMS software workflows." },
+            { id: "ins1", code: "INS-905", title: "DB Deadlock Frequency Reduction", category: "Kernel Stability", confidence: "99% Mitigated", status: "Positive Trend", statusType: "good", desc: "Hotfix #HF-892 deployment to staging reduced lock contention incidents to zero across 10,000 synthetic test transactions." },
+            { id: "ins2", code: "INS-906", title: "Heap Memory Allocation Profiler Alert", category: "Memory Profile", confidence: "92% Confidence", status: "RCA Ready", statusType: "warn", desc: "Fastify webhook microservice heap growth rate stable at 45MB/hr; PRD document generated for AD development squad handoff." },
+            { id: "ins3", code: "INS-907", title: "SQL Query Plan Regression in Claims Reporting", category: "Query Tuning", confidence: "95% Gain", status: "Patch Staged", statusType: "good", desc: "B-Tree indexing on claims_tbl(status, created_at) reduced execution time from 420ms to 15ms in test cluster." },
           ],
         },
       },
@@ -829,7 +829,7 @@ export const roleMockData = {
         subtitle: "GenAI First-Response Assistant, Triage Automation & Customer Query Desk",
         platform: "AMS-L1",
         shift: "L1 Operational Shift | Day · 08:00 - 16:00 ET",
-        shiftProgress: "30%",
+        shiftProgress: "37%",
         statusBadge: "● L1 BOT MESH · LIVE",
       },
       summary: {
@@ -843,10 +843,53 @@ export const roleMockData = {
       },
       tabs: [
         { id: "overview", label: "Overview", active: true },
+        { id: "incoming_triage", label: "Incoming Triage", badge: 3 },
         { id: "agent_resolve", label: "Agent Resolve", badge: 6 },
         { id: "vulnerabilities", label: "Vulnerabilities", badge: 3 },
         { id: "insights", label: "Insights", badge: null },
       ],
+      tabData: {
+        incoming_triage: {
+          title: "L1 Triage Queue & Customer Tickets",
+          sub: "Incoming support tickets requiring L1 verification, runbook execution or escalation",
+          items: [
+            { id: "t1", num: "INC009412", subject: "User unable to log into Member Portal", user: "John Smith (Member)", priority: "P3", slaTimer: "12 mins remaining", kbMatch: "98% (#KB-104)", status: "Needs Action" },
+            { id: "t2", num: "INC009418", subject: "Batch Report Export Timeout on Dashboard", user: "Maria Garcia (Internal)", priority: "P4", slaTimer: "2h 15m remaining", kbMatch: "85% (#KB-210)", status: "In Triage" },
+            { id: "t3", num: "RITM004125", subject: "Software License Request for Figma", user: "David Lee (Design)", priority: "P4", slaTimer: "4h 00m remaining", kbMatch: "100% (Auto Approval)", status: "Pending Action" },
+          ],
+        },
+        agent_resolve: {
+          title: "AI Agent Resolve & Automated Executions",
+          sub: "Log of 6 support tickets requiring automated AI execution today",
+          items: [
+            { id: "ar1", num: "INC009405", subject: "ignio Automated Incident Remediation", system: "ignio AIOps Engine", resolution: "ignio Autonomous Healing Pipeline", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
+            { id: "ar2", num: "RITM004120", subject: "Deterministic (Application Issue) — Password Data Validation", system: "Data Validation Engine", resolution: "Deterministic Password Validation Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
+            { id: "ar3", num: "RITM009428", subject: "Deterministic (Data Validation) — EDI 837 Claim Schema Validation Failure", system: "Claims Ingestion Engine", resolution: "Automated EDI X12 Schema Re-alignment", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
+            { id: "ar4", num: "INC009432", subject: "ignio Autonomous FHIR API Rate Limit & Throttling Mitigation", system: "Healthcare FHIR Gateway", resolution: "Dynamic Token Bucket Expansion & Circuit Breaker Reset", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
+            { id: "ar5", num: "RITM009440", subject: "Deterministic (API Integration) — OAuth Token Exchange Timeout Issue", system: "API Gateway & Auth Service", resolution: "Automated Key Rotation & OAuth Cache Flush", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
+            { id: "ar6", num: "RITM009452", subject: "Deterministic (Application Issue) — Member Profile Session State Mismatch", system: "Member Portal Session Service", resolution: "Deterministic Session Cache Re-sync", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
+          ],
+        },
+        vulnerabilities: {
+          title: "AMS Vulnerabilities & Security Findings",
+          sub: "Security vulnerability scans, CVE patches & compliance telemetry",
+          items: [
+            { id: "kb1", code: "CVE-2026-104", title: "Member Portal Password & MFA Token Vulnerability", category: "Auth & Identity", views: 1420, confidence: "98% Patch Ready", status: "Active" },
+            { id: "kb2", code: "CVE-2026-210", title: "Report Export Queue Parameter Tampering Scan", category: "BI & Analytics", views: 890, confidence: "85% Mitigated", status: "Active" },
+            { id: "kb3", code: "CVE-2026-901", title: "Legacy Single Sign-On (SSO) Cipher Weakness", category: "Security", views: 320, confidence: "62% Scan In Progress", status: "Needs Update" },
+          ],
+        },
+        insights: {
+          title: "L1 Support Insights Workspace",
+          sub: "First-line ticket trends, KB article hit rates & triage automation metrics",
+          items: [
+            { id: "ins1", code: "INS-908", title: "Password Reset Self-Service Adoption", category: "Automation Metrics", confidence: "78% Deflection", status: "Positive Trend", statusType: "good", desc: "Automated Okta self-service workflow successfully handled 78% of password reset inquiries without L1 agent intervention." },
+            { id: "ins2", code: "INS-909", title: "SSO Login Query Volume Spike on Monday Mornings", category: "Triage Trends", confidence: "85% Volume", status: "Action Needed", statusType: "warn", desc: "L1 queue experiences a 3x surge in SSO credential inquiries between 08:00 and 09:30 ET; automated pre-shift health check suggested." },
+            { id: "ins3", code: "INS-910", title: "Member Portal FAQ Knowledge Base Coverage", category: "KB Optimization", confidence: "94% Match", status: "Optimal", statusType: "good", desc: "Updated KB-104 and KB-210 articles resolved 94% of common member portal navigation questions on first contact." },
+          ],
+        },
+      },
+
       stateOfEnvironment: {
         title: "L1 Incident & Query Queues",
         tag: "Live L1 Monitoring",
@@ -982,7 +1025,7 @@ export const roleMockData = {
         subtitle: "GenAI Root Cause Diagnostics, Problem Engineering & Automatic PRD Generator",
         platform: "AMS-L2",
         shift: "L2 Escalation & Problem Engineering | Active",
-        shiftProgress: "30%",
+        shiftProgress: "41%",
         statusBadge: "● L2 DIAGNOSTIC & PRD MESH · LIVE",
       },
       summary: {
@@ -1135,7 +1178,7 @@ export const roleMockData = {
         subtitle: "GenAI Core Patching, DB Kernel Tuning & Complex Code Hotfix Workbench",
         platform: "AMS-L3",
         shift: "L3 Core Engineering & Architecture | Active",
-        shiftProgress: "30%",
+        shiftProgress: "34%",
         statusBadge: "● L3 HOTFIX AGENT MESH · LIVE",
       },
       summary: {
@@ -1257,7 +1300,7 @@ export const roleMockData = {
         subtitle: "GenAI Cloud Infrastructure, Vendor Coordination & Third-Party SLA Watch",
         platform: "AMS-L4",
         shift: "L4 Cloud Operations & Vendor Governance | Active",
-        shiftProgress: "30%",
+        shiftProgress: "39%",
         statusBadge: "● L4 CLOUD & VENDOR MESH · LIVE",
       },
       summary: {
@@ -1361,6 +1404,452 @@ export const roleMockData = {
           items: [
             { id: "esc1", ticketNum: "#VND-9941", vendor: "AWS Support", severity: "P2", topic: "Network Edge Route Latency Spike", status: "Resolved (Route Optimized)", eta: "Closed" },
             { id: "esc2", ticketNum: "#VND-9948", vendor: "Azure Support", severity: "P3", topic: "Data Factory Pipeline Lock Query", status: "In Progress (Awaiting Patch)", eta: "24 Hours" },
+          ],
+        },
+      },
+    },
+  },
+  // ─── AI for Infra ──────────────────────────────────────────────────────────
+  // Data sourced from Co-Worker Platform: itsm.json, monitoring.json, aiops.json
+  // knowledge.js (intent library) and plans.js (runbook catalogue)
+  "AI for Infra": {
+    // ── Infra Engineer (NOC / Shift Engineer) ────────────────────────────────
+    "Infra Engineer": {
+      topbar: {
+        title: "AI for Infra · Infra Engineer Assist",
+        subtitle: "Incident Management, SLA Watch, Capacity & Patch Compliance · GuideWell Infrastructure",
+        platform: "Infra-NOC",
+        shift: "Night Shift 19:00–07:00 | AI Agent Mesh · Active",
+        shiftProgress: "61%",
+        statusBadge: "● INFRA SHIFT · LIVE",
+      },
+      summary: {
+        greeting: "Good morning, Infra Engineer — overnight shift review is ready.",
+        subtext:
+          "60 incidents · 61% auto-resolved · Availability 99.94% · 2 P2s open · Solera storage at 88%",
+        chips: [
+          { id: "c1", text: "INC0104882 · Olive P2 · SLA clock 4h 06m", type: "danger" },
+          { id: "c2", text: "Patch compliance 91.3% (target 95%)", type: "warn" },
+          { id: "c3", text: "Solera Tier-1 storage 88.4% · 21 days to full", type: "warn" },
+          { id: "c4", text: "DR replication lag 22m (RPO target 15m)", type: "danger" },
+        ],
+      },
+      tabs: [
+        { id: "overview",    label: "Overview",               active: true },
+        { id: "incidents",   label: "Incidents & Changes",    badge: 7 },
+        { id: "capacity",    label: "Capacity & Compliance",  badge: 3 },
+        { id: "agents",      label: "Agent Activity",         badge: 14 },
+      ],
+      stateOfEnvironment: {
+        title: "Live Service Health",
+        tag: "07:00 Shift Start",
+        metrics: [
+          { id: "m1", count: 2,  label: "Critical",  color: "red" },
+          { id: "m2", count: 2,  label: "At Risk",   color: "orange" },
+          { id: "m3", count: 1,  label: "Watch",     color: "blue" },
+          { id: "m4", count: 3,  label: "Healthy",   color: "gray" },
+        ],
+        items: [
+          {
+            id: "s1",
+            title: "Olive — Claims & Prior Authorization",
+            status: "Degraded",
+            statusType: "danger",
+            desc: "P2 open · INC0104882 · p95 1,180ms (baseline 240ms) · Pool 198/200 · SLA clock expires 11:18",
+          },
+          {
+            id: "s2",
+            title: "RJ Health — Drug Pricing",
+            status: "At Risk",
+            statusType: "warn",
+            desc: "P2 open · INC0104915 · NDC pricing queue 8,412 msgs (normal <900) · API 503 rate 7.2%",
+          },
+          {
+            id: "s3",
+            title: "Solera — Care & Claims Data Platform",
+            status: "Watch",
+            statusType: "watch",
+            desc: "CAP-0071 · Tier-1 at 88.4% · Growth 1.9 TB/week · Crosses 90% in ~6 days",
+          },
+          {
+            id: "s4",
+            title: "Teladoc — Virtual Health",
+            status: "Healthy",
+            statusType: "good",
+            desc: "2,100 visits/day · Availability 99.94% · SAN path flap resolved 02:14 · Dell SR-88231 open",
+          },
+          {
+            id: "s5",
+            title: "Care Navigator — Care Management",
+            status: "Healthy",
+            statusType: "good",
+            desc: "1,240 care managers · Availability 99.99% · Citrix Farm B logon latency watch",
+          },
+          {
+            id: "s6",
+            title: "Corporate Apps / Citrix VDI",
+            status: "Healthy",
+            statusType: "good",
+            desc: "4,860 sessions · 3 farms · Farm B recurring logon storms (9 incidents / 14 days) — PRB proposed",
+          },
+        ],
+      },
+      whatRequiresAttention: {
+        title: "What Requires Attention",
+        tag: "7 Items",
+        cards: [
+          {
+            id: "a1",
+            title: "P2 · INC0104882 — Olive prior-auth API latency",
+            severity: "Act now",
+            severityType: "critical",
+            desc: "SLA clock expires 11:18 · Runbook RB-OLV-014 staged · Approve to clear in 22 min",
+            progress: 78,
+          },
+          {
+            id: "a2",
+            title: "P2 · INC0104915 — RJ Health pricing queue depth",
+            severity: "At risk",
+            severityType: "warn",
+            desc: "8,412 msgs queued · Scale API 6→10 pods · Pre-approved standard change STD0091",
+            progress: 64,
+          },
+          {
+            id: "a3",
+            title: "P3 · CAP-0071 — Solera Tier-1 storage at 88%",
+            severity: "Decide today",
+            severityType: "warn",
+            desc: "2.1 TB reclaimable · Crosses 90% in 6 days · Expansion PO: 12-week lead time",
+            progress: 88,
+          },
+          {
+            id: "a4",
+            title: "P3 · INC0104903 — Backup verification overdue 26h",
+            severity: "Compliance risk",
+            severityType: "warn",
+            desc: "Olive claims DB · Backup succeeded — verification gap only · Audit finding past 48h",
+            progress: 55,
+          },
+          {
+            id: "a5",
+            title: "P3 · PATCH-JUL — Patch compliance 91.3% vs 95% target",
+            severity: "Amber",
+            severityType: "warn",
+            desc: "63 non-compliant servers · 11 critical CVEs · Approve 8 retry jobs → 92.4%",
+            progress: 91,
+          },
+          {
+            id: "a6",
+            title: "Change CAB · 2 RFCs awaiting validation before 14:00",
+            severity: "Review",
+            severityType: "review",
+            desc: "CHG0032118 (switch firmware) · CHG0032124 (July patch wave — split Olive servers)",
+            progress: 40,
+          },
+          {
+            id: "a7",
+            title: "P2 · INC0104870 — Citrix Farm B recurring logon storms",
+            severity: "Create PRB",
+            severityType: "critical",
+            desc: "9 incidents / 14 days · FSLogix IOPS contention · ~2,700 advocate-min per event",
+            progress: 70,
+          },
+        ],
+      },
+      criticalRisks: {
+        title: "Infrastructure Risks",
+        tag: "Shift 19:00–07:00",
+        cards: [
+          {
+            id: "r1",
+            title: "SLA breach in 4h 06m — Olive prior-auth P2",
+            severity: "Critical",
+            severityType: "danger",
+            desc: "INC0104882 · Breach probability 72% if no action by 09:30 · Second breach triggers MSA service-credit clause",
+          },
+          {
+            id: "r2",
+            title: "3 recurrence clusters — 41% of P2/P3 volume",
+            severity: "High",
+            severityType: "warn",
+            desc: "Citrix logon (9), Olive pool (5), RJ Health 503s (4) — symptom-treated, not root-caused",
+          },
+          {
+            id: "r3",
+            title: "Database latency trend — PG-OLIVE-PRD-02 +38% WoW",
+            severity: "Watch",
+            severityType: "warn",
+            desc: "p95 62ms → 86ms · Autovacuum falling behind · Breaches 150ms timeout in ~5 weeks",
+          },
+          {
+            id: "r4",
+            title: "DR replication lag 22m — RPO target 15m",
+            severity: "Breach",
+            severityType: "danger",
+            desc: "Azure East US 2 secondary · Bandwidth contention with Solera archive · Olive & Teladoc at risk",
+          },
+        ],
+      },
+      askYourCoworker: {
+        headline: "61 autonomous actions last shift · INC0104882 SLA at risk · 9.4 engineer-hours saved",
+        actionNeeded: "Approve RB-OLV-014 (Olive pool) · Decide Solera reclaim or PO · Close backup verification gap",
+        suggestedNext: "Ask me about SLA clocks, recurring incidents, storage capacity, or patch compliance",
+      },
+      tabData: {
+        overview: {
+          title: "Shift Overview",
+          sub: "Night shift 19:00–07:00 · 60 incidents · 2 P1 · 6 P2 · 18 P3 · 34 P4",
+          items: [
+            { id: "o1", title: "Availability SLO", status: "99.94% (target 99.9%)", statusType: "good", desc: "Above target — two P1s restored within SLA" },
+            { id: "o2", title: "MTTA", status: "4.2 min (target 10 min)", statusType: "good", desc: "Agent alert correlation driving fast acknowledgement" },
+            { id: "o3", title: "MTTR", status: "38 min (target 45 min)", statusType: "good", desc: "4 of 6 P2s resolved autonomously" },
+            { id: "o4", title: "Auto-resolve rate", status: "61% (target 55%)", statusType: "good", desc: "Above contractual target — Remediation Agent active overnight" },
+            { id: "o5", title: "Patch compliance", status: "91.3% (target 95%)", statusType: "danger", desc: "Amber for July service review · 11 critical CVEs outstanding" },
+            { id: "o6", title: "DR replication RPO", status: "22 min (target 15 min)", statusType: "danger", desc: "Bandwidth contention — throttle Solera archive job" },
+          ],
+        },
+        incidents: {
+          title: "Open Incidents & Pending Changes",
+          sub: "7 items needing action — P2 SLA clock running",
+          items: [
+            { id: "i1", num: "INC0104882", title: "Olive prior-auth API latency", priority: "P2", status: "In Progress", statusType: "danger", desc: "p95 1,180ms · Pool 198/200 · SLA expires 11:18 · Runbook RB-OLV-014 staged" },
+            { id: "i2", num: "INC0104915", title: "RJ Health pricing queue depth", priority: "P2", status: "In Progress", statusType: "warn", desc: "8,412 msgs queued · Scale API 6→10 pods · STD0091 auto-approved" },
+            { id: "i3", num: "CAP-0071", title: "Solera Tier-1 storage 88.4%", priority: "P3", status: "Open", statusType: "warn", desc: "Growth 1.9 TB/week · 21 days to full · 2.1 TB reclaimable now" },
+            { id: "i4", num: "INC0104903", title: "Backup verification overdue 26h", priority: "P3", status: "Open", statusType: "warn", desc: "Olive claims DB · Verification gap · Audit finding risk past 48h" },
+            { id: "i5", num: "PATCH-JUL", title: "Patch compliance 91.3%", priority: "P3", status: "Open", statusType: "warn", desc: "63 non-compliant · 11 critical CVEs · 8 retry jobs drafted" },
+            { id: "i6", num: "CHG0032118", title: "CAB: Core switch firmware", priority: "P3", status: "Awaiting CAB", statusType: "review", desc: "6 switches DC-East · Risk: Medium · Window: Sat 02:00-06:00" },
+            { id: "i7", num: "CHG0032124", title: "CAB: Windows July CU — 214 servers", priority: "P3", status: "Awaiting CAB", statusType: "review", desc: "Conflicts with Olive freeze (22 servers) — split wave recommended" },
+          ],
+        },
+        capacity: {
+          title: "Capacity & Compliance",
+          sub: "Storage, patch compliance, backup/DR, and control posture",
+          items: [
+            { id: "cap1", title: "Solera Tier-1 data lake", metric: "88.4% used", status: "Watch", statusType: "warn", desc: "46 TB free · Growth 1.9 TB/week · 2.1 TB reclaimable · Expansion PO: 12-week lead" },
+            { id: "cap2", title: "PG-OLIVE-PRD-02 connection pool", metric: "99% saturated", status: "Critical", statusType: "danger", desc: "198/200 in use · Reconciliation job overran 47 min · RB-OLV-014 resolves" },
+            { id: "cap3", title: "Citrix Farm B FSLogix profile share", metric: "76% used", status: "Watch", statusType: "watch", desc: "IOPS ceiling 6,200 vs 9,400 shift-start demand · Cloud Cache fix proposed" },
+            { id: "cap4", title: "Patch compliance — 726 servers", metric: "91.3%", status: "Amber", statusType: "warn", desc: "63 non-compliant: 22 frozen, 19 staged, 14 legacy, 8 failed · 11 critical CVEs" },
+            { id: "cap5", title: "Backup/DR — Olive claims DB", metric: "26h gap", status: "Risk", statusType: "warn", desc: "Backup verified 02:10 · Verification worker exhausted · Audit gap past 48h" },
+            { id: "cap6", title: "DR replication lag — Azure East US 2", metric: "22 min", status: "Breach", statusType: "danger", desc: "RPO target 15 min · Solera archive job causing contention · Olive & Teladoc in scope" },
+          ],
+        },
+        agents: {
+          title: "Autonomous Agent Activity — Last 12h",
+          sub: "31 actions taken overnight · 9.4 engineer-hours saved · Nothing outside policy",
+          items: [
+            { id: "ag1", time: "06:52", name: "Remediation Agent", action: "Cleared /var/log on 4 Olive app nodes — disk 94% → 61%", status: "Success", statusType: "good" },
+            { id: "ag2", time: "06:20", name: "Observability Agent", action: "Correlated 23 alerts into INC0104915, suppressed 19 duplicates", status: "Success", statusType: "good" },
+            { id: "ag3", time: "05:47", name: "Remediation Agent", action: "Restarted hung RJ Health feed listener on RJH-FEED-02, queue drained", status: "Success", statusType: "good" },
+            { id: "ag4", time: "05:31", name: "Knowledge Agent", action: "Auto-documented INC0104870 with RCA draft + linked KB0014422", status: "Success", statusType: "good" },
+            { id: "ag5", time: "04:58", name: "Capacity Agent", action: "Reclaimed 640 GB orphaned snapshots on Solera Tier-1 array", status: "Success", statusType: "good" },
+            { id: "ag6", time: "04:12", name: "Remediation Agent", action: "Failed over stuck Citrix session host CTX-B-14, 38 sessions preserved", status: "Success", statusType: "good" },
+            { id: "ag7", time: "03:55", name: "Observability Agent", action: "Enriched INC0104882 with CMDB dependency map (41 CIs)", status: "Success", statusType: "good" },
+            { id: "ag8", time: "03:12", name: "Remediation Agent", action: "Restarted olive-worker pods 3 & 5 after OOM kill", status: "Success", statusType: "good" },
+            { id: "ag9", time: "02:40", name: "Patch Agent", action: "Staged July CU on 118 servers — awaiting reboot approval (guardrail blocked)", status: "Blocked", statusType: "warn" },
+            { id: "ag10", time: "02:05", name: "Backup Agent", action: "Verified restore integrity for 6 of 7 protection groups", status: "Partial", statusType: "warn" },
+            { id: "ag11", time: "01:33", name: "Remediation Agent", action: "Recycled IIS app pool on TELADOC-EDGE-04, 502s cleared", status: "Success", statusType: "good" },
+            { id: "ag12", time: "00:15", name: "Remediation Agent", action: "Extended tablespace on PG-OLIVE-PRD-02 by 200 GB", status: "Success", statusType: "good" },
+          ],
+        },
+      },
+    },
+
+    // ── SRE / NOC Lead (AI Agent Mesh Oversight) ─────────────────────────────
+    "SRE / NOC Lead": {
+      topbar: {
+        title: "AI for Infra · SRE / NOC Lead Dashboard",
+        subtitle: "Autonomous Agent Mesh · AI Quality · Model Spend · Audit & Governance",
+        platform: "Infra-SRE",
+        shift: "Shift Review 07:00 | Agent Mesh · 6 Agents Active",
+        shiftProgress: "100%",
+        statusBadge: "● AI AGENT MESH · LIVE",
+      },
+      summary: {
+        greeting: "Good morning, SRE Lead — overnight agent mesh summary is ready.",
+        subtext:
+          "31 autonomous actions · 14 auto-remediations · 9.4 engineer-hours saved · 0 rollbacks triggered · 5 guardrails fired",
+        chips: [
+          { id: "c1", text: "31 Autonomous Actions · Last 12h", type: "info" },
+          { id: "c2", text: "AI Groundedness 97.8% (target 95%)", type: "info" },
+          { id: "c3", text: "Patch Agent: Awaiting Approval", type: "warn" },
+          { id: "c4", text: "Model Spend $113.00 / shift · 21,696 requests", type: "info" },
+        ],
+      },
+      tabs: [
+        { id: "overview",    label: "Overview",             active: true },
+        { id: "agents",      label: "Agent Mesh",           badge: 6 },
+        { id: "quality",     label: "AI Quality & Audit",   badge: 6 },
+        { id: "models",      label: "Model Spend",          badge: 3 },
+      ],
+      stateOfEnvironment: {
+        title: "Agent Fleet Status",
+        tag: "Last 12h",
+        metrics: [
+          { id: "m1", count: 4, label: "Active",          color: "green" },
+          { id: "m2", count: 1, label: "Running Test",    color: "blue" },
+          { id: "m3", count: 1, label: "Awaiting Approval", color: "orange" },
+        ],
+        items: [
+          {
+            id: "a1",
+            title: "Observability Agent",
+            status: "Active",
+            statusType: "good",
+            desc: "7 actions · Read-only · Correlates alerts, enriches incidents with CMDB maps · claude-sonnet-4-6",
+          },
+          {
+            id: "a2",
+            title: "Remediation Agent",
+            status: "Active",
+            statusType: "good",
+            desc: "14 actions · Policy-gated write · Disk cleanup, pod restarts, app pool recycles · claude-sonnet-4-6",
+          },
+          {
+            id: "a3",
+            title: "Capacity Agent",
+            status: "Active",
+            statusType: "good",
+            desc: "3 actions · Read-only · Storage runway forecasting and reclaim modelling · claude-opus-5",
+          },
+          {
+            id: "a4",
+            title: "Patch & Compliance Agent",
+            status: "Awaiting Approval",
+            statusType: "warn",
+            desc: "1 action · Reboot approval required · Staged July CU on 118 servers · Guardrail GR-01 blocked",
+          },
+          {
+            id: "a5",
+            title: "Knowledge / ITSM Agent",
+            status: "Active",
+            statusType: "good",
+            desc: "4 actions · Policy-gated write · RCA drafts, KB articles, handovers · claude-opus-5",
+          },
+          {
+            id: "a6",
+            title: "Backup & DR Agent",
+            status: "Running Test",
+            statusType: "info",
+            desc: "2 actions · Policy-gated write · Restore integrity tests, RTO/RPO measurement · claude-sonnet-4-6",
+          },
+        ],
+      },
+      whatRequiresAttention: {
+        title: "Requires SRE Attention",
+        tag: "3 Items",
+        cards: [
+          {
+            id: "w1",
+            title: "3 Runbooks awaiting approval",
+            severity: "Act now",
+            severityType: "critical",
+            desc: "RB-OLV-014 (Olive pool), RB-STG-007 (Solera reclaim), RB-PCH-022 (patch retry) — all reversible",
+            progress: null,
+          },
+          {
+            id: "w2",
+            title: "Patch Agent blocked — reboot guardrail GR-01",
+            severity: "Approval needed",
+            severityType: "warn",
+            desc: "119 servers staged, awaiting reboot approval — patch compliance stays at 91.3% until unblocked",
+            progress: 91,
+          },
+          {
+            id: "w3",
+            title: "Model spend tracker — $113.00 shift total",
+            severity: "Review",
+            severityType: "review",
+            desc: "claude-opus-5 $61.40 · claude-sonnet-4-6 $38.70 · claude-haiku-4-5 $12.90 · Within budget",
+            progress: null,
+          },
+        ],
+      },
+      criticalRisks: {
+        title: "AI Quality & Governance",
+        tag: "12h window",
+        cards: [
+          {
+            id: "r1",
+            title: "Hallucination rate 0.7% — below 2% target",
+            severity: "OK",
+            severityType: "good",
+            desc: "Sampled at 20% of generations · PHI redaction guardrail fired 41 times (GR-05)",
+          },
+          {
+            id: "r2",
+            title: "Groundedness 97.8% — above 95% target",
+            severity: "OK",
+            severityType: "good",
+            desc: "Every claim in agent summaries checked against ITSM record, metric series, or CMDB entry",
+          },
+          {
+            id: "r3",
+            title: "Human override rate 8.1% — below 15% target",
+            severity: "OK",
+            severityType: "good",
+            desc: "8.1% of agent recommendations rejected or materially edited by engineers",
+          },
+          {
+            id: "r4",
+            title: "Guardrail GR-01 fired 2x — no unapproved production writes",
+            severity: "Expected",
+            severityType: "watch",
+            desc: "Patch Agent blocked from rebooting 19 staged servers — reboot requires explicit human approval",
+          },
+        ],
+      },
+      askYourCoworker: {
+        headline: "6 agents active · 31 autonomous actions · $113.00 model spend · 0 rollbacks · 31 audit entries",
+        actionNeeded: "Approve 3 runbooks · Unblock Patch Agent reboot · Review exec summary before distribution",
+        suggestedNext: "Ask me about agent activity, AI quality, model spend, guardrails, or the audit log",
+      },
+      tabData: {
+        overview: {
+          title: "Agent Mesh Performance Summary",
+          sub: "12h window: 19:00–07:00 · All policy guardrails respected · 0 rollbacks triggered",
+          items: [
+            { id: "o1", title: "Autonomous actions", metric: "31 total", status: "9.4 hrs saved", statusType: "good", desc: "14 remediations · 8 service restarts · 4 enrichments · 3 documented · 2 KB articles" },
+            { id: "o2", title: "Policy guardrails", metric: "5 triggered", status: "All correct", statusType: "good", desc: "GR-01 blocked unapproved reboots (2) · GR-02 change freeze respected (1) · GR-05 PHI redacted (41)" },
+            { id: "o3", title: "Remediation success rate", metric: "100%", status: "All succeeded", statusType: "good", desc: "14 remediations executed · 0 rollbacks required · All reversible" },
+            { id: "o4", title: "Human approvals requested", metric: "7 total", status: "3 pending", statusType: "warn", desc: "RB-OLV-014, RB-STG-007, RB-PCH-022 awaiting your approval" },
+            { id: "o5", title: "Audit log entries", metric: "31 entries", status: "Immutable", statusType: "good", desc: "6-year retention · Each tied to approver identity · Nothing outside policy" },
+            { id: "o6", title: "Rollbacks triggered", metric: "0", status: "Clean shift", statusType: "good", desc: "All executed runbooks validated successfully post-change" },
+          ],
+        },
+        agents: {
+          title: "Agent Fleet Detail",
+          sub: "6 agents in the mesh · Actions, models, and autonomy levels",
+          items: [
+            { id: "ag1", name: "Observability Agent",      status: "Active",             statusType: "good", desc: "7 actions · claude-sonnet-4-6 · p50 1,840ms · 100% success · Correlates alerts, enriches incidents with CMDB dependency maps, validates post-change state", autonomyLevel: "Read-only" },
+            { id: "ag2", name: "Remediation Agent",        status: "Active",             statusType: "good", desc: "14 actions · claude-sonnet-4-6 · p50 2,260ms · 100% success · Disk cleanup, pod restarts, app pool recycles, session host failover", autonomyLevel: "Policy-gated write" },
+            { id: "ag3", name: "Capacity Agent",           status: "Active",             statusType: "good", desc: "3 actions · claude-opus-5 · p50 3,410ms · 100% success · Forecasts storage and pool runway, models remediation outcomes before approval", autonomyLevel: "Read-only" },
+            { id: "ag4", name: "Patch & Compliance Agent", status: "Awaiting Approval",  statusType: "warn", desc: "1 action · claude-sonnet-4-6 · p50 1,520ms · Stages CU patches, classifies failures, drafts retry jobs — cannot reboot without human approval", autonomyLevel: "Approval required" },
+            { id: "ag5", name: "Knowledge / ITSM Agent",   status: "Active",             statusType: "good", desc: "4 actions · claude-opus-5 · p50 4,120ms · 100% success · Auto-documents incidents with RCA drafts, publishes KB articles, prepares handovers", autonomyLevel: "Policy-gated write" },
+            { id: "ag6", name: "Backup & DR Agent",        status: "Running Test",       statusType: "info", desc: "2 actions · claude-sonnet-4-6 · p50 1,990ms · Verifies restore integrity, measures RTO/RPO, maintains contingency-plan evidence", autonomyLevel: "Policy-gated write" },
+          ],
+        },
+        quality: {
+          title: "AI Quality Metrics & Audit",
+          sub: "12h evaluation window · Sampled at 20% of generations · 31 immutable audit entries",
+          items: [
+            { id: "q1", metric: "Groundedness vs source telemetry", value: "97.8%", status: "Above target (95%)", statusType: "good", desc: "Every claim in an agent summary checked back against the ITSM record, metric series, or CMDB entry it cites" },
+            { id: "q2", metric: "Citation coverage on RCA drafts",  value: "94.1%", status: "Above target (90%)", statusType: "good", desc: "Share of assertions in generated RCAs that carry a traceable source reference" },
+            { id: "q3", metric: "Unsupported-claim (hallucination) rate", value: "0.7%", status: "Below target (2%)",  statusType: "good", desc: "Claims flagged as unsupported by retrieved context · Sampled at 20% of generations" },
+            { id: "q4", metric: "Remediation action precision",     value: "99.2%", status: "Above target (98%)", statusType: "good", desc: "Executed actions that matched the approved runbook step exactly, with no drift" },
+            { id: "q5", metric: "False alert-correlation rate",     value: "3.4%",  status: "Below target (5%)",  statusType: "good", desc: "Alerts grouped into an incident that a human later separated" },
+            { id: "q6", metric: "Human override rate",              value: "8.1%",  status: "Below target (15%)", statusType: "good", desc: "Agent recommendations rejected or materially edited by the on-call engineer" },
+            { id: "q7", metric: "GR-01: No unapproved production writes",     value: "2 triggered", status: "Correct behaviour", statusType: "watch", desc: "Patch Agent blocked from rebooting 19 staged servers — reboot requires explicit human approval" },
+            { id: "q8", metric: "GR-02: Change freeze respected",             value: "1 triggered", status: "Correct behaviour", statusType: "watch", desc: "Patch wave held back from 22 Olive servers under release freeze expiring 2 Aug" },
+            { id: "q9", metric: "GR-05: PHI redaction on model input",        value: "41 triggered", status: "Correct behaviour", statusType: "good", desc: "Member identifiers stripped from 41 log excerpts before sent to a model" },
+          ],
+        },
+        models: {
+          title: "Model Spend & Performance",
+          sub: "21,696 total requests · $113.00 shift cost · Within policy budget",
+          items: [
+            { id: "m1", name: "claude-opus-5",      role: "Reasoning — RCA, forecasting, narrative",          requests: 412,   tokensUsed: "3.84M in / 286K out", value: "$61.40", latency: "p50 2,180ms · p95 4,380ms", desc: "Error rate 0.2% · Used by Capacity Agent and Knowledge Agent for deep analysis" },
+            { id: "m2", name: "claude-sonnet-4-6",  role: "Execution — correlation, runbook steps, enrichment", requests: 2864,  tokensUsed: "9.12M in / 612K out", value: "$38.70", latency: "p50 940ms · p95 2,260ms",   desc: "Error rate 0.1% · Primary workhorse — Observability, Remediation, Patch, Backup agents" },
+            { id: "m3", name: "claude-haiku-4-5",   role: "Classification — alert triage, dedup, routing",     requests: 18420, tokensUsed: "14.2M in / 340K out", value: "$12.90", latency: "p50 210ms · p95 480ms",    desc: "Error rate 0.05% · High-volume fast-path: alert triage, duplicate suppression, routing" },
           ],
         },
       },
