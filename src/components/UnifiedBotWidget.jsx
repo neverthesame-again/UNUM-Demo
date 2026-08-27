@@ -45,24 +45,6 @@ const ROLE_SUGGESTIONS = {
     "What is the status of active vendor escalation tickets?",
     "Is there any upcoming maintenance window I should know about?",
   ],
-
-  // ── AI for Infra role suggestions ─────────────────────────────────────────
-  "Infra Engineer": [
-    "Which incidents are at risk of breaching SLA right now?",
-    "Explain INC0104882 — what is the Olive prior-auth issue and the fix?",
-    "What is the Solera storage capacity situation and my options?",
-    "Show me the recurring incident clusters from last shift.",
-    "What is the current patch compliance status and how do I close the gap?",
-    "Generate my shift handover summary.",
-  ],
-  "SRE / NOC Lead": [
-    "What autonomous actions did the agents take overnight?",
-    "How accurate and trustworthy have the agents been this shift?",
-    "What is the model spend breakdown for this shift?",
-    "Which guardrails fired overnight and why?",
-    "What is the audit trail status — how many entries and how long are they retained?",
-    "Which runbooks are staged and waiting for my approval?",
-  ],
 };
 
 // Fallback for unknown roles

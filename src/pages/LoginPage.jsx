@@ -8,27 +8,31 @@ import { useForceTheme } from "../context/ThemeContext";
 
 // Page content
 const content = {
-  introBadge: "One GuideWell Knowledge HUB",
+  introBadge: "One GuideWell AI HUB",
   title: "Welcome to the Future of Enterprise AI",
   subtitle:
     "Sign in to access personalized AI workspaces and co-pilots tailored for your domain and role across GuideWell Enterprise AI.",
   features: [
     {
       icon: "💻",
-      text: "AI for AD: Workspaces for Product Owner, Developer featuring code synthesis, BDD stories.",
+      text: "AI for AD: Workspaces for Domain Admin, Product Owner, Developer & Tester — featuring code synthesis, BDD stories & QA test suites",
     },
     {
       icon: "🛠️",
-      text: "AI for AMS: Specialized desks for Support Engineer & Software Engineer — powering ticket triage, RCA diagnostics, PRD generator & SLA watch.",
+      text: "AI for AMS: Specialized desks for Support Engineer & Software Engineer — powering ticket triage, RCA diagnostics, PRD generator & SLA watch",
     },
     {
       icon: "📊",
-      text: "AI for Infra: Intelligence for Infra Engineer, SRE Lead & NOC Lead.",
+      text: "AI for Business: Intelligence for MedTech Business Analyst, Clinical Business Analyst & HealthCare Business Analyst",
+    },
+    {
+      icon: "🔒",
+      text: "Enterprise Governance: Built-in HIPAA-compliant security with zero-trust architecture and audit trails across all domains",
     },
   ],
   form: {
-    title: "GuideWell Knowledge\u00a0Hub",
-    subtitle: "Sign in using your tcs credentials",
+    title: "Sign in to GuideWell AI HUB",
+    subtitle: "Use your tcs credentials",
     emailLabel: "Email Address",
     emailPlaceholder: "your.name@tcs.com",
     passwordLabel: "Password",
@@ -39,7 +43,6 @@ const content = {
 
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { isSuperAdminEmail } from "../constants/admin-emails";
-import { validateTCSEmail } from "../services/auth.service";
 
 export default function LoginPage() {
   useForceTheme("dark");
@@ -68,7 +71,7 @@ export default function LoginPage() {
   // Check business area and role permissions when email changes
   useEffect(() => {
     if (!email || !email.includes("@")) {
-      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS", "AI for Infra"]);
+      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS"]);
       return;
     }
 
@@ -84,7 +87,7 @@ export default function LoginPage() {
         handleBusinessAreaChange(userPerms.businessAreas[0]);
       }
     } else {
-      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS", "AI for Infra"]);
+      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS"]);
     }
   }, [email]);
 
@@ -128,8 +131,8 @@ export default function LoginPage() {
     e.preventDefault();
 
     // Validate email domain
-    if (!validateTCSEmail(email)) {
-      showToast("Please use a valid email address");
+    if (!email.toLowerCase().endsWith("@tcs.com")) {
+      showToast("Please use your @tcs.com email address");
       return;
     }
 

@@ -4,13 +4,10 @@ import { supabase } from '../lib/supabase';
 import { isSuperAdminEmail } from '../constants/admin-emails';
 import { BUSINESS_AREAS, getRolesForBusinessArea } from '../constants/business-areas';
 
-// Validate email domain — allow @tcs.com and any super-admin overrides
-export const validateTCSEmail = (email) => {
+// Validate email domain
+const validateTCSEmail = (email) => {
   if (!email) return false;
-  const normalized = email.toLowerCase().trim();
-  // Super admin gmail (or other domain) overrides are always allowed
-  if (isSuperAdminEmail(normalized)) return true;
-  return normalized.endsWith('@tcs.com');
+  return email.toLowerCase().trim().endsWith('@tcs.com');
 };
 
 // Validate password strength
