@@ -234,9 +234,17 @@ export default function LandingPage() {
     setDeterministicItem(item);
     setDeterministicIsRunning(true);
     setDeterministicIsResolved(false);
-    setDeterministicMessages([]);
     setDeterministicInputValue("");
     setDeterministicAgentTyping(false);
+
+    setDeterministicMessages([
+      {
+        id: 1,
+        sender: "agent",
+        text: "Hi, how can I help you?",
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
+      }
+    ]);
     setDeterministicModalOpen(true);
   };
 
@@ -244,8 +252,10 @@ export default function LandingPage() {
     let timer;
     if (deterministicIsRunning && deterministicModalOpen) {
       const stepCount = deterministicMessages.length;
-      const isFlow1 = deterministicItem?.num === "RITM004120";
-      
+      const isVerificationFlow = deterministicItem?.id === "ar1" || deterministicItem?.num?.includes("Member Portal") || !deterministicItem?.id;
+      const isDobFlow = deterministicItem?.id === "ar2" || deterministicItem?.num?.includes("Data Validation");
+      const isAccountConflictFlow = deterministicItem?.id === "ar3" || deterministicItem?.num?.includes("Account Identity");
+
       const addMsg = (sender, text) => {
         setDeterministicMessages((prev) => [
           ...prev,
@@ -253,45 +263,151 @@ export default function LandingPage() {
         ]);
       };
 
-      if (stepCount === 1) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          addMsg("agent", isFlow1 ? "I'm sorry to hear you're experiencing trouble with this. Are you trying to register for an account?" : "I understand how frustrating that can be, and I'd be happy to help. Are you trying to register for an account?");
-        }, 2000);
-      } else if (stepCount === 3) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          addMsg("agent", isFlow1 ? "Thank you. Could you please provide the exact date of birth you are attempting to enter?" : "Got it. Could you please share the exact date of birth you are typing into the field?");
-        }, 2000);
-      } else if (stepCount === 5) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          addMsg("agent", isFlow1 
-            ? "Thank you for sharing that. Your information is perfectly correct! However, our system strictly accepts dates in the MM-DD-YYYY format using dashes instead of slashes. For example: 08-14-1992. Could you please try entering it this way so we can proceed?" 
-            : "Thank you. Your information is correct, but it looks like the month and day are reversed. Our system requires the month first in the MM-DD-YYYY format (e.g. 10-25-1988). Can you please try entering it in that specific format?");
-        }, 3000);
-      } else if (stepCount === 7) {
-        setDeterministicAgentTyping(true);
-        timer = setTimeout(() => {
-          setDeterministicAgentTyping(false);
-          setDeterministicMessages((prev) => [
-            ...prev,
-            { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
-          ]);
-          setDeterministicIsRunning(false);
-          setDeterministicIsResolved(true);
-          if (deterministicItem) {
-            deterministicItem.status = "Resolved (Deterministic)";
-            deterministicItem.statusType = "good";
-            deterministicItem.resolution = "Validated & Corrected";
-            deterministicItem.timeToResolve = "12 seconds";
-            deterministicItem.csat = "5/5 Stars";
-            deterministicItem.isResolved = true;
-          }
-        }, 2000);
+      if (isVerificationFlow) {
+        if (stepCount === 2) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I'm sorry you're having trouble logging in because the verification code email isn't coming through.\n\nAre you trying to log in, reset your password, or register a new account?");
+          }, 6000);
+        } else if (stepCount === 4) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I can help you reset your password and get the verification code email delivered.\n\nHave you checked your Spam/Junk (and Promotions, if you use Gmail) folders for the verification code email?");
+          }, 7000);
+        } else if (stepCount === 6) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I understand—thank you for confirming you've checked Spam/Junk and it's not there.\n\nWhat email address are you using to request the password reset verification code?");
+          }, 7000);
+        } else if (stepCount === 8) {
+          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
+          const emailMatch = lastUserMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+          const targetEmail = emailMatch ? emailMatch[0] : (lastUserMsg.trim() || "supriya@yahoo.com");
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `I've got it — you're using ${targetEmail} for the password reset.\n\nI checked the status for that email and found it's suppressed (hard bounce), which means our verification/OTP emails are being blocked and won't deliver. I've removed the suppression and cleared the stale verification attempts, so the system is ready to send a new code.\n\nPlease follow these steps:\n\n1. Clear your browser cache and cookies (or open a Private/Incognito window).\n2. Go back to the portal sign-in page and select "Change Password" / "Forgot Password."\n3. Request a new verification code (use only the most recent code).\n4. Check your Inbox (and Spam/Junk again, just in case).\n5. The email will come from no-reply@mail.entrykeyid.com.\n6. Your verification code expires in about 5 minutes—if it expires, wait for it to fully expire before requesting another.\n\nYou should now be able to receive the code and reset your password successfully.`
+            );
+          }, 8000);
+        } else if (stepCount === 9) {
+          timer = setTimeout(() => {
+            setDeterministicMessages((prev) => [
+              ...prev,
+              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            ]);
+            setDeterministicIsRunning(false);
+            setDeterministicIsResolved(true);
+            if (deterministicItem) {
+              deterministicItem.status = "Resolved";
+              deterministicItem.statusType = "good";
+              deterministicItem.resolution = "Suppression Removed & Verification Reset";
+              deterministicItem.timeToResolve = "14 seconds";
+              deterministicItem.csat = "5/5 Stars";
+              deterministicItem.isResolved = true;
+            }
+          }, 2000);
+        }
+      } else if (isDobFlow) {
+        if (stepCount === 2) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I'm sorry you're running into that—I'd like to help get you logged in. Are you trying to register for a new account or log in to an existing account?");
+          }, 6000);
+        } else if (stepCount === 4) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I understand—thanks for confirming you're registering for a new account.\n\nWhat exact date of birth are you entering (please type it exactly as you're inputting it, including any dashes or slashes)?");
+          }, 7000);
+        } else if (stepCount === 6) {
+          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
+          const dobMatch = lastUserMsg.match(/\d{2}[-/]\d{2}[-/]\d{4}/);
+          const typedDob = dobMatch ? dobMatch[0] : (lastUserMsg.trim() || "10-25-1990");
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `Thanks—yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format (October 25, 1990), so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
+            );
+          }, 8000);
+        } else if (stepCount === 7) {
+          timer = setTimeout(() => {
+            setDeterministicMessages((prev) => [
+              ...prev,
+              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            ]);
+            setDeterministicIsRunning(false);
+            setDeterministicIsResolved(true);
+            if (deterministicItem) {
+              deterministicItem.status = "Resolved";
+              deterministicItem.statusType = "good";
+              deterministicItem.resolution = "DOB Format Validated & Account Match Verified";
+              deterministicItem.timeToResolve = "12 seconds";
+              deterministicItem.csat = "5/5 Stars";
+              deterministicItem.isResolved = true;
+            }
+          }, 2000);
+        }
+      } else if (isAccountConflictFlow) {
+        if (stepCount === 2) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "I understand how frustrating that can be. To help me check whether there's an existing, inactive, or blocked account tied to your details, please share the email address you're using to register (the exact one you entered on the sign-up page).");
+          }, 6000);
+        } else if (stepCount === 4) {
+          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
+          const emailMatch = lastUserMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+          const targetEmail = emailMatch ? emailMatch[0] : (lastUserMsg.trim() || "supriya@yahoo.com");
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `Thanks, Supriya. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
+            );
+          }, 7000);
+        } else if (stepCount === 6) {
+          const emailMsg = deterministicMessages.find((m) => m.sender === "user" && m.text.includes("@"))?.text || "supriya@yahoo.com";
+          const emailMatch = emailMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+          const targetEmail = emailMatch ? emailMatch[0] : "supriya@yahoo.com";
+
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg(
+              "agent",
+              `Thank you for confirming. I've checked the records available to me, and ${targetEmail} is not showing as an Active/Inactive/Blocked account in the current list—so there isn't an inactive legacy account I can delete on my side based on this data.\n\nTo get you registered successfully, please try these quick steps:\n\n1. Use "Sign in / Forgot password" (since the system is indicating an account already exists) and attempt a password reset for ${targetEmail}.\n2. If you don't receive the reset email, check Spam/Junk and confirm there are no typos or extra spaces in the email.`
+            );
+          }, 8000);
+        } else if (stepCount === 7) {
+          timer = setTimeout(() => {
+            setDeterministicMessages((prev) => [
+              ...prev,
+              { id: prev.length + 1, sender: "system", text: "🎉 Issue is resolved successfully!", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }), isSuccess: true }
+            ]);
+            setDeterministicIsRunning(false);
+            setDeterministicIsResolved(true);
+            if (deterministicItem) {
+              deterministicItem.status = "Resolved";
+              deterministicItem.statusType = "good";
+              deterministicItem.resolution = "Account Existence Verified & Reset Guidance Provided";
+              deterministicItem.timeToResolve = "11 seconds";
+              deterministicItem.csat = "5/5 Stars";
+              deterministicItem.isResolved = true;
+            }
+          }, 2000);
+        }
       }
     }
     return () => clearTimeout(timer);
@@ -1790,163 +1906,163 @@ export default function LandingPage() {
                         return true;
                       })
                       .map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid var(--border)",
-                        boxShadow: "var(--shadow-card)",
-                        borderRadius: "12px",
-                        padding: "16px",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        gap: "12px",
-                        transition: "transform 0.2s ease, border-color 0.2s ease",
-                      }}
-                    >
-                      <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-
-
-                        {/* Card Header Row */}
                         <div
+                          key={item.id || idx}
                           style={{
+                            background: "rgba(255, 255, 255, 0.03)",
+                            border: "1px solid var(--border)",
+                            boxShadow: "var(--shadow-card)",
+                            borderRadius: "12px",
+                            padding: "16px",
                             display: "flex",
-                            alignItems: "center",
+                            flexDirection: "column",
                             justifyContent: "space-between",
-                            gap: "8px",
-                            marginBottom: "8px",
+                            gap: "12px",
+                            transition: "transform 0.2s ease, border-color 0.2s ease",
                           }}
                         >
-                          <span
-                            style={{
-                              fontSize: "14px",
-                              fontWeight: "700",
-                              color: "var(--text-primary)",
-                              wordBreak: "break-word",
-                            }}
-                          >
-                            {activeTab === "agent_resolve" ? (item.subject || item.name || item.title || item.code || item.num) : (item.code || item.num || item.build || item.name || item.title || item.subject || item.metric || item.query || item.suite || item.vendor || item.prbCode || item.patch || item.area || `Item #${idx + 1}`)}
-                          </span>
+                          <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
 
-                          {(item.status || item.severity || item.health || item.acStatus) && (
-                            <span
-                              className={`re-tag ${(item.statusType === "danger" || item.severity === "Critical" || item.severity === "P1 Blocker" || item.status === "Failed Gate")
-                                ? "danger"
-                                : (item.statusType === "warn" || item.severity === "High" || item.severity === "Review" || item.status === "At Risk" || item.status === "Warning")
-                                  ? "warn"
-                                  : "watch"
-                                }`}
+
+                            {/* Card Header Row */}
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "8px",
+                                marginBottom: "8px",
+                              }}
                             >
-                              {item.status || item.severity || item.health || item.acStatus}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Card Sub-title / Main Name if different */}
-                        {(item.name || item.title) && (item.code || item.num || item.build || item.prbCode) && (
-                          <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--cyan)", marginBottom: "6px" }}>
-                            {item.name || item.title}
-                          </div>
-                        )}
-
-                        {/* Item Details Grid */}
-                        <div style={{ fontSize: "12px", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-                          {item.desc && <p style={{ margin: "4px 0", lineHeight: "1.4", flex: 1 }}>{item.desc}</p>}
-                          {item.format && <p style={{ margin: "4px 0", fontStyle: "italic", background: "rgba(0,0,0,0.2)", padding: "8px", borderRadius: "6px", borderLeft: "3px solid var(--cyan)", flex: 1 }}>"{item.format}"</p>}
-                          {item.snippet && <pre style={{ margin: "4px 0", background: "#0a1120", padding: "8px", borderRadius: "6px", fontSize: "11px", color: "#38bdf8", overflowX: "auto", flex: 1 }}>{item.snippet}</pre>}
-                          {item.rcaSummary && <p style={{ margin: "4px 0" }}><strong>RCA:</strong> {item.rcaSummary}</p>}
-                          {item.recommendation && <p style={{ margin: "4px 0", color: "#34d399" }}><strong>Fix:</strong> {item.recommendation}</p>}
-
-
-
-
-                          {/* Key-Value Tag List */}
-                          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
-                            {item.target && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🎯 Target: {item.target}</span>}
-                            {item.points && <span style={{ background: "rgba(0,159,218,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⭐ {item.points} Points</span>}
-                            {item.priority && <span style={{ background: "rgba(247,148,29,0.15)", color: "#f7941d", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⚡ {item.priority}</span>}
-                            {item.progress !== undefined && <span style={{ background: "rgba(151,215,0,0.15)", color: "#97d700", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📊 {item.progress}% Complete</span>}
-                            {item.valueScore && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>💎 Value: {item.valueScore}</span>}
-                            {item.duration && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>⏱️ {item.duration}</span>}
-                            {item.checks && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>✅ {item.checks}</span>}
-                            {item.reviewScore && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🤖 Score: {item.reviewScore}</span>}
-                            {item.passRate && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🎯 Pass: {item.passRate}</span>}
-                            {item.slaTimer && <span style={{ background: "rgba(229,83,83,0.15)", color: "#e55353", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⏳ SLA: {item.slaTimer}</span>}
-                            {item.kbMatch && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>📚 KB Match: {item.kbMatch}</span>}
-                            {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 Confidence: {item.confidence}</span>}
-                            {item.tokensUsed && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🪙 Tokens: {item.tokensUsed}</span>}
-                          </div>
-
-                          {/* Application & Ticket Tag */}
-                          {(item.code || item.story || item.num) && activeTab !== "agent_resolve" && (
-                            <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              {activeApp?.name ? (
-                                <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
-                                  🚀 Application: <strong>{activeApp.name}</strong>
-                                </span>
-                              ) : <div />}
                               <span
                                 style={{
-                                  fontSize: "11px",
+                                  fontSize: "14px",
                                   fontWeight: "700",
-                                  color: "#38bdf8",
-                                  background: "rgba(56, 189, 248, 0.12)",
-                                  border: "1px solid rgba(56, 189, 248, 0.3)",
-                                  borderRadius: "6px",
-                                  padding: "4px 10px",
+                                  color: "var(--text-primary)",
+                                  wordBreak: "break-word",
                                 }}
                               >
-                                {item.code || item.story}
+                                {activeTab === "agent_resolve" ? (item.subject || item.name || item.title || item.code || item.num) : (item.code || item.num || item.build || item.name || item.title || item.subject || item.metric || item.query || item.suite || item.vendor || item.prbCode || item.patch || item.area || `Item #${idx + 1}`)}
                               </span>
-                            </div>
-                          )}
 
-                          {/* Action Button for Agent Resolve Incidents */}
-                          {activeTab === "agent_resolve" && (
-                            <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              {item.isResolved ? (
-                                <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
-                                  <Icon name="check" size={16} /> Issue Resolved Successfully
-                                </span>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (item.isIgnio) {
-                                      startIgnioAutoResolve(item);
-                                    } else {
-                                      startDeterministicAutoResolve(item);
-                                    }
-                                  }}
-                                  style={{
-                                    background: item.isIgnio 
-                                      ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)" 
-                                      : "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
-                                    color: "#ffffff",
-                                    border: "none",
-                                    borderRadius: "8px",
-                                    padding: "8px 16px",
-                                    fontWeight: "700",
-                                    fontSize: "12px",
-                                    cursor: "pointer",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    gap: "6px",
-                                    boxShadow: "0 4px 12px rgba(8, 145, 178, 0.3)",
-                                    transition: "all 0.2s ease",
-                                  }}
+                              {(item.status || item.severity || item.health || item.acStatus) && (
+                                <span
+                                  className={`re-tag ${(item.statusType === "danger" || item.severity === "Critical" || item.severity === "P1 Blocker" || item.status === "Failed Gate")
+                                    ? "danger"
+                                    : (item.statusType === "warn" || item.severity === "High" || item.severity === "Review" || item.status === "At Risk" || item.status === "Warning")
+                                      ? "warn"
+                                      : "watch"
+                                    }`}
                                 >
-                                  <Icon name="zap" size={14} /> {item.actionLabel || (item.isIgnio ? "Auto Resolve" : "Agent Resolve")}
-                                </button>
+                                  {item.status || item.severity || item.health || item.acStatus}
+                                </span>
                               )}
                             </div>
-                          )}
+
+                            {/* Card Sub-title / Main Name if different */}
+                            {(item.name || item.title) && (item.code || item.num || item.build || item.prbCode) && (
+                              <div style={{ fontSize: "13px", fontWeight: "600", color: "var(--cyan)", marginBottom: "6px" }}>
+                                {item.name || item.title}
+                              </div>
+                            )}
+
+                            {/* Item Details Grid */}
+                            <div style={{ fontSize: "12px", color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
+                              {item.desc && <p style={{ margin: "4px 0", lineHeight: "1.4", flex: 1 }}>{item.desc}</p>}
+                              {item.format && <p style={{ margin: "4px 0", fontStyle: "italic", background: "rgba(0,0,0,0.2)", padding: "8px", borderRadius: "6px", borderLeft: "3px solid var(--cyan)", flex: 1 }}>"{item.format}"</p>}
+                              {item.snippet && <pre style={{ margin: "4px 0", background: "#0a1120", padding: "8px", borderRadius: "6px", fontSize: "11px", color: "#38bdf8", overflowX: "auto", flex: 1 }}>{item.snippet}</pre>}
+                              {item.rcaSummary && <p style={{ margin: "4px 0" }}><strong>RCA:</strong> {item.rcaSummary}</p>}
+                              {item.recommendation && <p style={{ margin: "4px 0", color: "#34d399" }}><strong>Fix:</strong> {item.recommendation}</p>}
+
+
+
+
+                              {/* Key-Value Tag List */}
+                              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "auto", paddingTop: "8px" }}>
+                                {item.target && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🎯 Target: {item.target}</span>}
+                                {item.points && <span style={{ background: "rgba(0,159,218,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⭐ {item.points} Points</span>}
+                                {item.priority && <span style={{ background: "rgba(247,148,29,0.15)", color: "#f7941d", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⚡ {item.priority}</span>}
+                                {item.progress !== undefined && <span style={{ background: "rgba(151,215,0,0.15)", color: "#97d700", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📊 {item.progress}% Complete</span>}
+                                {item.valueScore && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>💎 Value: {item.valueScore}</span>}
+                                {item.duration && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>⏱️ {item.duration}</span>}
+                                {item.checks && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>✅ {item.checks}</span>}
+                                {item.reviewScore && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🤖 Score: {item.reviewScore}</span>}
+                                {item.passRate && <span style={{ background: "rgba(52,211,153,0.15)", color: "#34d399", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>🎯 Pass: {item.passRate}</span>}
+                                {item.slaTimer && <span style={{ background: "rgba(229,83,83,0.15)", color: "#e55353", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>⏳ SLA: {item.slaTimer}</span>}
+                                {item.kbMatch && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>📚 KB Match: {item.kbMatch}</span>}
+                                {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 Confidence: {item.confidence}</span>}
+                                {item.tokensUsed && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🪙 Tokens: {item.tokensUsed}</span>}
+                              </div>
+
+                              {/* Application & Ticket Tag */}
+                              {(item.code || item.story || item.num) && activeTab !== "agent_resolve" && (
+                                <div style={{ marginTop: "10px", paddingTop: "8px", borderTop: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                  {activeApp?.name ? (
+                                    <span style={{ fontSize: "11px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+                                      🚀 Application: <strong>{activeApp.name}</strong>
+                                    </span>
+                                  ) : <div />}
+                                  <span
+                                    style={{
+                                      fontSize: "11px",
+                                      fontWeight: "700",
+                                      color: "#38bdf8",
+                                      background: "rgba(56, 189, 248, 0.12)",
+                                      border: "1px solid rgba(56, 189, 248, 0.3)",
+                                      borderRadius: "6px",
+                                      padding: "4px 10px",
+                                    }}
+                                  >
+                                    {item.code || item.story}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Action Button for Agent Resolve Incidents */}
+                              {activeTab === "agent_resolve" && (
+                                <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                                  {item.isResolved ? (
+                                    <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+                                      <Icon name="check" size={16} /> Issue Resolved Successfully
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (item.isIgnio) {
+                                          startIgnioAutoResolve(item);
+                                        } else {
+                                          startDeterministicAutoResolve(item);
+                                        }
+                                      }}
+                                      style={{
+                                        background: item.isIgnio
+                                          ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)"
+                                          : "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)",
+                                        color: "#ffffff",
+                                        border: "none",
+                                        borderRadius: "8px",
+                                        padding: "8px 16px",
+                                        fontWeight: "700",
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: "6px",
+                                        boxShadow: "0 4px 12px rgba(8, 145, 178, 0.3)",
+                                        transition: "all 0.2s ease",
+                                      }}
+                                    >
+                                      <Icon name="zap" size={14} /> {item.actionLabel || (item.isIgnio ? "Auto Resolve" : "Agent Resolve")}
+                                    </button>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      ))}
                   </div>
                 </>
               )}
@@ -2092,85 +2208,85 @@ export default function LandingPage() {
       {(selectedRole === "L3 Support Engineer" ||
         selectedRole === "L4 Support Engineer" ||
         (selectedArea === "AI for AD" && (selectedRole === "Developer" || selectedRole === "Product Owner"))) && (
-        <>
-          {!selNexusOpen && (
-            <div
-              className="sel-nexus-float"
-              onClick={() => setSelNexusOpen(true)}
-              title="Open SEL Nexus Autonomous Pipeline"
+          <>
+            {!selNexusOpen && (
+              <div
+                className="sel-nexus-float"
+                onClick={() => setSelNexusOpen(true)}
+                title="Open SEL Nexus Autonomous Pipeline"
+              >
+                <Icon name="zap" size={18} />
+                <span>SEL Nexus</span>
+              </div>
+            )}
+
+            <Modal
+              isOpen={selNexusOpen}
+              onClose={() => setSelNexusOpen(false)}
+              title="Automation Pipeline"
             >
-              <Icon name="zap" size={18} />
-              <span>SEL Nexus</span>
-            </div>
-          )}
+              <div className="pd-ai-tools-card" style={{ border: "none", background: "transparent", padding: 0, boxShadow: "none", margin: "0 auto", maxWidth: "640px" }}>
+                <div className="pd-ai-tools-icon">
+                  <Icon name="zap" size={32} />
+                </div>
+                <h3 className="pd-ai-tools-title" style={{ marginTop: "12px", marginBottom: "8px" }}>Invoke SEL Nexus</h3>
+                <p className="pd-ai-tools-desc" style={{ marginBottom: "24px" }}>
+                  Run SEL Nexus for &quot;{selectedRole === "L3 Support Engineer" ? "L3 Deep Engineering & Hotfix" : selectedRole === "Product Owner" ? "Product Owner Backlog & AC" : selectedRole === "Developer" ? "AD Developer Workspace" : "L4 Support Platform"}&quot; — governed, autonomous
+                  delivery from requirements through implementation.
+                </p>
 
-          <Modal
-            isOpen={selNexusOpen}
-            onClose={() => setSelNexusOpen(false)}
-            title="Automation Pipeline"
-          >
-            <div className="pd-ai-tools-card" style={{ border: "none", background: "transparent", padding: 0, boxShadow: "none", margin: "0 auto", maxWidth: "640px" }}>
-              <div className="pd-ai-tools-icon">
-                <Icon name="zap" size={32} />
+                <div className="pd-ai-tools-actions">
+                  <a
+                    href={GREENFIELD_PIPELINE_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pd-ai-tools-action greenfield"
+                    data-tooltip="Invoke Greenfield L3 Autonomous Pipeline"
+                    aria-label="Invoke Greenfield L3 Autonomous Pipeline"
+                  >
+                    <Icon name="externalLink" size={20} />
+                    <span className="pd-ai-tools-action-text">
+                      <span className="pd-ai-tools-action-title">Green Field</span>
+                      <span className="pd-ai-tools-action-subtitle">
+                        L3 Autonomous Pipeline
+                      </span>
+                    </span>
+                  </a>
+
+                  <button
+                    type="button"
+                    className="pd-ai-tools-action brownfield"
+                    onClick={() => {
+                      setSelNexusOpen(false);
+                      setPipelineModalOpen(true);
+                    }}
+                    data-tooltip="Invoke Application Enhancements L3 Pipeline"
+                    aria-label="Invoke Application Enhancements L3 Pipeline"
+                  >
+                    <Icon name="play" size={20} />
+                    <span className="pd-ai-tools-action-text">
+                      <span className="pd-ai-tools-action-title">
+                        Application Enhancements
+                      </span>
+                      <span className="pd-ai-tools-action-subtitle">
+                        L3 Autonomous Pipeline
+                      </span>
+                    </span>
+                  </button>
+                </div>
               </div>
-              <h3 className="pd-ai-tools-title" style={{ marginTop: "12px", marginBottom: "8px" }}>Invoke SEL Nexus</h3>
-              <p className="pd-ai-tools-desc" style={{ marginBottom: "24px" }}>
-                Run SEL Nexus for &quot;{selectedRole === "L3 Support Engineer" ? "L3 Deep Engineering & Hotfix" : selectedRole === "Product Owner" ? "Product Owner Backlog & AC" : selectedRole === "Developer" ? "AD Developer Workspace" : "L4 Support Platform"}&quot; — governed, autonomous
-                delivery from requirements through implementation.
-              </p>
+            </Modal>
 
-              <div className="pd-ai-tools-actions">
-                <a
-                  href={GREENFIELD_PIPELINE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="pd-ai-tools-action greenfield"
-                  data-tooltip="Invoke Greenfield L3 Autonomous Pipeline"
-                  aria-label="Invoke Greenfield L3 Autonomous Pipeline"
-                >
-                  <Icon name="externalLink" size={20} />
-                  <span className="pd-ai-tools-action-text">
-                    <span className="pd-ai-tools-action-title">Green Field</span>
-                    <span className="pd-ai-tools-action-subtitle">
-                      L3 Autonomous Pipeline
-                    </span>
-                  </span>
-                </a>
-
-                <button
-                  type="button"
-                  className="pd-ai-tools-action brownfield"
-                  onClick={() => {
-                    setSelNexusOpen(false);
-                    setPipelineModalOpen(true);
-                  }}
-                  data-tooltip="Invoke Application Enhancements L3 Pipeline"
-                  aria-label="Invoke Application Enhancements L3 Pipeline"
-                >
-                  <Icon name="play" size={20} />
-                  <span className="pd-ai-tools-action-text">
-                    <span className="pd-ai-tools-action-title">
-                      Application Enhancements
-                    </span>
-                    <span className="pd-ai-tools-action-subtitle">
-                      L3 Autonomous Pipeline
-                    </span>
-                  </span>
-                </button>
-              </div>
-            </div>
-          </Modal>
-
-          <PipelineModal
-            isOpen={pipelineModalOpen}
-            onClose={() => setPipelineModalOpen(false)}
-            appSlug="SEL Nexus"
-            featureDescription={`${selectedRole} autonomous hotfix & enhancements pipeline execution`}
-            endpoint={BROWNFIELD_PIPELINE_ENDPOINT}
-            onStarted={() => { }}
-          />
-        </>
-      )}
+            <PipelineModal
+              isOpen={pipelineModalOpen}
+              onClose={() => setPipelineModalOpen(false)}
+              appSlug="SEL Nexus"
+              featureDescription={`${selectedRole} autonomous hotfix & enhancements pipeline execution`}
+              endpoint={BROWNFIELD_PIPELINE_ENDPOINT}
+              onStarted={() => { }}
+            />
+          </>
+        )}
 
       {/* Claims Observability Dashboard Modal */}
       {showClaimsModal && (
@@ -2516,10 +2632,10 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#f8fafc" }}>
-                    Automated Resolution Assistant
+                    {deterministicItem?.num || "Automated Resolution Assistant"}
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                    Ticket: <strong>{deterministicItem?.num || "RITM004120"}</strong> • Application Data Issue
+                    Ticket: <strong>{deterministicItem?.subject?.split(" — ")[0] || deterministicItem?.subject || "Support Ticket"}</strong>
                   </div>
                 </div>
               </div>
@@ -2628,12 +2744,7 @@ export default function LandingPage() {
                 </div>
               )}
 
-              {deterministicIsRunning && (
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#38bdf8", fontSize: "12px", fontStyle: "italic", padding: "4px" }}>
-                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#38bdf8", animation: "pulse 1s infinite" }} />
-                  Deterministic agent is executing validation rules...
-                </div>
-              )}
+
             </div>
 
             {/* Input Area / Footer */}
@@ -2649,41 +2760,51 @@ export default function LandingPage() {
             >
               {(() => {
                 const stepCount = deterministicMessages.length;
-                const isFlow1 = deterministicItem?.num === "RITM004120";
-                
-                if (stepCount === 0) {
-                  const suggestedText = isFlow1 ? "It says my dob is incorrect but I'm entering the right one." : "The portal won't accept my birthdate. It keeps giving me a validation error.";
-                  return (
-                    <button
-                      onClick={() => {
-                        setDeterministicMessages((prev) => [
-                          ...prev,
-                          { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-                        ]);
-                      }}
-                      style={{
-                        background: "rgba(59, 130, 246, 0.1)",
-                        border: "1px solid #3b82f6",
-                        color: "#60a5fa",
-                        padding: "10px 16px",
-                        borderRadius: "20px",
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        transition: "all 0.2s",
-                        alignSelf: "flex-start",
-                        marginBottom: "4px"
-                      }}
-                      onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
-                      onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
-                    >
-                      {suggestedText}
-                    </button>
-                  );
+
+                if (stepCount === 1) {
+                  let suggestedText = "";
+                  if (deterministicItem?.id === "ar1" || deterministicItem?.num?.includes("Member Portal")) {
+                    suggestedText = "I'm unable to log in to the member portal. It keeps asking for a verification code, but I'm not receiving any email";
+                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.num?.includes("Data Validation")) {
+                    suggestedText = "It says my date of birth is incorrect, but I'm entering the right one. I can't log in";
+                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.num?.includes("Account Identity")) {
+                    suggestedText = "I'm trying to create an account, but it keeps saying I already have one";
+                  }
+
+                  if (suggestedText) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeterministicMessages((prev) => [
+                            ...prev,
+                            { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+                          ]);
+                        }}
+                        style={{
+                          background: "rgba(59, 130, 246, 0.1)",
+                          border: "1px solid #3b82f6",
+                          color: "#60a5fa",
+                          padding: "10px 16px",
+                          borderRadius: "20px",
+                          fontSize: "13px",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.2s",
+                          alignSelf: "flex-start",
+                          marginBottom: "4px"
+                        }}
+                        onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
+                        onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
+                      >
+                        {suggestedText}
+                      </button>
+                    );
+                  }
                 }
                 return null;
               })()}
-              
+
               {!deterministicIsResolved ? (
                 <form
                   onSubmit={(e) => {
