@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // GuideWell automation agents
       '/api/automation-agents': {
         target: 'https://mnnb9bbkgu.ap-south-1.awsapprunner.com',
         changeOrigin: true,

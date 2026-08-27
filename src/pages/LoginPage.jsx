@@ -43,6 +43,7 @@ const content = {
 
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { isSuperAdminEmail } from "../constants/admin-emails";
+import { validateTCSEmail } from "../services/auth.service";
 
 export default function LoginPage() {
   useForceTheme("dark");
@@ -71,7 +72,7 @@ export default function LoginPage() {
   // Check business area and role permissions when email changes
   useEffect(() => {
     if (!email || !email.includes("@")) {
-      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS"]);
+      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS", "AI for Infra"]);
       return;
     }
 
@@ -87,7 +88,7 @@ export default function LoginPage() {
         handleBusinessAreaChange(userPerms.businessAreas[0]);
       }
     } else {
-      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS"]);
+      setAllowedBusinessAreas(["Acquisition", "AI for AD", "AI for AMS", "AI for Infra"]);
     }
   }, [email]);
 
@@ -131,8 +132,8 @@ export default function LoginPage() {
     e.preventDefault();
 
     // Validate email domain
-    if (!email.toLowerCase().endsWith("@tcs.com")) {
-      showToast("Please use your @tcs.com email address");
+    if (!validateTCSEmail(email)) {
+      showToast("Please use a valid email address");
       return;
     }
 

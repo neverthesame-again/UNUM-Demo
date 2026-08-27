@@ -22,8 +22,11 @@ export const BUSINESS_AREAS = [
   {
     id: "ai-for-infra",
     name: "AI for Infra",
-    status: "coming_soon",
-    roles: [],
+    status: "active",
+    roles: [
+      { value: "Infra Engineer", label: "Infra Engineer" },
+      { value: "SRE / NOC Lead", label: "SRE / NOC Lead" },
+    ],
   },
   {
     id: "ai-for-business",

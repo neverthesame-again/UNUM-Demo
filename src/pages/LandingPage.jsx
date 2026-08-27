@@ -7,6 +7,7 @@ import { landingPageService } from "../services/landing-page.service";
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { Footer } from "../components/Footer";
 import { Chatbot } from "../components/chatbot";
+import InfraPage from "./InfraPage";
 import { AdRoleBotWidget } from "../components/AdRoleBotWidget";
 import { UnifiedBotWidget } from "../components/UnifiedBotWidget";
 import { useToast } from "../components/Toast";
@@ -549,11 +550,7 @@ export default function LandingPage() {
     }
   }
 
-  return (
-    <>
-      <main className="re-landing-page fade-in">
-        {/* Domain & Role Context Selector Bar */}
-        {!selectedWorkspace && (
+  const contextSelectorBar = !selectedWorkspace && (
           <div
             style={{
               display: "flex",
@@ -659,7 +656,22 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        )}
+  );
+
+  if (selectedArea === "AI for Infra") {
+    return (
+      <main className="re-landing-page fade-in">
+        {contextSelectorBar}
+        <InfraPage />
+      </main>
+    );
+  }
+
+  return (
+    <>
+      <main className="re-landing-page fade-in">
+        {/* Domain & Role Context Selector Bar */}
+        {contextSelectorBar}
 
         {/* Top Header Bar */}
         <header className="re-topbar">
