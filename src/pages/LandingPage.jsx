@@ -1559,10 +1559,17 @@ export default function LandingPage() {
                                   fontWeight: "700",
                                   padding: "3px 10px",
                                   borderRadius: "12px",
-                                  background: item.statusType === "good" ? "rgba(16, 185, 129, 0.15)" : item.statusType === "warn" ? "rgba(245, 158, 11, 0.15)" : "rgba(8, 145, 178, 0.15)",
-                                  color: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#38bdf8",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  background: item.statusType === "good" ? "rgba(16, 185, 129, 0.15)" : item.statusType === "warn" ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                                  color: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#ef4444",
                                 }}
                               >
+                                <span style={{
+                                  width: "7px", height: "7px", borderRadius: "50%", display: "inline-block", flexShrink: 0,
+                                  background: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#ef4444",
+                                }} />
                                 {item.status}
                               </span>
                             )}
