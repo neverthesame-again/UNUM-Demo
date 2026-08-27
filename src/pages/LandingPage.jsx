@@ -302,20 +302,20 @@ export default function LandingPage() {
     if (ignioIsRunning && ignioCurrentStep > 0 && ignioCurrentStep < 4) {
       timer = setTimeout(() => {
         setIgnioCurrentStep((prev) => prev + 1);
-      }, 2200);
+      }, 4500);
     } else if (ignioIsRunning && ignioCurrentStep === 4) {
       timer = setTimeout(() => {
         setIgnioIsRunning(false);
         setIgnioIsResolved(true);
         if (ignioItem) {
-          ignioItem.status = "Resolved (ignio)";
+          ignioItem.status = "Resolved";
           ignioItem.statusType = "good";
-          ignioItem.resolution = ignioItem.resolution || "ignio Autonomous Healing Executed (100% Success)";
-          ignioItem.timeToResolve = "8 seconds";
+          ignioItem.resolution = ignioItem.resolution || "Autonomous Healing Executed (100% Success)";
+          ignioItem.timeToResolve = "18 seconds";
           ignioItem.csat = "5/5 Stars";
           ignioItem.isResolved = true;
         }
-      }, 1800);
+      }, 4000);
     }
     return () => clearTimeout(timer);
   }, [ignioIsRunning, ignioCurrentStep, ignioItem]);
@@ -587,6 +587,9 @@ export default function LandingPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
+                Active Workspace:
+              </span>
               <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
                 Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
               </span>
@@ -595,7 +598,7 @@ export default function LandingPage() {
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                  {selectedArea === "AI for AMS" ? "L1 Classification:" : "Domain:"}
+                  {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
                 </label>
                 <select
                   value={selectedArea === "AI for AMS" ? "Acquisition" : selectedArea}
@@ -1095,7 +1098,7 @@ export default function LandingPage() {
 
         {/* Tab View 1: Overview Grid View */}
         {activeTab === "overview" && (
-          selectedArea === "AI for AMS" ? (
+          selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
             <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
               {/* 1. Middle 3 Columns Section */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
@@ -1139,8 +1142,8 @@ export default function LandingPage() {
                         padding: "14px 16px",
                         color: "var(--text-primary)",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
+                        flexDirection: "column",
+                        gap: "12px",
                         cursor: "pointer",
                         fontWeight: "700",
                         fontSize: "13px",
@@ -1159,27 +1162,48 @@ export default function LandingPage() {
                         e.currentTarget.style.transform = "none";
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Claims</span>
+                      {/* Top Row: Title + Active Badge + Redirect Icon */}
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Experience</span>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              color: "#ef4444",
+                              background: "rgba(239, 68, 68, 0.12)",
+                              padding: "3px 8px",
+                              borderRadius: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
+                            Active
+                          </span>
+                          <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
+                        </div>
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <span
-                          style={{
-                            fontSize: "11px",
-                            fontWeight: "600",
-                            color: "#ef4444",
-                            background: "rgba(239, 68, 68, 0.12)",
-                            padding: "3px 8px",
-                            borderRadius: "12px",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                          }}
-                        >
-                          <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
-                          Active
-                        </span>
-                        <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
+
+                      {/* Impacted Parameters Grid */}
+                      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px", fontSize: "11px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                        <div style={{ fontSize: "11px", fontWeight: "700", color: "#ef4444", letterSpacing: "0.4px" }}>
+                          IMPACTS TO:
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            📊 <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
+                          </span>
+                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            📝 <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
+                          </span>
+                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
+                            ⚡ <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
+                          </span>
+                        </div>
                       </div>
                     </button>
 
@@ -1681,7 +1705,7 @@ export default function LandingPage() {
                                 wordBreak: "break-word",
                               }}
                             >
-                              {item.code || item.num || item.title || `Item #${idx + 1}`}
+                              {activeTab === "agent_resolve" ? (item.subject || item.name || item.title || item.code || item.num) : (item.code || item.num || item.title || `Item #${idx + 1}`)}
                             </span>
                             {item.status && (
                               <span
@@ -1716,6 +1740,7 @@ export default function LandingPage() {
                             </div>
                           )}
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "10px" }}>
+                            {item.batchTag && <span style={{ background: "rgba(139,92,246,0.15)", color: "#c084fc", padding: "2px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700" }}>📦 {item.batchTag}</span>}
                             {item.category && <span style={{ background: "rgba(255,255,255,0.06)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🏷️ {item.category}</span>}
                             {item.confidence && <span style={{ background: "rgba(0,210,211,0.15)", color: "var(--cyan)", padding: "2px 8px", borderRadius: "6px", fontSize: "11px" }}>🤖 {item.confidence}</span>}
                           </div>
@@ -1750,63 +1775,6 @@ export default function LandingPage() {
                 </div>
               ) : (
                 <>
-                  {activeTab === "agent_resolve" && (
-                    <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-                      <button
-                        type="button"
-                        onClick={() => setAgentResolveFilter("all")}
-                        style={{
-                          background: agentResolveFilter === "all" ? "var(--text-primary)" : "transparent",
-                          color: agentResolveFilter === "all" ? "var(--bg-primary)" : "var(--text-secondary)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "20px",
-                          padding: "6px 16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        All Items
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAgentResolveFilter("ignio")}
-                        style={{
-                          background: agentResolveFilter === "ignio" ? "linear-gradient(135deg, #0891b2 0%, #2563eb 100%)" : "transparent",
-                          color: agentResolveFilter === "ignio" ? "#fff" : "var(--text-secondary)",
-                          border: "1px solid",
-                          borderColor: agentResolveFilter === "ignio" ? "transparent" : "var(--border)",
-                          borderRadius: "20px",
-                          padding: "6px 16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        ignio
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setAgentResolveFilter("deterministic")}
-                        style={{
-                          background: agentResolveFilter === "deterministic" ? "linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%)" : "transparent",
-                          color: agentResolveFilter === "deterministic" ? "#fff" : "var(--text-secondary)",
-                          border: "1px solid",
-                          borderColor: agentResolveFilter === "deterministic" ? "transparent" : "var(--border)",
-                          borderRadius: "20px",
-                          padding: "6px 16px",
-                          fontSize: "12px",
-                          fontWeight: "600",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        Deterministic
-                      </button>
-                    </div>
-                  )}
                   <div
                     style={{
                       display: "grid",
@@ -1826,8 +1794,8 @@ export default function LandingPage() {
                         key={item.id || idx}
                       style={{
                         background: "rgba(255, 255, 255, 0.03)",
-                        border: activeTab === "agent_resolve" ? `1px solid ${item.isIgnio ? "rgba(8,145,178,0.5)" : item.isDeterministic ? "rgba(139,92,246,0.5)" : "var(--border)"}` : "1px solid var(--border)",
-                        boxShadow: activeTab === "agent_resolve" ? (item.isIgnio ? "0 4px 12px rgba(8,145,178,0.1)" : item.isDeterministic ? "0 4px 12px rgba(139,92,246,0.1)" : "none") : "none",
+                        border: "1px solid var(--border)",
+                        boxShadow: "var(--shadow-card)",
                         borderRadius: "12px",
                         padding: "16px",
                         display: "flex",
@@ -1838,25 +1806,7 @@ export default function LandingPage() {
                       }}
                     >
                       <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                        {/* Agent Resolve Workflow Badge */}
-                        {activeTab === "agent_resolve" && (item.isIgnio || item.isDeterministic) && (
-                          <div style={{ marginBottom: "12px", display: "flex", alignItems: "center" }}>
-                            <span style={{
-                              background: item.isIgnio ? "linear-gradient(135deg, rgba(8,145,178,0.2) 0%, rgba(37,99,235,0.2) 100%)" : "linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(6,182,212,0.2) 100%)",
-                              border: `1px solid ${item.isIgnio ? "rgba(8,145,178,0.5)" : "rgba(139,92,246,0.5)"}`,
-                              color: item.isIgnio ? "#38bdf8" : "#c084fc",
-                              padding: "4px 10px",
-                              borderRadius: "12px",
-                              fontSize: "11px",
-                              fontWeight: "800",
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "4px"
-                            }}>
-                              {item.isIgnio ? "ignio" : "Deterministic"}
-                            </span>
-                          </div>
-                        )}
+
 
                         {/* Card Header Row */}
                         <div
@@ -1876,7 +1826,7 @@ export default function LandingPage() {
                               wordBreak: "break-word",
                             }}
                           >
-                            {item.code || item.num || item.build || item.name || item.title || item.subject || item.metric || item.query || item.suite || item.vendor || item.prbCode || item.patch || item.area || `Item #${idx + 1}`}
+                            {activeTab === "agent_resolve" ? (item.subject || item.name || item.title || item.code || item.num) : (item.code || item.num || item.build || item.name || item.title || item.subject || item.metric || item.query || item.suite || item.vendor || item.prbCode || item.patch || item.area || `Item #${idx + 1}`)}
                           </span>
 
                           {(item.status || item.severity || item.health || item.acStatus) && (
@@ -1908,12 +1858,7 @@ export default function LandingPage() {
                           {item.rcaSummary && <p style={{ margin: "4px 0" }}><strong>RCA:</strong> {item.rcaSummary}</p>}
                           {item.recommendation && <p style={{ margin: "4px 0", color: "#34d399" }}><strong>Fix:</strong> {item.recommendation}</p>}
 
-                          {activeTab === "agent_resolve" && item.system && (
-                            <div style={{ background: "var(--surface-card)", borderLeft: "3px solid var(--blue)", padding: "10px 12px", margin: "6px 0", borderRadius: "0 8px 8px 0", border: "1px solid var(--border)", borderLeftWidth: "3px" }}>
-                              <strong style={{ color: "var(--blue)", fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Impacted System:</strong>
-                              <div style={{ marginTop: "4px", fontSize: "13px", color: "var(--text-primary)", fontWeight: "500" }}>{item.system}</div>
-                            </div>
-                          )}
+
 
 
                           {/* Key-Value Tag List */}
@@ -1962,7 +1907,7 @@ export default function LandingPage() {
                             <div style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                               {item.isResolved ? (
                                 <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
-                                  <Icon name="check" size={16} /> Issue Resolved Successfully via {item.isIgnio ? "ignio" : "Deterministic AI"}
+                                  <Icon name="check" size={16} /> Issue Resolved Successfully
                                 </span>
                               ) : (
                                 <button
@@ -1993,7 +1938,7 @@ export default function LandingPage() {
                                     transition: "all 0.2s ease",
                                   }}
                                 >
-                                  <Icon name="zap" size={14} /> {item.isIgnio ? "Auto Resolve" : "Agent Resolve"}
+                                  <Icon name="zap" size={14} /> {item.actionLabel || (item.isIgnio ? "Auto Resolve" : "Agent Resolve")}
                                 </button>
                               )}
                             </div>
@@ -2232,7 +2177,7 @@ export default function LandingPage() {
         <Modal
           isOpen={showClaimsModal}
           onClose={() => setShowClaimsModal(false)}
-          title="Member Portal Observability - Claims"
+          title="Member Portal Observability - Member Experience"
           videoUrl="https://ismartams.tcsapps.com/member-portal-observability/"
         />
       )}
@@ -2309,10 +2254,10 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#f8fafc" }}>
-                    ignio
+                    Automated AI Remediation
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
-                    Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "ignio Automated Incident Remediation"}
+                    Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "Automated Incident Remediation"}
                   </div>
                 </div>
               </div>
@@ -2351,39 +2296,39 @@ export default function LandingPage() {
                 {[
                   {
                     step: 1,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Connecting to ignio AIOps Engine & Fetching FHIR API Gateway Metrics"
-                      : "Connecting to ignio AIOps Engine & Fetching Incident Diagnostics",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Establishing secure telemetry stream to Interoperability Gateway node."
-                      : "Establishing secure channel to ignio core telemetry node."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "1. Ingest & Connect: Member Ingestion Queue"
+                      : "1. Ingest & Connect: Batch Scheduler Telemetry",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Connecting to HR Connect ingestion service and checking file transfer queue status."
+                      : "Connecting to Control-M Batch Scheduler and fetching worker thread status logs."
                   },
                   {
                     step: 2,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Analyzing API Traffic Logs & Identifying 429 Rate-Limit Throttling Spike"
-                      : "Analyzing Logs & Executing Automated Root Cause Analysis (RCA)",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Correlating client request bursts with Token Bucket exhaustion & tripped circuit breaker."
-                      : "Parsing application stack traces & correlated metric anomalies."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "2. Observe & Detect: File Lock & Stream Stall"
+                      : "2. Observe & Detect: Stalled Batch Job Identification",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Identifying file read-lock on enrollment batch feed and unreleased stream handle."
+                      : "Detecting thread memory deadlock, unreleased database locks, and batch job failure."
                   },
                   {
                     step: 3,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Running ignio Rate-Limit Auto-Expansion & Circuit Breaker Reset Payload"
-                      : "Running ignio Automated Remediation & Self-Healing Payload",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Expanding throughput ceiling by 2.5x and executing automatic circuit breaker state reset."
-                      : "Applying system patch, clearing locks, and recycling target worker threads."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "3. Auto-Resume & Self-Heal: Releasing Lock & Resuming Stream"
+                      : "3. Auto-Restart & Self-Heal: Clearing Locks & Resuming Job",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Clearing file lock, resetting staging pointer, and issuing automated stream resume."
+                      : "Releasing stale database locks, clearing worker cache, and issuing automated job restart."
                   },
                   {
                     step: 4,
-                    title: ignioItem?.num === "INC009432"
-                      ? "Verifying FHIR Gateway Telemetry & Confirming Zero Throttling Drops"
-                      : "Verifying System Health Telemetry & Signing Off Resolution",
-                    desc: ignioItem?.num === "INC009432"
-                      ? "Executing synthetic HL7/FHIR payload test suite; updating ITSM ticket status."
-                      : "Executing synthetic health check suite and updating ITSM ticket status."
+                    title: ignioItem?.num === "RITM004120"
+                      ? "4. Govern & Verify: Confirming HR Data Flow & Sign-off"
+                      : "4. Govern & Verify: Confirming Successful Execution",
+                    desc: ignioItem?.num === "RITM004120"
+                      ? "Verifying member enrollment records processed successfully and setting ticket status to Resolved."
+                      : "Verifying batch job resumed successfully, all records ingested, and setting ticket status to Resolved."
                   },
                 ].map((s) => {
                   const isDone = ignioCurrentStep > s.step || ignioIsResolved;
@@ -2462,7 +2407,7 @@ export default function LandingPage() {
                       Issue is resolved successfully!
                     </h4>
                     <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>
-                      ignio automated remediation completed. Incident status has been updated to <strong>Resolved</strong> with 100% health confirmation.
+                      Automated remediation completed. Incident status has been updated to <strong>Resolved</strong> with 100% health confirmation.
                     </p>
                   </div>
                   <button
@@ -2571,7 +2516,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#f8fafc" }}>
-                    Deterministic
+                    Automated Resolution Assistant
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
                     Ticket: <strong>{deterministicItem?.num || "RITM004120"}</strong> • Application Data Issue

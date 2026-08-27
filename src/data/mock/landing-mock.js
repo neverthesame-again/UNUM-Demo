@@ -657,28 +657,23 @@ export const roleMockData = {
         subtext: "28 incoming tickets · 18 auto-resolved by Chatbot · 6 items need triage decision",
         chips: [
           { id: "c1", text: "Auto-Resolution Rate 64.2%", type: "info" },
-          { id: "c2", text: "SLA Breach Risk: 1 Ticket in 12m", type: "danger" },
           { id: "c3", text: "Password Reset Automation 100%", type: "info" },
           { id: "c4", text: "First Contact Resolution 4.2 min", type: "warn" },
         ],
       },
       tabs: [
         { id: "overview", label: "Overview", active: true },
-        { id: "agent_resolve", label: "Agent Resolve", badge: 6 },
+        { id: "agent_resolve", label: "Agent Resolve", badge: 2 },
         { id: "vulnerabilities", label: "Vulnerabilities", badge: 3 },
         { id: "insights", label: "Insights", badge: 4 },
       ],
       tabData: {
         agent_resolve: {
           title: "AI Agent Resolve & Automated Executions",
-          sub: "Log of 6 support tickets requiring automated AI execution today",
+          sub: "Log of 2 batch support tickets requiring automated AI execution today",
           items: [
-            { id: "ar1", num: "INC009405", subject: "ignio Automated Incident Remediation", desc: "Automated remediation of high memory utilization across application nodes.", system: "ignio AIOps Engine", resolution: "ignio Autonomous Healing Pipeline", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
-            { id: "ar2", num: "RITM004120", subject: "Deterministic (Data Validation) — Date of Birth Formatting Error", desc: "User entered Date of Birth using slashes, causing frontend validation to fail.", system: "Data Validation Engine", resolution: "Deterministic Formatter Chat Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
-            { id: "ar3", num: "RITM009428", subject: "Deterministic (Data Validation) — Date of Birth Sequence Error", desc: "User entered Date of Birth in DD-MM-YYYY format, failing strict MM-DD-YYYY rule.", system: "Claims Ingestion Engine", resolution: "Deterministic Format Correction Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
-            { id: "ar4", num: "INC009432", subject: "ignio Autonomous FHIR API Rate Limit & Throttling Mitigation", desc: "API Gateway reported excessive 429 Too Many Requests errors for the FHIR endpoints.", system: "Healthcare FHIR Gateway", resolution: "Dynamic Token Bucket Expansion & Circuit Breaker Reset", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
-            { id: "ar5", num: "INC009440", subject: "ignio (API Integration) — OAuth Token Exchange Timeout Issue", desc: "Token renewal requests are timing out, preventing downstream microservices from authenticating.", system: "API Gateway & Auth Service", resolution: "Automated Key Rotation & OAuth Cache Flush", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
-            { id: "ar6", num: "INC009452", subject: "ignio (Application Issue) — Member Profile Session State Mismatch", desc: "Discrepancy detected between Redis cache and database session state for logged-in members.", system: "Member Portal Session Service", resolution: "Session Cache Re-sync", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
+            { id: "ar1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Restart", batchTag: "Batch Job Auto-Restart" },
+            { id: "ar2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resume", batchTag: "Enrollment Batch Resume" },
           ],
         },
         vulnerabilities: {
@@ -842,7 +837,6 @@ export const roleMockData = {
         subtext: "28 incoming tickets · 18 auto-resolved by Chatbot · 6 items need L1 triage decision",
         chips: [
           { id: "c1", text: "Auto-Resolution Rate 64.2%", type: "info" },
-          { id: "c2", text: "SLA Breach Risk: 1 Ticket in 12m", type: "danger" },
           { id: "c3", text: "Password Reset Automation 100%", type: "info" },
           { id: "c4", text: "First Contact Resolution 4.2 min", type: "warn" },
         ],
@@ -1007,14 +1001,10 @@ export const roleMockData = {
         },
         agent_resolve: {
           title: "AI Agent Resolve & Automated Executions",
-          sub: "Log of 6 support tickets requiring automated AI execution today",
+          sub: "Log of 2 batch support tickets requiring automated AI execution today",
           items: [
-            { id: "ar1", num: "INC009405", subject: "ignio Automated Incident Remediation", system: "ignio AIOps Engine", resolution: "ignio Autonomous Healing Pipeline", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
-            { id: "ar2", num: "RITM004120", subject: "Deterministic (Application Issue) — Password Data Validation", system: "Data Validation Engine", resolution: "Deterministic Password Validation Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
-            { id: "ar3", num: "RITM009428", subject: "Deterministic (Data Validation) — EDI 837 Claim Schema Validation Failure", system: "Claims Ingestion Engine", resolution: "Automated EDI X12 Schema Re-alignment", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
-            { id: "ar4", num: "INC009432", subject: "ignio Autonomous FHIR API Rate Limit & Throttling Mitigation", system: "Healthcare FHIR Gateway", resolution: "Dynamic Token Bucket Expansion & Circuit Breaker Reset", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve" },
-            { id: "ar5", num: "RITM009440", subject: "Deterministic (API Integration) — OAuth Token Exchange Timeout Issue", system: "API Gateway & Auth Service", resolution: "Automated Key Rotation & OAuth Cache Flush", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
-            { id: "ar6", num: "RITM009452", subject: "Deterministic (Application Issue) — Member Profile Session State Mismatch", system: "Member Portal Session Service", resolution: "Deterministic Session Cache Re-sync", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Auto Resolve" },
+            { id: "ar1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Restart", batchTag: "Batch Job Auto-Restart" },
+            { id: "ar2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resume", batchTag: "Enrollment Batch Resume" },
           ],
         },
         vulnerabilities: {
@@ -1904,14 +1894,14 @@ export const getMockDataForRole = (businessArea, role) => {
 
 export const amsOverviewData = {
   topMetrics: [
-    { id: "m1", count: 7, label: "Needs My Action", color: "blue", icon: "list" },
+    { id: "m1", count: 5, label: "Needs My Action", color: "blue", icon: "list" },
     { id: "m2", count: 5, label: "Awaiting My Approval (HITL)", color: "orange", icon: "clock" },
     { id: "m3", count: 23, label: "AI Completed Autonomously Today", color: "green", icon: "cpu" },
     { id: "m4", count: 3, label: "Critical Issues / SLA Risk", color: "red", icon: "alert-triangle" },
   ],
   needsMyAction: {
     title: "Needs My Action",
-    badge: 7,
+    badge: 5,
     headerColor: "#2563eb",
     items: [
       { id: "n1", tag: "RUN OPS", meta: "Due 25 min", text: "INC0045231 – Batch job failure, triage required" },

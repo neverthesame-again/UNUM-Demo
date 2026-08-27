@@ -98,7 +98,7 @@ export function MemberPortalObservabilityDashboard({ onClose }) {
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <h2 style={{ fontSize: "17px", fontWeight: "700", color: "#f8fafc", margin: 0 }}>
-                Member Portal Observability — Claims Dashboard
+                Member Portal Observability — Member Experience Dashboard
               </h2>
               <span
                 style={{
