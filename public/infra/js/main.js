@@ -86,12 +86,14 @@ function updateTabCounts(dashboard) {
 }
 
 /* ── Session ───────────────────────────────────────────────── */
-function initLogout() {
-  el('logoutBtn').addEventListener('click', async () => {
-    try { await api.auth.logout(); } catch { /* session may already be gone */ }
-    window.location.href = '/login.html';
-  });
-}
+  function initLogout() {
+    const btn = document.getElementById('logoutBtn');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        window.parent.postMessage({ type: 'INFRA_LOGOUT' }, '*');
+      });
+    }
+  }
 
 /* ── Approvals ─────────────────────────────────────────────── */
 /**
