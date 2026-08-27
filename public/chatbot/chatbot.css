@@ -158,28 +158,30 @@
 .centene-predefined-prompts {
   padding: 10px 16px;
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 8px;
   background: #050d1f;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
+  max-height: 180px;
+  overflow-y: auto;
 }
 
 .centene-prompt-item {
   position: relative;
   font-size: 12px;
-  padding: 7px 13px;
+  padding: 8px 14px;
   background: rgba(0, 200, 255, 0.08);
   border: 1px solid rgba(0, 200, 255, 0.25);
-  border-radius: 20px;
+  border-radius: 12px;
   color: #00c4ff;
   cursor: pointer;
   transition: all 0.2s ease;
-  line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
+  line-height: 1.45;
+  white-space: normal;
+  word-break: break-word;
+  text-align: left;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .centene-prompt-item:hover {
@@ -1490,24 +1492,30 @@
 /* ── Suggestion chips ────────────────────────────────────── */
 .ad-bot-suggestions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 6px;
   padding: 8px 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   flex-shrink: 0;
+  max-height: 160px;
+  overflow-y: auto;
 }
 
 .ad-bot-suggestion-chip {
-  padding: 5px 11px;
-  border-radius: 16px;
+  padding: 7px 12px;
+  border-radius: 12px;
   border: 1px solid rgba(0, 196, 255, 0.25);
   background: rgba(0, 196, 255, 0.06);
   color: #7dd3fc;
   font-size: 11.5px;
   cursor: pointer;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
   transition: all 0.18s ease;
   text-align: left;
+  line-height: 1.4;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ad-bot-suggestion-chip:hover {

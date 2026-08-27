@@ -7,10 +7,12 @@ import { landingPageService } from "../services/landing-page.service";
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { Footer } from "../components/Footer";
 import { Chatbot } from "../components/chatbot";
+import InfraPage from "./InfraPage";
 import { AdRoleBotWidget } from "../components/AdRoleBotWidget";
 import { UnifiedBotWidget } from "../components/UnifiedBotWidget";
 import { useToast } from "../components/Toast";
 import { PipelineModal } from "../components/project-detail/PipelineModal";
+import { AppHealthModal } from "../components/project-detail/AppHealthModal";
 import { Modal } from "../components/Modal";
 import { Icon } from "../components/Icon";
 import {
@@ -40,6 +42,8 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [showPrdModal, setShowPrdModal] = useState(false);
+  const [showAppHealthModal, setShowAppHealthModal] = useState(false);
+  const [selectedHealthApp, setSelectedHealthApp] = useState(null);
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
   const [isBotOpen, setIsBotOpen] = useState(false);
@@ -527,11 +531,7 @@ export default function LandingPage() {
     tabData,
   } = data;
 
-  let currentAvailableRoles = getRolesForBusinessArea(selectedArea);
-  if (user?.activeRole) {
-    const matched = currentAvailableRoles.filter((r) => r.value === user.activeRole);
-    currentAvailableRoles = matched.length > 0 ? matched : [{ value: user.activeRole, label: user.activeRole }];
-  }
+  const currentAvailableRoles = getRolesForBusinessArea(selectedArea);
   const isPOPage = selectedArea === "AI for AD" && selectedRole === "Product Owner";
   const activeApp = selectedApp || DEFAULT_APP;
   const currentAppData = APPLICATION_DATA_MAP[activeApp.name] || APPLICATION_DATA_MAP["BSpoke Application"];
@@ -570,11 +570,7 @@ export default function LandingPage() {
     }
   }
 
-  return (
-    <>
-      <main className="re-landing-page fade-in">
-        {/* Domain & Role Context Selector Bar */}
-        {!selectedWorkspace && (
+  const contextSelectorBar = !selectedWorkspace && (
           <div
             style={{
               display: "flex",
@@ -591,7 +587,7 @@ export default function LandingPage() {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-<span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
                 Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
               </span>
             </div>
@@ -646,7 +642,6 @@ export default function LandingPage() {
                 </label>
                 <select
                   value={selectedRole}
-                  disabled={!!user?.activeRole}
                   onChange={(e) => {
                     sessionStorage.removeItem("landing_active_tab");
                     sessionStorage.removeItem("landing_selected_workspace");
@@ -660,8 +655,7 @@ export default function LandingPage() {
                     padding: "6px 12px",
                     fontSize: "12px",
                     fontWeight: "600",
-                    cursor: user?.activeRole ? "default" : "pointer",
-                    opacity: user?.activeRole ? 0.95 : 1,
+                    cursor: "pointer",
                   }}
                 >
                   {currentAvailableRoles.map((r) => (
@@ -677,7 +671,22 @@ export default function LandingPage() {
               </div>
             </div>
           </div>
-        )}
+  );
+
+  if (selectedArea === "AI for Infra") {
+    return (
+      <main className="re-landing-page fade-in">
+        {contextSelectorBar}
+        <InfraPage />
+      </main>
+    );
+  }
+
+  return (
+    <>
+      <main className="re-landing-page fade-in">
+        {/* Domain & Role Context Selector Bar */}
+        {contextSelectorBar}
 
         {/* Top Header Bar */}
         <header className="re-topbar">
@@ -984,7 +993,6 @@ export default function LandingPage() {
                   {currentAppData.acceptance_criteria?.length || 0}
                 </span>
               </button>
-
               {/* Overall Status tab */}
               <button
                 type="button"
@@ -1543,7 +1551,6 @@ export default function LandingPage() {
                 boxShadow: "var(--shadow-card)",
               }}
             >
-
               <div style={{ marginBottom: "20px" }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                   <h2 style={{ margin: 0, fontSize: "18px", color: "var(--text-primary)", fontWeight: "700" }}>
@@ -1571,125 +1578,69 @@ export default function LandingPage() {
               {/* Items Card List Grid or Insights Analytics & Cards */}
               {activeTab === "insights" ? (
                 <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-                  {/* 2-Column Analytics Charts */}
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(360px, 1fr))", gap: "20px" }}>
-                    {selectedRole === "Software Engineer" ? (
-                      <>
-                        {/* Panel 1: Software Code Quality & Test Telemetry */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              📊 Software Code Quality & Test Telemetry
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Current Sprint</span>
-                          </div>
+                  {/* Top Two Analytics Panels */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+                      gap: "16px",
+                    }}
+                  >
+                    {/* Panel 1: Resolution Category Breakdown */}
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                          📊 Incident Resolution Category Distribution
+                        </h3>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
+                      </div>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                            {[
-                              { label: "Unit & Integration Test Coverage", count: "94% (Passed)", color: "#10b981", pct: 94 },
-                              { label: "Static Code Analysis & Lint Pass Rate", count: "98% (Clean)", color: "#0891b2", pct: 98 },
-                              { label: "CI/CD Build Pipeline Speed", count: "3.2 min avg", color: "#8b5cf6", pct: 85 },
-                              { label: "Zero-Day Vulnerability Scanning", count: "0 Critical", color: "#34d399", pct: 100 },
-                            ].map((cat, i) => (
-                              <div key={i}>
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                                  <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                                </div>
-                                <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                                  <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                                </div>
-                              </div>
-                            ))}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                        {[
+                          { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
+                          { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
+                          { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
+                          { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
+                        ].map((cat, i) => (
+                          <div key={i}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
+                              <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
+                              <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
+                            </div>
+                            <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
+                              <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
+                            </div>
                           </div>
-                        </div>
+                        ))}
+                      </div>
+                    </div>
 
-                        {/* Panel 2: Hotfix & PR Engineering Velocity */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              ⚡ Hotfix & PR Engineering Velocity
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>65% Faster</span>
-                          </div>
+                    {/* Panel 2: Top Autonomous AI Runbooks Executed */}
+                    <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+                        <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
+                          ⚡ Top Autonomous Runbooks Executed
+                        </h3>
+                        <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
+                      </div>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {[
-                              { name: "PR Code Review Lead Time", execs: "1.4h avg", success: "65% Faster", time: "Approved" },
-                              { name: "Hotfix Patch Merge Reliability", execs: "42 merges", success: "99.2%", time: "Passed" },
-                              { name: "Automated Regression Test Suite", execs: "142 tests", success: "100% Pass", time: "Verified" },
-                              { name: "Software Code Complexity Index", execs: "Low Risk", success: "Grade A", time: "Passed" },
-                            ].map((rb, i) => (
-                              <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <div>
-                                  <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                                </div>
-                                <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                              </div>
-                            ))}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                        {[
+                          { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
+                          { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
+                          { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
+                          { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
+                        ].map((rb, i) => (
+                          <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <div>
+                              <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
+                              <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
+                            </div>
+                            <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
                           </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        {/* Panel 1: Resolution Category Breakdown */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              📊 Incident Resolution Category Distribution
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>Last 30 Days</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
-                            {[
-                              { label: "Data Validation & Schema Errors", count: "68 tickets (38%)", color: "#0891b2", pct: 38 },
-                              { label: "Authentication & Identity Management", count: "48 tickets (27%)", color: "#8b5cf6", pct: 27 },
-                              { label: "Database Connection Pool & Latency", count: "36 tickets (20%)", color: "#10b981", pct: 20 },
-                              { label: "API Gateway & Integration Timeouts", count: "27 tickets (15%)", color: "#f59e0b", pct: 15 },
-                            ].map((cat, i) => (
-                              <div key={i}>
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "6px" }}>
-                                  <span style={{ color: "var(--text-primary)", fontWeight: "600" }}>{cat.label}</span>
-                                  <span style={{ color: "var(--text-muted)" }}>{cat.count}</span>
-                                </div>
-                                <div style={{ height: "8px", background: "rgba(255,255,255,0.06)", borderRadius: "4px", overflow: "hidden" }}>
-                                  <div style={{ width: `${cat.pct}%`, height: "100%", background: cat.color, borderRadius: "4px", transition: "width 0.5s ease" }} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Panel 2: Top Autonomous AI Runbooks Executed */}
-                        <div style={{ background: "rgba(255, 255, 255, 0.03)", border: "1px solid var(--border)", borderRadius: "16px", padding: "20px" }}>
-                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-                            <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "var(--text-primary)" }}>
-                              ⚡ Top Autonomous Runbooks Executed
-                            </h3>
-                            <span style={{ fontSize: "11px", color: "#34d399", fontWeight: "700" }}>99.4% Avg Success</span>
-                          </div>
-
-                          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                            {[
-                              { name: "ignio™ Autonomous Healing Payload #89", execs: "142 runs", success: "100%", time: "8s avg" },
-                              { name: "Deterministic Data Validation Reconciler", execs: "98 runs", success: "99.2%", time: "6s avg" },
-                              { name: "OAuth Token Cache Flusher & Key Rotator", execs: "64 runs", success: "98.4%", time: "12s avg" },
-                              { name: "DB Pool Auto-Scaler & Session Drainer", execs: "41 runs", success: "100%", time: "10s avg" },
-                            ].map((rb, i) => (
-                              <div key={i} style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)", borderRadius: "10px", padding: "10px 14px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                                <div>
-                                  <div style={{ fontSize: "12px", fontWeight: "700", color: "var(--text-primary)" }}>{rb.name}</div>
-                                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>{rb.execs} · {rb.time}</div>
-                                </div>
-                                <span style={{ background: "rgba(16,185,129,0.15)", color: "#10b981", fontSize: "11px", fontWeight: "700", padding: "3px 8px", borderRadius: "6px" }}>{rb.success}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </>
-                    )}
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Simple Insight Cards Grid */}
@@ -1701,10 +1652,7 @@ export default function LandingPage() {
                     }}
                   >
                     {activeTabData.items && activeTabData.items.map((item, idx) => (
-                      <div
-                        key={item.id || idx}
-                        style={{
-                          background: "rgba(255, 255, 255, 0.03)",
+                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{ cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
                           border: "1px solid var(--border)",
                           borderRadius: "12px",
                           padding: "16px",
@@ -1742,10 +1690,17 @@ export default function LandingPage() {
                                   fontWeight: "700",
                                   padding: "3px 10px",
                                   borderRadius: "12px",
-                                  background: item.statusType === "good" ? "rgba(16, 185, 129, 0.15)" : item.statusType === "warn" ? "rgba(245, 158, 11, 0.15)" : "rgba(8, 145, 178, 0.15)",
-                                  color: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#38bdf8",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  background: item.statusType === "good" ? "rgba(16, 185, 129, 0.15)" : item.statusType === "warn" ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)",
+                                  color: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#ef4444",
                                 }}
                               >
+                                <span style={{
+                                  width: "7px", height: "7px", borderRadius: "50%", display: "inline-block", flexShrink: 0,
+                                  background: item.statusType === "good" ? "#10b981" : item.statusType === "warn" ? "#f59e0b" : "#ef4444",
+                                }} />
                                 {item.status}
                               </span>
                             )}
@@ -2279,6 +2234,16 @@ export default function LandingPage() {
           onClose={() => setShowClaimsModal(false)}
           title="Member Portal Observability - Claims"
           videoUrl="https://ismartams.tcsapps.com/member-portal-observability/"
+        />
+      )}
+
+      
+      {/* App Health Modal */}
+      {showAppHealthModal && (
+        <AppHealthModal
+          isOpen={showAppHealthModal}
+          onClose={() => setShowAppHealthModal(false)}
+          app={selectedHealthApp}
         />
       )}
 
