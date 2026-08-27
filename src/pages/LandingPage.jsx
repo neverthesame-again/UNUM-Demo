@@ -65,6 +65,21 @@ export default function LandingPage() {
     return role || "Product Owner";
   });
 
+  const L0_CLASSIFICATIONS = [
+    "Acquisition",
+    "Medical Management",
+    "Back Office Mgmt.",
+    "Engagement Management",
+    "Corporate Functions",
+    "Enterprise",
+    "Enterprise Analytics",
+    "Enterprise Data",
+  ];
+
+  const [selectedL0, setSelectedL0] = useState(() => {
+    return sessionStorage.getItem("landing_selected_l0") || "Acquisition";
+  });
+
 
 
   // SEL Nexus States for L3/L4 Support Engineer
@@ -717,11 +732,12 @@ export default function LandingPage() {
                   {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
                 </label>
                 <select
-                  value={selectedArea === "AI for AMS" ? "Acquisition" : selectedArea}
+                  value={selectedArea === "AI for AMS" ? selectedL0 : selectedArea}
                   onChange={(e) => {
                     const val = e.target.value;
-                    if (val === "Acquisition") {
-                      handleAreaChange("AI for AMS");
+                    if (selectedArea === "AI for AMS") {
+                      setSelectedL0(val);
+                      sessionStorage.setItem("landing_selected_l0", val);
                     } else {
                       handleAreaChange(val);
                     }
@@ -738,9 +754,15 @@ export default function LandingPage() {
                   }}
                 >
                   {selectedArea === "AI for AMS" ? (
-                    <option value="Acquisition" style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}>
-                      Acquisition
-                    </option>
+                    L0_CLASSIFICATIONS.map((l0) => (
+                      <option
+                        key={l0}
+                        value={l0}
+                        style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
+                      >
+                        {l0}
+                      </option>
+                    ))
                   ) : (
                     BUSINESS_AREAS.filter((a) => a.status !== "coming_soon" && (selectedArea !== "AI for AD" || a.name !== "AI for AMS")).map((area) => (
                       <option
@@ -2370,7 +2392,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#f8fafc" }}>
-                    Automated AI Remediation
+                    ignio™ Automated AI Remediation
                   </h3>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
                     Target: <strong>{ignioItem?.num || "INC009405"}</strong> — {ignioItem?.subject || "Automated Incident Remediation"}
@@ -2523,7 +2545,7 @@ export default function LandingPage() {
                       Issue is resolved successfully!
                     </h4>
                     <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>
-                      Automated remediation completed. Incident status has been updated to <strong>Resolved</strong> with 100% health confirmation.
+                      ignio™ automated remediation completed. Incident status has been updated to <strong>Resolved</strong> with 100% health confirmation.
                     </p>
                   </div>
                   <button
