@@ -374,7 +374,7 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
+              `Thanks, Supriya. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
             );
           }, 7000);
         } else if (stepCount === 6) {
@@ -687,109 +687,109 @@ export default function LandingPage() {
   }
 
   const contextSelectorBar = !selectedWorkspace && (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexWrap: "wrap",
-        gap: "16px",
-        background: "var(--surface-card)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius-md)",
-        padding: "12px 20px",
-        marginBottom: "16px",
-        boxShadow: "var(--shadow-card)",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
-          Active Workspace:
-        </span>
-        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-          Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
-        </span>
-      </div>
-
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-            {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
-          </label>
-          <select
-            value={selectedArea === "AI for AMS" ? "Acquisition" : selectedArea}
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val === "Acquisition") {
-                handleAreaChange("AI for AMS");
-              } else {
-                handleAreaChange(val);
-              }
-            }}
+          <div
             style={{
-              background: "var(--surface-input)",
-              color: "var(--text-primary)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "16px",
+              background: "var(--surface-card)",
               border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "12px",
-              fontWeight: "600",
-              cursor: "pointer",
+              borderRadius: "var(--radius-md)",
+              padding: "12px 20px",
+              marginBottom: "16px",
+              boxShadow: "var(--shadow-card)",
             }}
           >
-            {selectedArea === "AI for AMS" ? (
-              <option value="Acquisition" style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}>
-                Acquisition
-              </option>
-            ) : (
-              BUSINESS_AREAS.filter((a) => a.status !== "coming_soon" && (selectedArea !== "AI for AD" || a.name !== "AI for AMS")).map((area) => (
-                <option
-                  key={area.id}
-                  value={area.name}
-                  style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
+                Active Workspace:
+              </span>
+              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
+              </span>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+                  {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
+                </label>
+                <select
+                  value={selectedArea === "AI for AMS" ? "Acquisition" : selectedArea}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "Acquisition") {
+                      handleAreaChange("AI for AMS");
+                    } else {
+                      handleAreaChange(val);
+                    }
+                  }}
+                  style={{
+                    background: "var(--surface-input)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    padding: "6px 12px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
                 >
-                  {area.name}
-                </option>
-              ))
-            )}
-          </select>
-        </div>
+                  {selectedArea === "AI for AMS" ? (
+                    <option value="Acquisition" style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}>
+                      Acquisition
+                    </option>
+                  ) : (
+                    BUSINESS_AREAS.filter((a) => a.status !== "coming_soon" && (selectedArea !== "AI for AD" || a.name !== "AI for AMS")).map((area) => (
+                      <option
+                        key={area.id}
+                        value={area.name}
+                        style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
+                      >
+                        {area.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-            Role:
-          </label>
-          <select
-            value={selectedRole}
-            onChange={(e) => {
-              sessionStorage.removeItem("landing_active_tab");
-              sessionStorage.removeItem("landing_selected_workspace");
-              setSelectedRole(e.target.value);
-            }}
-            style={{
-              background: "var(--surface-input)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              padding: "6px 12px",
-              fontSize: "12px",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            {currentAvailableRoles.map((r) => (
-              <option
-                key={r.value}
-                value={r.value}
-                style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-              >
-                {r.value}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-    </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+                  Role:
+                </label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => {
+                    sessionStorage.removeItem("landing_active_tab");
+                    sessionStorage.removeItem("landing_selected_workspace");
+                    setSelectedRole(e.target.value);
+                  }}
+                  style={{
+                    background: "var(--surface-input)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    padding: "6px 12px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    cursor: "pointer",
+                  }}
+                >
+                  {currentAvailableRoles.map((r) => (
+                    <option
+                      key={r.value}
+                      value={r.value}
+                      style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
+                    >
+                      {r.value}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
   );
 
   if (selectedArea === "AI for Infra") {
@@ -846,18 +846,18 @@ export default function LandingPage() {
               {(() => {
                 const ROLE_STATS = {
                   "AI for AD": {
-                    "Admin": [{ label: "SPRINT VELOCITY", value: "94%", color: "var(--cyan)" }, { label: "CODE QUALITY", value: "88.5%", color: "#50c878" }],
-                    "Product Owner": [{ label: "EPIC READINESS", value: "92%", color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%", color: "#50c878" }],
-                    "Developer": [{ label: "CODE COVERAGE", value: "91.2%", color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%", color: "#50c878" }],
-                    "Tester": [{ label: "PASS RATE", value: "96.8%", color: "var(--cyan)" }, { label: "API COVERAGE", value: "94.5%", color: "#50c878" }],
+                    "Admin":          [{ label: "SPRINT VELOCITY", value: "94%",    color: "var(--cyan)" }, { label: "CODE QUALITY",    value: "88.5%",  color: "#50c878" }],
+                    "Product Owner":  [{ label: "EPIC READINESS",  value: "92%",    color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%",    color: "#50c878" }],
+                    "Developer":      [{ label: "CODE COVERAGE",   value: "91.2%",  color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%",  color: "#50c878" }],
+                    "Tester":         [{ label: "PASS RATE",       value: "96.8%",  color: "var(--cyan)" }, { label: "API COVERAGE",   value: "94.5%",  color: "#50c878" }],
                   },
                   "AI for AMS": {
-                    "Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
-                    "Software Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "PATCH SUCCESS", value: "98.8%", color: "var(--cyan)" }],
-                    "L1 Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
-                    "L2 Support Engineer": [{ label: "RCA CONFIDENCE", value: "92%", color: "var(--cyan)" }, { label: "SLA REMAINING", value: "2h 45m", color: "var(--gold)" }],
-                    "L3 Support Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "ZERO-DAY VULNS", value: "0", color: "var(--cyan)" }],
-                    "L4 Support Engineer": [{ label: "VENDOR SLA", value: "99.9%", color: "#50c878" }, { label: "COST VARIANCE", value: "-4.2%", color: "var(--cyan)" }],
+                    "Support Engineer":   [{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
+                    "Software Engineer":  [{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "PATCH SUCCESS",   value: "98.8%",  color: "var(--cyan)" }],
+                    "L1 Support Engineer":[{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
+                    "L2 Support Engineer":[{ label: "RCA CONFIDENCE",  value: "92%",    color: "var(--cyan)" }, { label: "SLA REMAINING",   value: "2h 45m", color: "var(--gold)" }],
+                    "L3 Support Engineer":[{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "ZERO-DAY VULNS", value: "0",      color: "var(--cyan)" }],
+                    "L4 Support Engineer":[{ label: "VENDOR SLA",      value: "99.9%",  color: "#50c878"      }, { label: "COST VARIANCE",  value: "-4.2%",  color: "var(--cyan)" }],
                   },
                 };
                 const stats = ROLE_STATS[selectedArea]?.[selectedRole];
@@ -1792,17 +1792,16 @@ export default function LandingPage() {
                     }}
                   >
                     {activeTabData.items && activeTabData.items.map((item, idx) => (
-                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{
-                        cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "12px",
-                        padding: "16px",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        gap: "12px",
-                        transition: "transform 0.2s ease, border-color 0.2s ease",
-                      }}
+                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{ cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "12px",
+                          padding: "16px",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "space-between",
+                          gap: "12px",
+                          transition: "transform 0.2s ease, border-color 0.2s ease",
+                        }}
                       >
                         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                           <div
@@ -2299,7 +2298,7 @@ export default function LandingPage() {
         />
       )}
 
-
+      
       {/* App Health Modal */}
       {showAppHealthModal && (
         <AppHealthModal
@@ -2824,3 +2823,69 @@ export default function LandingPage() {
                     value={deterministicInputValue}
                     onChange={(e) => setDeterministicInputValue(e.target.value)}
                     placeholder="Ask about your ticket..."
+                    disabled={deterministicAgentTyping}
+                    style={{
+                      flex: 1,
+                      background: "#1e293b",
+                      border: "1px solid #334155",
+                      color: "#f8fafc",
+                      padding: "12px 16px",
+                      borderRadius: "24px",
+                      fontSize: "14px",
+                      outline: "none",
+                      opacity: deterministicAgentTyping ? 0.6 : 1,
+                      transition: "opacity 0.2s"
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    disabled={!deterministicInputValue.trim() || deterministicAgentTyping}
+                    style={{
+                      background: deterministicInputValue.trim() && !deterministicAgentTyping ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)" : "#334155",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "42px",
+                      height: "42px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: deterministicInputValue.trim() && !deterministicAgentTyping ? "pointer" : "not-allowed",
+                      transition: "all 0.2s",
+                      flexShrink: 0
+                    }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  </button>
+                </form>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                  <span style={{ fontSize: "12px", color: "#64748b" }}>Status: 100% Resolved</span>
+                  <button
+                    type="button"
+                    onClick={() => setDeterministicModalOpen(false)}
+                    style={{
+                      background: "#10b981",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "8px 18px",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Close & Done
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
