@@ -190,28 +190,9 @@ export function AdRoleBotWidget({ selectedRole, data, onOpenChange }) {
     setLoading(true);
 
     try {
-      // ── Hardcoded Mock Intercept for Developer Prompt ───────────────────────
-      if (text.includes("failing unit tests") && text.includes("hotfix strategies")) {
-        const mockDevReply = `### Failing Tests & Build Blockers Analysis
-        
-Based on the current pipeline telemetry and AI static analysis, here is the root cause summary for the active build failures:
-
-- **PR #219 (TypeScript Compilation Error)**: The build is failing due to an interface type mismatch in the \`MemberProfileResponse\` struct. **Hotfix Strategy**: Update the struct definition in \`types/member.ts\` to align with the new Provider Gateway v1 API contract requirements.
-- **Async Webhook Crash Risk**: An unhandled Promise rejection was detected in the async webhook handler. **Hotfix Strategy**: Wrap the webhook payload processor in a try/catch block and ensure proper error logging to prevent process exit under high load.
-- **Migration Script Lint Failure**: The database migration \`20260819_add_claims_index.sql\` is missing a mandatory rollback block. **Hotfix Strategy**: Append a \`-- //@UNDO\` block that drops the newly created index to pass the CI/CD quality gate.
-
-I recommend applying the type fix for PR #219 first, as it is actively blocking the release pipeline.`;
-
-        setMessages((prev) => [
-          ...prev,
-          { sender: "bot", text: mockDevReply, timestamp: getCurrentTime() },
-        ]);
-        return;
-      }
 
       // Build Gemini history from all messages except the last user message
-      // (Gemini history is everything before the current question)
-      const history = toGeminiHistory(messages); // messages before current user msg
+      const history = toGeminiHistory(messages);
 
       const answer = await askGemini(selectedRole, data, text, history);
 

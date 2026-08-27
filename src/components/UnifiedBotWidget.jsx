@@ -203,24 +203,6 @@ export function UnifiedBotWidget({ selectedRole, data, onOpenChange }) {
     setMessages(nextMessages);
     setLoading(true);
 
-    try {
-      // ── Hardcoded Mock Intercept for SWE Prompt ───────────────────────────
-      if (text.includes("INC-9920") && text.includes("deadlock")) {
-        const mockRCA = `### Root Cause Analysis: INC-9920 (Database Deadlock)
-        
-- **Root Cause**: High-concurrency transaction collision on the \`claims_processing\` table due to missing row-level locking semantics.
-- **AI Diagnosis Confidence**: 94%
-- **Required Patch**: The **PostgreSQL Row Lock Clearance Patch (HF-892)** is required to resolve this deadlock condition.
-- **Deployment Status**: HF-892 is currently **Staging Passed** and ready for deployment to Production Cluster A.
-- **Impact Analysis**: Deploying this patch is expected to yield a **+45% Speedup** in throughput.`;
-
-        setMessages((prev) => [
-          ...prev,
-          { sender: "bot", text: mockRCA, timestamp: getCurrentTime() },
-        ]);
-        return;
-      }
-
       const history = toGeminiHistory(messages);
       let answer = await askGemini(selectedRole, data, text, history);
 
