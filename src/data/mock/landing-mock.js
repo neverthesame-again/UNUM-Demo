@@ -663,17 +663,20 @@ export const roleMockData = {
       },
       tabs: [
         { id: "overview", label: "Overview", active: true },
-        { id: "agent_resolve", label: "Agent Resolve", badge: 2 },
+        { id: "agent_resolve", label: "Agent Resolve", badge: 5 },
         { id: "vulnerabilities", label: "Vulnerabilities", badge: 3 },
         { id: "insights", label: "Insights", badge: 4 },
       ],
       tabData: {
         agent_resolve: {
           title: "AI Agent Resolve & Automated Executions",
-          sub: "Log of 2 batch support tickets requiring automated AI execution today",
+          sub: "Log of 5 support tickets requiring automated AI execution today",
           items: [
-            { id: "ar1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Restart", batchTag: "Batch Job Auto-Restart" },
-            { id: "ar2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resume", batchTag: "Enrollment Batch Resume" },
+            { id: "ar1", num: "Member Portal Auth & Email Service", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+            { id: "ar2", num: "Member Registration & Data Validation Engine", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+            { id: "ar3", num: "Member Registration Engine & Account Identity Mesh", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+            { id: "arb1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Restart", batchTag: "Batch Job Auto-Restart" },
+            { id: "arb2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resume", batchTag: "Enrollment Batch Resume" },
           ],
         },
         vulnerabilities: {
@@ -1001,10 +1004,13 @@ export const roleMockData = {
         },
         agent_resolve: {
           title: "AI Agent Resolve & Automated Executions",
-          sub: "Log of 2 batch support tickets requiring automated AI execution today",
+          sub: "Log of 5 support tickets requiring automated AI execution today",
           items: [
-            { id: "ar1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Restart", batchTag: "Batch Job Auto-Restart" },
-            { id: "ar2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resume", batchTag: "Enrollment Batch Resume" },
+            { id: "ar1", num: "Member Portal Auth & Email Service", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+            { id: "ar2", num: "Member Registration & Data Validation Engine", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+            { id: "ar3", num: "Member Registration Engine & Account Identity Mesh", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+            { id: "arb1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Restart", batchTag: "Batch Job Auto-Restart" },
+            { id: "arb2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resume", batchTag: "Enrollment Batch Resume" },
           ],
         },
         vulnerabilities: {
