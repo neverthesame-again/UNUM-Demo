@@ -315,6 +315,10 @@ Deno.serve({ port }, async (req) => {
       );
     }
 
+    // Read domain sent from the frontend widget
+    const requestDomain: string = (body.domain || "").trim();
+    const isAMSDomain = requestDomain === "AI for AMS";
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY") || "";
     const sessionId = body.sessionId;
@@ -361,8 +365,16 @@ Deno.serve({ port }, async (req) => {
     }
 
     // Step 1: Prompt Router (incident_data vs normal_chat)
-    const routeResult = await routePrompt(apiKey, message);
-    console.log(`[Router Decision] Prompt: "${message}" -> Route: "${routeResult.route}"`);
+    // For AI for AMS domain: NEVER route to incident_data — the LLM must answer
+    // only from UI dashboard content and must NOT query the Supabase incidents table.
+    let routeResult: { route: "incident_data" | "normal_chat" };
+    if (isAMSDomain) {
+      routeResult = { route: "normal_chat" };
+      console.log(`[Router Decision] Domain "AI for AMS" — incident_data route BLOCKED. Forcing normal_chat.`);
+    } else {
+      routeResult = await routePrompt(apiKey, message);
+      console.log(`[Router Decision] Prompt: "${message}" -> Route: "${routeResult.route}"`);
+    }
 
     let replyText = "";
 
