@@ -8,31 +8,27 @@ import { useForceTheme } from "../context/ThemeContext";
 
 // Page content
 const content = {
-  introBadge: "One GuideWell AI HUB",
+  introBadge: "One GuideWell Knowledge HUB",
   title: "Welcome to the Future of Enterprise AI",
   subtitle:
     "Sign in to access personalized AI workspaces and co-pilots tailored for your domain and role across GuideWell Enterprise AI.",
   features: [
     {
       icon: "💻",
-      text: "AI for AD: Workspaces for Domain Admin, Product Owner, Developer & Tester — featuring code synthesis, BDD stories & QA test suites",
+      text: "AI for AD: Workspaces for Product Owner, Developer featuring code synthesis, BDD stories.",
     },
     {
       icon: "🛠️",
-      text: "AI for AMS: Specialized desks for Support Engineer & Software Engineer — powering ticket triage, RCA diagnostics, PRD generator & SLA watch",
+      text: "AI for AMS: Specialized desks for Support Engineer & Software Engineer — powering ticket triage, RCA diagnostics, PRD generator & SLA watch.",
     },
     {
       icon: "📊",
-      text: "AI for Business: Intelligence for MedTech Business Analyst, Clinical Business Analyst & HealthCare Business Analyst",
-    },
-    {
-      icon: "🔒",
-      text: "Enterprise Governance: Built-in HIPAA-compliant security with zero-trust architecture and audit trails across all domains",
+      text: "AI for Infra: Intelligence for Infra Engineer, SRE Lead & NOC Lead.",
     },
   ],
   form: {
-    title: "Sign in to GuideWell AI HUB",
-    subtitle: "Use your tcs credentials",
+    title: "GuideWell Knowledge\u00a0Hub",
+    subtitle: "Sign in using your tcs credentials",
     emailLabel: "Email Address",
     emailPlaceholder: "your.name@tcs.com",
     passwordLabel: "Password",
