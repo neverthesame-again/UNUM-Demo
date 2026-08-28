@@ -24,7 +24,7 @@ import { domainDetailService } from "../services/domain-detail.service";
 import { amsOverviewData } from "../data/mock/landing-mock";
 
 // Controls visibility of the Chatbot floating circle based on business area and role.
-// Enabled for Support Engineer & Software Engineer under AI for AMS.
+// Enabled for Support Engineer & Software Engineer under AI for AMS only.
 const isChatbotEnabled = (businessArea, role) => {
   return (
     businessArea === "AI for AMS" &&
@@ -47,6 +47,8 @@ export default function LandingPage() {
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
   const [isBotOpen, setIsBotOpen] = useState(false);
+  const [isPrdChatOpen, setIsPrdChatOpen] = useState(false);
+  const [prdChatKey, setPrdChatKey] = useState(0);
 
   // Application Workspaces States for AD Developer
   const [workspaces, setWorkspaces] = useState([]);
@@ -57,8 +59,15 @@ export default function LandingPage() {
   });
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
 
-  // Selected Domain & Role states (defaulting to user session context or 'AI for AD' &rarr; 'Product Owner')
-  const [selectedArea, setSelectedArea] = useState(user?.activeBusinessArea || "AI for AD");
+  // Selected Domain & Role states (defaulting to user session context or first allowed)
+  const allowedDomains = user?.isSuperAdmin
+    ? BUSINESS_AREAS.filter(a => a.status !== "coming_soon").map(a => a.name)
+    : user?.domains || ["AI for AD"];
+
+  const [selectedArea, setSelectedArea] = useState(() => {
+    return user?.activeBusinessArea || (allowedDomains.length > 0 ? allowedDomains[0] : "AI for AD");
+  });
+
   const [selectedRole, setSelectedRole] = useState(() => {
     const role = user?.activeRole;
     if (role === "Admin" || role === "Tester") return "Product Owner";
@@ -351,7 +360,7 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks-yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format (October 25, 1990), so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
+              `Thanks-yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format, so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
             );
           }, 8000);
         } else if (stepCount === 7) {
@@ -389,7 +398,7 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks, Supriya. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
+              `Thanks. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
             );
           }, 7000);
         } else if (stepCount === 6) {
@@ -490,14 +499,15 @@ export default function LandingPage() {
     sessionStorage.removeItem("landing_active_tab");
     sessionStorage.removeItem("landing_selected_workspace");
     setSelectedArea(newArea);
-    let availableRoles = getRolesForBusinessArea(newArea);
-    if (newArea === "AI for AMS") {
-      availableRoles = availableRoles.filter((r) => r.value !== "Software Engineer");
-    } else if (newArea === "AI for AD") {
-      availableRoles = availableRoles.filter((r) => r.value !== "Developer");
-    }
+
+    let availableRoles = getRolesForBusinessArea(newArea).filter(
+      r => user?.isSuperAdmin || (user?.roles || []).includes(r.value)
+    );
+
     if (availableRoles && availableRoles.length > 0) {
       setSelectedRole(availableRoles[0].value);
+    } else {
+      setSelectedRole("");
     }
   };
 
@@ -662,7 +672,10 @@ export default function LandingPage() {
     tabData,
   } = data;
 
-  const currentAvailableRoles = getRolesForBusinessArea(selectedArea);
+  const currentAvailableRoles = getRolesForBusinessArea(selectedArea).filter(
+    r => user?.isSuperAdmin || (user?.roles || []).includes(r.value)
+  );
+
   const isPOPage = selectedArea === "AI for AD" && selectedRole === "Product Owner";
   const activeApp = selectedApp || DEFAULT_APP;
   const currentAppData = APPLICATION_DATA_MAP[activeApp.name] || APPLICATION_DATA_MAP["BSpoke Application"];
@@ -702,121 +715,121 @@ export default function LandingPage() {
   }
 
   const contextSelectorBar = !selectedWorkspace && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "16px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-md)",
-              padding: "12px 20px",
-              marginBottom: "16px",
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
-                Active Workspace:
-              </span>
-              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
-              </span>
-            </div>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: "16px",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        padding: "12px 20px",
+        marginBottom: "16px",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
+          Active Workspace:
+        </span>
+        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+          Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
+        </span>
+      </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                  {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
-                </label>
-                <select
-                  value={selectedArea === "AI for AMS" ? selectedL0 : selectedArea}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (selectedArea === "AI for AMS") {
-                      setSelectedL0(val);
-                      sessionStorage.setItem("landing_selected_l0", val);
-                    } else {
-                      handleAreaChange(val);
-                    }
-                  }}
-                  style={{
-                    background: "var(--surface-input)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    padding: "6px 12px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  {selectedArea === "AI for AMS" ? (
-                    L0_CLASSIFICATIONS.map((l0) => (
-                      <option
-                        key={l0}
-                        value={l0}
-                        style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-                      >
-                        {l0}
-                      </option>
-                    ))
-                  ) : (
-                    BUSINESS_AREAS.filter((a) => a.status !== "coming_soon" && (selectedArea !== "AI for AD" || a.name !== "AI for AMS")).map((area) => (
-                      <option
-                        key={area.id}
-                        value={area.name}
-                        style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-                      >
-                        {area.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                  Role:
-                </label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => {
-                    sessionStorage.removeItem("landing_active_tab");
-                    sessionStorage.removeItem("landing_selected_workspace");
-                    setSelectedRole(e.target.value);
-                  }}
-                  style={{
-                    background: "var(--surface-input)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    padding: "6px 12px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  {currentAvailableRoles.map((r) => (
-                    <option
-                      key={r.value}
-                      value={r.value}
-                      style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-                    >
-                      {r.value}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {selectedArea !== "AI for AMS" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+              Domain:
+            </label>
+            <div
+              style={{
+                background: "var(--surface-input)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                cursor: "default",
+                opacity: 0.9,
+              }}
+            >
+              {selectedArea}
             </div>
           </div>
+        )}
+
+        {selectedArea === "AI for AMS" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+              L0:
+            </label>
+            <select
+              value={selectedL0}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedL0(val);
+                sessionStorage.setItem("landing_selected_l0", val);
+              }}
+              style={{
+                background: "var(--surface-input)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              {L0_CLASSIFICATIONS.map((l0) => (
+                <option
+                  key={l0}
+                  value={l0}
+                  style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
+                >
+                  {l0}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+            Role:
+          </label>
+          <div
+            style={{
+              background: "var(--surface-input)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border)",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "12px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              cursor: "default",
+              opacity: 0.9,
+            }}
+          >
+            {selectedRole}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   if (selectedArea === "AI for Infra") {
     return (
-      <main className="re-landing-page fade-in">
+      <main className="re-landing-page re-landing-page--infra fade-in">
         {contextSelectorBar}
         <InfraPage />
       </main>
@@ -868,18 +881,18 @@ export default function LandingPage() {
               {(() => {
                 const ROLE_STATS = {
                   "AI for AD": {
-                    "Admin":          [{ label: "SPRINT VELOCITY", value: "94%",    color: "var(--cyan)" }, { label: "CODE QUALITY",    value: "88.5%",  color: "#50c878" }],
-                    "Product Owner":  [{ label: "EPIC READINESS",  value: "92%",    color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%",    color: "#50c878" }],
-                    "Developer":      [{ label: "CODE COVERAGE",   value: "91.2%",  color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%",  color: "#50c878" }],
-                    "Tester":         [{ label: "PASS RATE",       value: "96.8%",  color: "var(--cyan)" }, { label: "API COVERAGE",   value: "94.5%",  color: "#50c878" }],
+                    "Admin": [{ label: "SPRINT VELOCITY", value: "94%", color: "var(--cyan)" }, { label: "CODE QUALITY", value: "88.5%", color: "#50c878" }],
+                    "Product Owner": [{ label: "EPIC READINESS", value: "92%", color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%", color: "#50c878" }],
+                    "Developer": [{ label: "CODE COVERAGE", value: "91.2%", color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%", color: "#50c878" }],
+                    "Tester": [{ label: "PASS RATE", value: "96.8%", color: "var(--cyan)" }, { label: "API COVERAGE", value: "94.5%", color: "#50c878" }],
                   },
                   "AI for AMS": {
-                    "Support Engineer":   [{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
-                    "Software Engineer":  [{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "PATCH SUCCESS",   value: "98.8%",  color: "var(--cyan)" }],
-                    "L1 Support Engineer":[{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
-                    "L2 Support Engineer":[{ label: "RCA CONFIDENCE",  value: "92%",    color: "var(--cyan)" }, { label: "SLA REMAINING",   value: "2h 45m", color: "var(--gold)" }],
-                    "L3 Support Engineer":[{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "ZERO-DAY VULNS", value: "0",      color: "var(--cyan)" }],
-                    "L4 Support Engineer":[{ label: "VENDOR SLA",      value: "99.9%",  color: "#50c878"      }, { label: "COST VARIANCE",  value: "-4.2%",  color: "var(--cyan)" }],
+                    "Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "Software Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "PATCH SUCCESS", value: "98.8%", color: "var(--cyan)" }],
+                    "L1 Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "L2 Support Engineer": [{ label: "RCA CONFIDENCE", value: "92%", color: "var(--cyan)" }, { label: "SLA REMAINING", value: "2h 45m", color: "var(--gold)" }],
+                    "L3 Support Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "ZERO-DAY VULNS", value: "0", color: "var(--cyan)" }],
+                    "L4 Support Engineer": [{ label: "VENDOR SLA", value: "99.9%", color: "#50c878" }, { label: "COST VARIANCE", value: "-4.2%", color: "var(--cyan)" }],
                   },
                 };
                 const stats = ROLE_STATS[selectedArea]?.[selectedRole];
@@ -1155,6 +1168,34 @@ export default function LandingPage() {
               >
                 <span>Overall Status</span>
               </button>
+
+              {/* PRD Creation tab — only for BSpoke Application */}
+              {activeApp?.id === "bspoke" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleTabClick("prd_creation");
+                    setIsPrdChatOpen(false);
+                  }}
+                  style={{
+                    background: activeTab === "prd_creation" ? "var(--blue)" : "var(--surface-input)",
+                    color: activeTab === "prd_creation" ? "#ffffff" : "var(--text-primary)",
+                    border: activeTab === "prd_creation" ? "none" : "1px solid var(--border)",
+                    borderRadius: "20px",
+                    padding: "8px 18px",
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <span>✦</span>
+                  <span>PRD Creation</span>
+                </button>
+              )}
             </div>
 
             {/* Active Application Status & Clear Button */}
@@ -1234,8 +1275,150 @@ export default function LandingPage() {
           );
         })()}
 
+        {/* ─── PRD Creation Tab ─────────────────────────────────────── */}
+        {activeTab === "prd_creation" && isPOPage && (
+          <div className="fade-in" style={{ marginTop: "4px" }}>
+
+            {/* ── Outer Box ── */}
+            <div style={{
+              background: "var(--surface-card)",
+              border: "1px solid var(--border)",
+              borderRadius: "14px",
+              padding: "24px 28px",
+              boxShadow: "var(--shadow-card)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+            }}>
+              {/* Section title */}
+              <div>
+                <h2 style={{ fontSize: "22px", fontWeight: "800", color: "var(--text-primary)", margin: 0, lineHeight: 1.3 }}>
+                  AI PRD Creation
+                </h2>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "6px 0 0" }}>
+                  Analyse high-priority incidents and generate a Product Requirement Document with AI
+                </p>
+              </div>
+
+              {/* ── Inner Incident Card (centered inside outer box) ── */}
+              <div style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid var(--border)",
+                borderRadius: "12px",
+                padding: "24px 28px",
+                maxWidth: "560px",
+                margin: "0 auto",
+                width: "100%",
+              }}>
+                {/* Card header row — ID + badge */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--text-primary)" }}>
+                    CARE-DASHBOARD-HIGH
+                  </span>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "700",
+                    background: "var(--cyan)", color: "var(--navy)",
+                    padding: "3px 12px", borderRadius: "20px",
+                  }}>
+                    High Priority
+                  </span>
+                </div>
+
+                {/* Cyan sub-title */}
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)", marginBottom: "10px" }}>
+                  Top 10 Incidents — Care Dashboard, January 2025
+                </div>
+
+                {/* Description */}
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.6 }}>
+                  Generate a PRD from the top 10 high-priority incidents in the Care Dashboard application for January 2025, including SLA breaches, MTTR and root cause analysis.
+                </p>
+
+                {/* Meta badges */}
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "24px" }}>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "700",
+                    background: "rgba(16,185,129,0.12)", color: "#10b981",
+                    border: "1px solid rgba(16,185,129,0.3)",
+                    padding: "4px 12px", borderRadius: "20px",
+                  }}>
+                    Urgency: 1 – High
+                  </span>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "700",
+                    background: "rgba(6,182,212,0.12)", color: "var(--cyan)",
+                    border: "1px solid rgba(6,182,212,0.3)",
+                    padding: "4px 12px", borderRadius: "20px",
+                  }}>
+                    Application: Care Dashboard
+                  </span>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "600",
+                    color: "var(--text-secondary)",
+                    border: "1px solid var(--border)",
+                    padding: "4px 12px", borderRadius: "20px",
+                  }}>
+                    CARE-DASH-JAN25
+                  </span>
+                </div>
+
+                {/* Footer row */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+                  <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    Application: <strong style={{ color: "var(--text-primary)" }}>BSpoke Application</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setIsPrdChatOpen(true); setPrdChatKey(k => k + 1); }}
+                    style={{
+                      padding: "9px 20px",
+                      background: "var(--cyan)",
+                      color: "var(--navy)",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "7px",
+                      transition: "all 0.2s ease",
+                      boxShadow: "0 2px 10px rgba(6,182,212,0.25)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.88";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.transform = "none";
+                    }}
+                  >
+                    🤖 Create PRD
+                  </button>
+                </div>
+              </div>
+              {/* ── End inner card ── */}
+
+            </div>
+            {/* ── End outer box ── */}
+
+            {/* Chatbot — mounts and auto-fires when Create PRD is clicked */}
+            {isPrdChatOpen && (
+              <Chatbot
+                key={prdChatKey}
+                hideFloat={true}
+                defaultOpen={true}
+              />
+            )}
+          </div>
+
+        )}
+
+
         {/* Tab View 1: Overview Grid View */}
         {activeTab === "overview" && (
+
           selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
             <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
               {/* 1. Middle 3 Columns Section */}
@@ -1336,10 +1519,10 @@ export default function LandingPage() {
                             Progress: <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
                           </span>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                             <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
+                            <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
                           </span>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                             <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
+                            <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
                           </span>
                         </div>
                       </div>
@@ -1749,16 +1932,17 @@ export default function LandingPage() {
                     }}
                   >
                     {activeTabData.items && activeTabData.items.map((item, idx) => (
-                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{ cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "12px",
-                          padding: "16px",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "space-between",
-                          gap: "12px",
-                          transition: "transform 0.2s ease, border-color 0.2s ease",
-                        }}
+                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{
+                        cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "12px",
+                        padding: "16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        transition: "transform 0.2s ease, border-color 0.2s ease",
+                      }}
                       >
                         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                           <div
@@ -1849,7 +2033,7 @@ export default function LandingPage() {
                   </div>
                 </div>
               )}
-              
+
               {activeTab !== "insights" && activeTabData.items && activeTabData.items.length > 0 && (
                 <>
                   <div
@@ -2082,7 +2266,7 @@ export default function LandingPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", color: "var(--cyan)", fontWeight: "700" }}>
-                 AI-Generated PRD Document - {selectedPrdItem?.prbCode || "PRB003210"}
+                AI-Generated PRD Document - {selectedPrdItem?.prbCode || "PRB003210"}
               </h3>
               <button
                 onClick={() => setShowPrdModal(false)}
@@ -2153,9 +2337,6 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-
-      <Footer />
-      {/* Deprecated: <Chatbot hideFloat={!isChatbotEnabled(selectedArea, selectedRole)} /> */}
 
       {/* Unified Bot Widget - shown for AMS Support / Software Engineers */}
       {isChatbotEnabled(selectedArea, selectedRole) && data && (
@@ -2261,7 +2442,7 @@ export default function LandingPage() {
         />
       )}
 
-      
+
       {/* App Health Modal */}
       {showAppHealthModal && (
         <AppHealthModal
@@ -2674,7 +2855,29 @@ export default function LandingPage() {
                       <div style={{ fontWeight: "700", marginBottom: "4px", fontSize: "11px", color: msg.sender === "user" ? "#93c5fd" : "#94a3b8" }}>
                         {msg.sender === "user" ? "User" : "Agent"}
                       </div>
-                      {msg.text}
+                      {msg.text.split("\n").map((line, i) => {
+                        const isListItem = /^\d+\./.test(line.trim());
+                        return line === "" ? (
+                          <br key={i} />
+                        ) : (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              gap: isListItem ? "8px" : "0",
+                              alignItems: "flex-start",
+                              marginBottom: isListItem ? "4px" : "0",
+                            }}
+                          >
+                            {isListItem && (
+                              <span style={{ color: "var(--cyan)", fontWeight: "700", minWidth: "16px" }}>
+                                {line.trim().match(/^\d+/)[0]}.
+                              </span>
+                            )}
+                            <span>{isListItem ? line.trim().replace(/^\d+\.\s*/, "") : line}</span>
+                          </div>
+                        );
+                      })}
                       <div style={{ fontSize: "10px", color: msg.sender === "user" ? "#bfdbfe" : "#64748b", marginTop: "6px", textAlign: "right" }}>
                         {msg.time}
                       </div>

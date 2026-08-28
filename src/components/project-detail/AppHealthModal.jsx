@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from "react";
+import React, { useMemo } from "react";
 import { Modal } from "../Modal";
 
 // Color helpers based on statusType
@@ -34,7 +34,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
 
     const uptime = Array(7).fill(0).map((_, i) => {
       let base, variance;
-      if (isGood)       { base = 99.0; variance = 1.0; }
+      if (isGood)       { base = 99.5; variance = 0.5; }
       else if (isWarn)  { base = 92.0; variance = 5.0; }
       else              { base = 65.0; variance = 15.0; }
 

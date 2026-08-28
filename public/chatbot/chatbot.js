@@ -114,9 +114,6 @@ const HorizonChatbot = {
         <div class="centene-prompt-item" data-prompt="Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025">
           Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025
         </div>
-        <div class="centene-prompt-item" data-prompt="The member’s eligibility dates are different in TruCare Classic versus TruCare Cloud">
-          The member’s eligibility dates are different in TruCare Classic versus TruCare Cloud
-        </div>
       </div>
 
       <div class="centene-file-preview-bar" style="display: none;"></div>

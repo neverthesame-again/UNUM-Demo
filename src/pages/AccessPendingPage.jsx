@@ -1,193 +1,93 @@
-// Access Pending Page - Displayed when user access is pending or declined
-
-import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useForceTheme } from "../context/ThemeContext";
 
 export default function AccessPendingPage() {
-  const { user, logout } = useAuth();
+  useForceTheme("dark");
   const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-  };
-
-  const isPending = user?.accessStatus === "pending";
-  const isDeclined = user?.accessStatus === "declined";
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  useEffect(() => {
+    if (!isLoading && (!isAuthenticated || user?.accessStatus !== "pending")) {
+      navigate("/");
+    }
+  }, [isAuthenticated, user, isLoading, navigate]);
 
   return (
     <div className="login-page">
       <div className="orb orb-1" style={{ opacity: 0.1 }} />
       <div className="orb orb-2" style={{ opacity: 0.1 }} />
-
-      <div
-        style={{
-          maxWidth: "600px",
-          margin: "0 auto",
-          textAlign: "center",
-          padding: "40px 20px",
-        }}
-      >
-        <div
-          style={{
-            background: "var(--card-bg)",
-            border: "1px solid var(--card-bd)",
-            borderRadius: "var(--radius-lg)",
-            padding: "60px 40px",
-          }}
-        >
-          {isPending && (
-            <>
-              <div
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  margin: "0 auto 24px",
-                  background: "rgba(var(--blue2-rgb), 0.1)",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "40px",
-                }}
-              >
-                ⏳
-              </div>
-              <h2
-                style={{
-                  fontSize: "28px",
-                  fontWeight: "600",
-                  color: "var(--white)",
-                  marginBottom: "16px",
-                }}
-              >
-                Access Request Pending
-              </h2>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "var(--muted)",
-                  lineHeight: "1.6",
-                  marginBottom: "32px",
-                }}
-              >
-                Your account has been created successfully! An administrator
-                will review your access request shortly. You'll receive access
-                to the platform once your request is approved.
-              </p>
-              <div
-                style={{
-                  background: "rgba(var(--blue2-rgb), 0.05)",
-                  border: "1px solid rgba(var(--blue2-rgb), 0.2)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "20px",
-                  marginBottom: "32px",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "var(--cyan)",
-                    margin: 0,
-                  }}
-                >
-                  <strong>Account Details:</strong>
-                  <br />
-                  {user?.name} ({user?.email})
-                </p>
-              </div>
-            </>
-          )}
-
-          {isDeclined && (
-            <>
-              <div
-                style={{
-                  width: "80px",
-                  height: "80px",
-                  margin: "0 auto 24px",
-                  background: "rgba(255, 68, 68, 0.1)",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: "40px",
-                }}
-              >
-                ⚠️
-              </div>
-              <h2
-                style={{
-                  fontSize: "28px",
-                  fontWeight: "600",
-                  color: "var(--white)",
-                  marginBottom: "16px",
-                }}
-              >
-                Access Request Declined
-              </h2>
-              <p
-                style={{
-                  fontSize: "16px",
-                  color: "var(--muted)",
-                  lineHeight: "1.6",
-                  marginBottom: "32px",
-                }}
-              >
-                Your access request has been declined by an administrator.
-                Please contact your system administrator for more information.
-              </p>
-              <div
-                style={{
-                  background: "rgba(255, 68, 68, 0.05)",
-                  border: "1px solid rgba(255, 68, 68, 0.2)",
-                  borderRadius: "var(--radius-md)",
-                  padding: "20px",
-                  marginBottom: "32px",
-                }}
-              >
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#ff6b6b",
-                    margin: 0,
-                  }}
-                >
-                  <strong>Account Details:</strong>
-                  <br />
-                  {user?.name} ({user?.email})
-                </p>
-              </div>
-            </>
-          )}
-
-          <button
-            onClick={handleLogout}
-            className="login-btn"
-            style={{
-              width: "100%",
-              maxWidth: "300px",
-              margin: "0 auto",
-            }}
-          >
-            Sign Out
-          </button>
-
-          <p
-            style={{
-              fontSize: "13px",
-              color: "var(--muted)",
-              marginTop: "24px",
-            }}
-          >
-            Need help? Contact your administrator at{" "}
-            <a
-              href="mailto:admin@tcs.com"
-              style={{ color: "var(--cyan)", textDecoration: "none" }}
-            >
-              admin@tcs.com
-            </a>
+      
+      <div className="login-split">
+        <div className="login-left">
+          <div className="login-badge">GuideWell AI Platform</div>
+          <h2>Access Request Pending</h2>
+          <p>
+            Your account is currently under review by an administrator. This process ensures the security and proper authorization of all platform users.
           </p>
+          <div className="login-feature">
+            <div className="login-feature-icon">🛡️</div>
+            <div className="login-feature-text">Secure Access Control & Verification</div>
+          </div>
+          <div className="login-feature">
+            <div className="login-feature-icon">⏳</div>
+            <div className="login-feature-text">Typical Review Time: 1-2 Business Days</div>
+          </div>
+        </div>
+        <div className="login-right">
+          <div style={{ textAlign: "center", marginBottom: "32px" }}>
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                background: "rgba(0, 240, 255, 0.1)",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto 24px",
+                boxShadow: "0 0 20px rgba(0, 240, 255, 0.2)",
+              }}
+            >
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+            </div>
+            
+            <h3 style={{
+              fontSize: "24px",
+              fontWeight: "700",
+              color: "var(--text-primary)",
+              marginBottom: "12px",
+            }}>Approval Pending</h3>
+            
+            <p style={{
+              fontSize: "15px",
+              color: "var(--text-secondary)",
+              lineHeight: "1.6",
+              marginBottom: "32px"
+            }}>
+              Your account for <strong>{user?.email}</strong> is awaiting administrator approval. 
+              We'll notify you once your access has been granted.
+            </p>
+
+            <button 
+              className="login-btn"
+              onClick={async () => {
+                await logout();
+                navigate("/login");
+              }}
+              style={{
+                background: "transparent",
+                border: "1px solid var(--border)",
+                color: "var(--text-primary)",
+                marginTop: "16px"
+              }}
+            >
+              Back to Login
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ export default function InfraPage() {
   }, [logout]);
 
   return (
-    <div style={{ width: "100%", height: "100vh", overflow: "hidden", background: "#0a0a0a" }}>
+    <div style={{ width: "100%", height: "calc(100vh - 75px)", overflow: "hidden", background: "#0a0a0a" }}>
       <iframe
         src="/infra/index.html"
         style={{ width: "100%", height: "100%", border: "none" }}
