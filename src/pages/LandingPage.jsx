@@ -827,7 +827,7 @@ export default function LandingPage() {
 
   if (selectedArea === "AI for Infra") {
     return (
-      <main className="re-landing-page fade-in">
+      <main className="re-landing-page re-landing-page--infra fade-in">
         {contextSelectorBar}
         <InfraPage />
       </main>

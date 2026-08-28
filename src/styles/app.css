@@ -6024,6 +6024,14 @@
   color: var(--text-primary);
 }
 
+/* Infra domain: iframe fills the full viewport width — no padding/margin */
+.re-landing-page--infra {
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .re-topbar {
   min-height: 68px;
   background: var(--surface-card);
