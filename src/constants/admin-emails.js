@@ -11,7 +11,8 @@ export const SUPER_ADMIN_EMAILS = [
   'vishnu4916@gmail.com',
   'dinesh.kottakota@tcs.com',
   'sreeja.biswas2@tcs.com',
-  'praveen.katta1@tcs.com'
+  'praveen.katta1@tcs.com',
+  'slnvsssupriya.daita@tcs.com'
 ];
 
 // Helper function to check if email is Super Admin

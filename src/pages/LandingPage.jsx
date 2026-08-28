@@ -358,7 +358,7 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks-yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format (October 25, 1990), so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
+              `Thanks-yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format, so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
             );
           }, 8000);
         } else if (stepCount === 7) {
@@ -396,7 +396,7 @@ export default function LandingPage() {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks, Supriya. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
+              `Thanks. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
             );
           }, 7000);
         } else if (stepCount === 6) {
@@ -497,11 +497,11 @@ export default function LandingPage() {
     sessionStorage.removeItem("landing_active_tab");
     sessionStorage.removeItem("landing_selected_workspace");
     setSelectedArea(newArea);
-    
+
     let availableRoles = getRolesForBusinessArea(newArea).filter(
       r => user?.isSuperAdmin || (user?.roles || []).includes(r.value)
     );
-    
+
     if (availableRoles && availableRoles.length > 0) {
       setSelectedRole(availableRoles[0].value);
     } else {
@@ -673,7 +673,7 @@ export default function LandingPage() {
   const currentAvailableRoles = getRolesForBusinessArea(selectedArea).filter(
     r => user?.isSuperAdmin || (user?.roles || []).includes(r.value)
   );
-  
+
   const isPOPage = selectedArea === "AI for AD" && selectedRole === "Product Owner";
   const activeApp = selectedApp || DEFAULT_APP;
   const currentAppData = APPLICATION_DATA_MAP[activeApp.name] || APPLICATION_DATA_MAP["BSpoke Application"];
@@ -713,116 +713,116 @@ export default function LandingPage() {
   }
 
   const contextSelectorBar = !selectedWorkspace && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              flexWrap: "wrap",
-              gap: "16px",
-              background: "var(--surface-card)",
-              border: "1px solid var(--border)",
-              borderRadius: "var(--radius-md)",
-              padding: "12px 20px",
-              marginBottom: "16px",
-              boxShadow: "var(--shadow-card)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
-                Active Workspace:
-              </span>
-              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
-              </span>
-            </div>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: "16px",
+        background: "var(--surface-card)",
+        border: "1px solid var(--border)",
+        borderRadius: "var(--radius-md)",
+        padding: "12px 20px",
+        marginBottom: "16px",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <span style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)" }}>
+          Active Workspace:
+        </span>
+        <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+          Viewing as <strong style={{ color: "#3b82f6" }}>{selectedRole}</strong> under <strong style={{ color: "#3b82f6" }}>{selectedArea}</strong>
+        </span>
+      </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              {selectedArea !== "AI for AMS" && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                    Domain:
-                  </label>
-                  <div
-                    style={{
-                      background: "var(--surface-input)",
-                      color: "var(--text-primary)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                      padding: "6px 12px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      display: "flex",
-                      alignItems: "center",
-                      cursor: "default",
-                      opacity: 0.9,
-                    }}
-                  >
-                    {selectedArea}
-                  </div>
-                </div>
-              )}
-
-              {selectedArea === "AI for AMS" && (
-                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                  <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                    L0:
-                  </label>
-                  <select
-                    value={selectedL0}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSelectedL0(val);
-                      sessionStorage.setItem("landing_selected_l0", val);
-                    }}
-                    style={{
-                      background: "var(--surface-input)",
-                      color: "var(--text-primary)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "8px",
-                      padding: "6px 12px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {L0_CLASSIFICATIONS.map((l0) => (
-                      <option
-                        key={l0}
-                        value={l0}
-                        style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-                      >
-                        {l0}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                  Role:
-                </label>
-                <div
-                  style={{
-                    background: "var(--surface-input)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    padding: "6px 12px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "default",
-                    opacity: 0.9,
-                  }}
-                >
-                  {selectedRole}
-                </div>
-              </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {selectedArea !== "AI for AMS" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+              Domain:
+            </label>
+            <div
+              style={{
+                background: "var(--surface-input)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                cursor: "default",
+                opacity: 0.9,
+              }}
+            >
+              {selectedArea}
             </div>
           </div>
+        )}
+
+        {selectedArea === "AI for AMS" && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+              L0:
+            </label>
+            <select
+              value={selectedL0}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSelectedL0(val);
+                sessionStorage.setItem("landing_selected_l0", val);
+              }}
+              style={{
+                background: "var(--surface-input)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: "600",
+                cursor: "pointer",
+              }}
+            >
+              {L0_CLASSIFICATIONS.map((l0) => (
+                <option
+                  key={l0}
+                  value={l0}
+                  style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
+                >
+                  {l0}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+            Role:
+          </label>
+          <div
+            style={{
+              background: "var(--surface-input)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border)",
+              borderRadius: "8px",
+              padding: "6px 12px",
+              fontSize: "12px",
+              fontWeight: "600",
+              display: "flex",
+              alignItems: "center",
+              cursor: "default",
+              opacity: 0.9,
+            }}
+          >
+            {selectedRole}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
   if (selectedArea === "AI for Infra") {
@@ -879,18 +879,18 @@ export default function LandingPage() {
               {(() => {
                 const ROLE_STATS = {
                   "AI for AD": {
-                    "Admin":          [{ label: "SPRINT VELOCITY", value: "94%",    color: "var(--cyan)" }, { label: "CODE QUALITY",    value: "88.5%",  color: "#50c878" }],
-                    "Product Owner":  [{ label: "EPIC READINESS",  value: "92%",    color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%",    color: "#50c878" }],
-                    "Developer":      [{ label: "CODE COVERAGE",   value: "91.2%",  color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%",  color: "#50c878" }],
-                    "Tester":         [{ label: "PASS RATE",       value: "96.8%",  color: "var(--cyan)" }, { label: "API COVERAGE",   value: "94.5%",  color: "#50c878" }],
+                    "Admin": [{ label: "SPRINT VELOCITY", value: "94%", color: "var(--cyan)" }, { label: "CODE QUALITY", value: "88.5%", color: "#50c878" }],
+                    "Product Owner": [{ label: "EPIC READINESS", value: "92%", color: "var(--cyan)" }, { label: "SPRINT CAPACITY", value: "88%", color: "#50c878" }],
+                    "Developer": [{ label: "CODE COVERAGE", value: "91.2%", color: "var(--cyan)" }, { label: "TEST PASS RATE", value: "98.4%", color: "#50c878" }],
+                    "Tester": [{ label: "PASS RATE", value: "96.8%", color: "var(--cyan)" }, { label: "API COVERAGE", value: "94.5%", color: "#50c878" }],
                   },
                   "AI for AMS": {
-                    "Support Engineer":   [{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
-                    "Software Engineer":  [{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "PATCH SUCCESS",   value: "98.8%",  color: "var(--cyan)" }],
-                    "L1 Support Engineer":[{ label: "AUTO-RESOLVED",   value: "64.2%",  color: "var(--cyan)" }, { label: "FCR TIME",        value: "4.2 min", color: "var(--gold)" }],
-                    "L2 Support Engineer":[{ label: "RCA CONFIDENCE",  value: "92%",    color: "var(--cyan)" }, { label: "SLA REMAINING",   value: "2h 45m", color: "var(--gold)" }],
-                    "L3 Support Engineer":[{ label: "DB THROUGHPUT",   value: "+45%",   color: "#50c878"      }, { label: "ZERO-DAY VULNS", value: "0",      color: "var(--cyan)" }],
-                    "L4 Support Engineer":[{ label: "VENDOR SLA",      value: "99.9%",  color: "#50c878"      }, { label: "COST VARIANCE",  value: "-4.2%",  color: "var(--cyan)" }],
+                    "Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "Software Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "PATCH SUCCESS", value: "98.8%", color: "var(--cyan)" }],
+                    "L1 Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "L2 Support Engineer": [{ label: "RCA CONFIDENCE", value: "92%", color: "var(--cyan)" }, { label: "SLA REMAINING", value: "2h 45m", color: "var(--gold)" }],
+                    "L3 Support Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "ZERO-DAY VULNS", value: "0", color: "var(--cyan)" }],
+                    "L4 Support Engineer": [{ label: "VENDOR SLA", value: "99.9%", color: "#50c878" }, { label: "COST VARIANCE", value: "-4.2%", color: "var(--cyan)" }],
                   },
                 };
                 const stats = ROLE_STATS[selectedArea]?.[selectedRole];
@@ -1347,10 +1347,10 @@ export default function LandingPage() {
                             Progress: <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
                           </span>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                             <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
+                            <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
                           </span>
                           <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                             <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
+                            <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
                           </span>
                         </div>
                       </div>
@@ -1760,16 +1760,17 @@ export default function LandingPage() {
                     }}
                   >
                     {activeTabData.items && activeTabData.items.map((item, idx) => (
-                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{ cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "12px",
-                          padding: "16px",
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "space-between",
-                          gap: "12px",
-                          transition: "transform 0.2s ease, border-color 0.2s ease",
-                        }}
+                      <div key={item.id || idx} onClick={() => { if (item.category === "Application Health") { setSelectedHealthApp(item); setShowAppHealthModal(true); } }} style={{
+                        cursor: item.category === "Application Health" ? "pointer" : "default", background: "rgba(255, 255, 255, 0.03)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "12px",
+                        padding: "16px",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        transition: "transform 0.2s ease, border-color 0.2s ease",
+                      }}
                       >
                         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                           <div
@@ -1860,7 +1861,7 @@ export default function LandingPage() {
                   </div>
                 </div>
               )}
-              
+
               {activeTab !== "insights" && activeTabData.items && activeTabData.items.length > 0 && (
                 <>
                   <div
@@ -2093,7 +2094,7 @@ export default function LandingPage() {
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "18px", color: "var(--cyan)", fontWeight: "700" }}>
-                 AI-Generated PRD Document - {selectedPrdItem?.prbCode || "PRB003210"}
+                AI-Generated PRD Document - {selectedPrdItem?.prbCode || "PRB003210"}
               </h3>
               <button
                 onClick={() => setShowPrdModal(false)}
@@ -2272,7 +2273,7 @@ export default function LandingPage() {
         />
       )}
 
-      
+
       {/* App Health Modal */}
       {showAppHealthModal && (
         <AppHealthModal
