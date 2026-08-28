@@ -2855,7 +2855,29 @@ export default function LandingPage() {
                       <div style={{ fontWeight: "700", marginBottom: "4px", fontSize: "11px", color: msg.sender === "user" ? "#93c5fd" : "#94a3b8" }}>
                         {msg.sender === "user" ? "User" : "Agent"}
                       </div>
-                      {msg.text}
+                      {msg.text.split("\n").map((line, i) => {
+                        const isListItem = /^\d+\./.test(line.trim());
+                        return line === "" ? (
+                          <br key={i} />
+                        ) : (
+                          <div
+                            key={i}
+                            style={{
+                              display: "flex",
+                              gap: isListItem ? "8px" : "0",
+                              alignItems: "flex-start",
+                              marginBottom: isListItem ? "4px" : "0",
+                            }}
+                          >
+                            {isListItem && (
+                              <span style={{ color: "var(--cyan)", fontWeight: "700", minWidth: "16px" }}>
+                                {line.trim().match(/^\d+/)[0]}.
+                              </span>
+                            )}
+                            <span>{isListItem ? line.trim().replace(/^\d+\.\s*/, "") : line}</span>
+                          </div>
+                        );
+                      })}
                       <div style={{ fontSize: "10px", color: msg.sender === "user" ? "#bfdbfe" : "#64748b", marginTop: "6px", textAlign: "right" }}>
                         {msg.time}
                       </div>
