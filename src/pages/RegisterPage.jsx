@@ -1,10 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
 import { useForceTheme } from "../context/ThemeContext";
 
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
+
+// Fixed order for roles
+const ALL_ROLES = [
+  { value: "Product Owner", label: "Product Owner", domain: "AI for AD" },
+  { value: "Developer", label: "Developer", domain: "AI for AD" },
+  { value: "Support Engineer", label: "Support Engineer", domain: "AI for AMS" },
+  { value: "Software Engineer", label: "Software Engineer", domain: "AI for AMS" },
+  { value: "Infra Engineer", label: "Infra Engineer", domain: "AI for Infra" },
+  { value: "SRE / NOC Lead", label: "SRE / NOC Lead", domain: "AI for Infra" },
+];
 
 export default function RegisterPage() {
   useForceTheme("dark");
@@ -13,49 +23,82 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [birthYear, setBirthYear] = useState("");
-  const [businessArea, setBusinessArea] = useState("");
-  const [role, setRole] = useState("");
-  const [availableRoles, setAvailableRoles] = useState([]);
+  
+  const [selectedDomains, setSelectedDomains] = useState([]);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  
+  const [isDomainOpen, setIsDomainOpen] = useState(false);
+  const [isRoleOpen, setIsRoleOpen] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const { register, isAuthenticated } = useAuth();
+  const { register, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
+  const domainRef = useRef(null);
+  const roleRef = useRef(null);
+
   useEffect(() => {
-    // Redirect to dashboard if already logged in
     if (isAuthenticated) {
       navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
 
-  const handleBusinessAreaChange = (newArea) => {
-    setBusinessArea(newArea);
-    const roles = getRolesForBusinessArea(newArea);
-    setAvailableRoles(roles);
-    setRole("");
-    if (errors.businessArea) setErrors({ ...errors, businessArea: "" });
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (domainRef.current && !domainRef.current.contains(event.target)) {
+        setIsDomainOpen(false);
+      }
+      if (roleRef.current && !roleRef.current.contains(event.target)) {
+        setIsRoleOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleDomain = (domainName) => {
+    const removing = selectedDomains.includes(domainName);
+    const newDomains = removing
+      ? selectedDomains.filter(d => d !== domainName)
+      : [...selectedDomains, domainName];
+      
+    if (removing) {
+      const domainRoles = getRolesForBusinessArea(domainName).map(r => r.value);
+      setSelectedRoles(prev => prev.filter(r => !domainRoles.includes(r)));
+    }
+    
+    setSelectedDomains(newDomains);
+    if (errors.domains) setErrors({ ...errors, domains: "" });
   };
+
+  const toggleRole = (roleValue) => {
+    setSelectedRoles(prev => 
+      prev.includes(roleValue)
+        ? prev.filter(r => r !== roleValue)
+        : [...prev, roleValue]
+    );
+    if (errors.roles) setErrors({ ...errors, roles: "" });
+  };
+
+  const isRoleEnabled = (roleDomain) => selectedDomains.includes(roleDomain);
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Full name validation
     if (!fullName.trim() || fullName.trim().length < 2) {
-      newErrors.fullName =
-        "Please enter your full name (at least 2 characters)";
+      newErrors.fullName = "Please enter your full name (at least 2 characters)";
     }
 
-    // Email validation
     if (!email.trim()) {
       newErrors.email = "Email is required";
     } else if (!email.toLowerCase().endsWith("@tcs.com")) {
       newErrors.email = "Please use your @tcs.com email address";
     }
 
-    // Password validation
     if (!password) {
       newErrors.password = "Password is required";
     } else if (password.length < 8) {
@@ -66,14 +109,12 @@ export default function RegisterPage() {
       newErrors.password = "Password must contain at least 1 number";
     }
 
-    // Confirm password validation
     if (!confirmPassword) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    // Birth year validation
     const currentYear = new Date().getFullYear();
     const yearNum = parseInt(birthYear);
     if (!birthYear) {
@@ -82,14 +123,21 @@ export default function RegisterPage() {
       newErrors.birthYear = `Please enter a valid year between 1900 and ${currentYear}`;
     }
 
-    // Business area validation
-    if (!businessArea) {
-      newErrors.businessArea = "Please select a Business Area";
+    if (selectedDomains.length === 0) {
+      newErrors.domains = "Please select at least one Domain";
     }
 
-    // Role validation
-    if (!role) {
-      newErrors.role = "Please select a Role";
+    if (selectedRoles.length === 0) {
+      newErrors.roles = "Please select at least one Role";
+    } else {
+      for (const domain of selectedDomains) {
+        const domainRoles = getRolesForBusinessArea(domain).map(r => r.value);
+        const hasRoleForDomain = selectedRoles.some(r => domainRoles.includes(r));
+        if (!hasRoleForDomain) {
+          newErrors.roles = `Please select a Role for ${domain}`;
+          break;
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -112,14 +160,15 @@ export default function RegisterPage() {
         password,
         fullName,
         birthYear,
-        [businessArea],
-        { [businessArea]: [role] }
+        selectedDomains,
+        selectedRoles
       );
       if (result.success) {
+        await logout(); // Ensure they are logged out so they go to login screen
         showToast(
-          `✓ Account created successfully — Welcome as ${role} (${businessArea}), ${result.user.name}!`,
+          `✓ Account created successfully! Please wait for admin approval to log in.`,
         );
-        setTimeout(() => navigate("/dashboard"), 600);
+        setTimeout(() => navigate("/login"), 600);
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -133,6 +182,7 @@ export default function RegisterPage() {
     <div className="login-page">
       <div className="orb orb-1" style={{ opacity: 0.1 }} />
       <div className="orb orb-2" style={{ opacity: 0.1 }} />
+      
       <div className="login-split">
         <div className="login-left">
           <div className="login-badge">GuideWell AI Platform</div>
@@ -156,8 +206,9 @@ export default function RegisterPage() {
           </div>
         </div>
         <div className="login-right">
-          <h3>Create Account</h3>
-          <p className="login-subtitle">Enter your details to get started</p>
+          <h3>GuideWell AI Platform</h3>
+          <p className="login-subtitle">Create your account</p>
+
           <form onSubmit={handleSubmit}>
             <label className="form-label">Full Name</label>
             <input
@@ -171,9 +222,7 @@ export default function RegisterPage() {
               }}
               autoComplete="name"
             />
-            {errors.fullName && (
-              <div className="form-error">{errors.fullName}</div>
-            )}
+            {errors.fullName && <div className="form-error">{errors.fullName}</div>}
 
             <label className="form-label">TCS Email</label>
             <input
@@ -209,35 +258,19 @@ export default function RegisterPage() {
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                     <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 ) : (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 )}
               </button>
             </div>
-            {errors.password && (
-              <div className="form-error">{errors.password}</div>
-            )}
+            {errors.password && <div className="form-error">{errors.password}</div>}
 
             <label className="form-label">Confirm Password</label>
             <div className="password-input-wrap">
@@ -248,8 +281,7 @@ export default function RegisterPage() {
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value);
-                  if (errors.confirmPassword)
-                    setErrors({ ...errors, confirmPassword: "" });
+                  if (errors.confirmPassword) setErrors({ ...errors, confirmPassword: "" });
                 }}
                 autoComplete="new-password"
               />
@@ -257,46 +289,24 @@ export default function RegisterPage() {
                 type="button"
                 className="password-toggle-btn"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={
-                  showConfirmPassword ? "Hide password" : "Show password"
-                }
               >
                 {showConfirmPassword ? (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                     <line x1="1" y1="1" x2="23" y2="23" />
                   </svg>
                 ) : (
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                     <circle cx="12" cy="12" r="3" />
                   </svg>
                 )}
               </button>
             </div>
-            {errors.confirmPassword && (
-              <div className="form-error">{errors.confirmPassword}</div>
-            )}
+            {errors.confirmPassword && <div className="form-error">{errors.confirmPassword}</div>}
 
             <label className="form-label">
-              Birth Year{" "}
-              <span style={{ color: "var(--muted)", fontSize: "11px" }}>
-                (for account recovery)
-              </span>
+              Birth Year <span style={{ color: "var(--muted)", fontSize: "11px" }}>(for account recovery)</span>
             </label>
             <input
               type="number"
@@ -311,82 +321,99 @@ export default function RegisterPage() {
               min="1900"
               max={new Date().getFullYear()}
             />
-            {errors.birthYear && (
-              <div className="form-error">{errors.birthYear}</div>
-            )}
+            {errors.birthYear && <div className="form-error">{errors.birthYear}</div>}
 
-            {/* Domain Dropdown */}
-            <label className="form-label">Domain</label>
-            <select
-              className="form-input"
-              value={businessArea}
-              onChange={(e) => handleBusinessAreaChange(e.target.value)}
-              required
-              style={{
-                backgroundColor: "var(--surface-input)",
-                color: businessArea ? "var(--text-primary)" : "var(--text-muted)",
-                cursor: "pointer"
-              }}
-            >
-              <option value="" disabled style={{ background: "#0f172a", color: "#94a3b8" }}>
-                Select Domain
-              </option>
-              {BUSINESS_AREAS.map((area) => {
-                const isComingSoon = area.status === "coming_soon";
-                return (
-                  <option
-                    key={area.id}
-                    value={area.name}
-                    disabled={isComingSoon}
-                    style={{
-                      background: "#0f172a",
-                      color: isComingSoon ? "#64748b" : "#e2e8f0"
-                    }}
-                  >
-                    {area.name} {isComingSoon ? "(Coming Soon)" : ""}
-                  </option>
-                );
-              })}
-            </select>
-            {errors.businessArea && <div className="form-error">{errors.businessArea}</div>}
+            <div style={{ position: 'relative', marginBottom: '20px' }} ref={domainRef}>
+              <label className="form-label">Domain</label>
+              <div 
+                className="form-input"
+                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                onClick={() => setIsDomainOpen(!isDomainOpen)}
+              >
+                <span style={{ 
+                  color: selectedDomains.length ? "var(--text-primary)" : "var(--text-muted)",
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 'calc(100% - 20px)', display: 'block'
+                }}>
+                  {selectedDomains.length > 0 ? selectedDomains.join(", ") : "Select Domain..."}
+                </span>
+                <span style={{ fontSize: '10px' }}>▼</span>
+              </div>
+              {isDomainOpen && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0,
+                  background: '#0f172a', border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px', padding: '8px', zIndex: 10, marginTop: '4px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.8)'
+                }}>
+                  {BUSINESS_AREAS.filter(a => a.status !== 'coming_soon').map(area => (
+                    <label key={area.id} style={{ display: 'flex', alignItems: 'center', padding: '8px', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={selectedDomains.includes(area.name)}
+                        onChange={() => toggleDomain(area.name)}
+                        style={{ marginRight: '10px', accentColor: 'var(--cyan)' }}
+                      />
+                      <span style={{ color: 'var(--text-primary)' }}>{area.name}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+              {errors.domains && <div className="form-error" style={{marginTop: '4px'}}>{errors.domains}</div>}
+            </div>
 
-            {/* Cascading Role Dropdown */}
-            <label className="form-label">Role</label>
-            <select
-              className="form-input"
-              value={role}
-              onChange={(e) => {
-                setRole(e.target.value);
-                if (errors.role) setErrors({ ...errors, role: "" });
-              }}
-              disabled={!businessArea || availableRoles.length === 0}
-              required
-              style={{
-                backgroundColor: "var(--surface-input)",
-                color: role ? "var(--text-primary)" : "var(--text-muted)",
-                cursor: !businessArea || availableRoles.length === 0 ? "not-allowed" : "pointer"
-              }}
-            >
-              <option value="" disabled style={{ background: "#0f172a", color: "#94a3b8" }}>
-                {!businessArea
-                  ? "Select Business Area First"
-                  : availableRoles.length === 0
-                    ? "No Roles Available"
-                    : "Select Role"}
-              </option>
-              {availableRoles.map((r) => (
-                <option key={r.value} value={r.value} style={{ background: "#0f172a", color: "#e2e8f0" }}>
-                  {r.label}
-                </option>
-              ))}
-            </select>
-            {errors.role && <div className="form-error">{errors.role}</div>}
+            <div style={{ position: 'relative', marginBottom: '24px' }} ref={roleRef}>
+              <label className="form-label">Role</label>
+              <div 
+                className="form-input"
+                style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+                onClick={() => setIsRoleOpen(!isRoleOpen)}
+              >
+                <span style={{ 
+                  color: selectedRoles.length ? "var(--text-primary)" : "var(--text-muted)",
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 'calc(100% - 20px)', display: 'block'
+                }}>
+                  {selectedRoles.length > 0 ? selectedRoles.join(", ") : "Select Role..."}
+                </span>
+                <span style={{ fontSize: '10px' }}>▼</span>
+              </div>
+              {isRoleOpen && (
+                <div style={{
+                  position: 'absolute', top: '100%', left: 0, right: 0,
+                  background: '#0f172a', border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '8px', padding: '8px', zIndex: 10, marginTop: '4px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.8)', maxHeight: '200px', overflowY: 'auto'
+                }}>
+                  {ALL_ROLES.map(r => {
+                    const enabled = isRoleEnabled(r.domain);
+                    return (
+                      <label key={r.value} style={{ 
+                        display: 'flex', alignItems: 'center', padding: '8px', 
+                        cursor: enabled ? 'pointer' : 'not-allowed',
+                        opacity: enabled ? 1 : 0.4 
+                      }}>
+                        <input 
+                          type="checkbox"
+                          checked={selectedRoles.includes(r.value)}
+                          onChange={() => { if(enabled) toggleRole(r.value); }}
+                          disabled={!enabled}
+                          style={{ marginRight: '10px', accentColor: 'var(--cyan)', cursor: enabled ? 'pointer' : 'not-allowed' }}
+                        />
+                        <span style={{ color: enabled ? 'var(--text-primary)' : 'var(--text-muted)' }}>
+                          {r.label} <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '4px' }}>({r.domain})</span>
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+              {errors.roles && <div className="form-error" style={{marginTop: '4px'}}>{errors.roles}</div>}
+            </div>
 
-            <button type="submit" className="login-btn" disabled={isLoading} style={{ marginTop: "12px" }}>
+            <button type="submit" className="login-btn" disabled={isLoading}>
               {isLoading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
-          <p className="login-helper">
+          <p className="login-helper" style={{ marginTop: "24px" }}>
             Already have an account?{" "}
             <Link to="/login" className="login-link">
               Sign In

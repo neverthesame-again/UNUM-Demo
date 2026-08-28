@@ -5718,9 +5718,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 100px 20px 40px 20px; /* Increased top padding for navbar */
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: var(--page-bg);
 }
 
@@ -5729,11 +5730,11 @@
   max-width: 960px;
   width: 100%;
   background: var(--surface-card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
+  border: 1px solid var(--border-light, rgba(255,255,255,0.1));
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--shadow-modal);
-  backdrop-filter: var(--card-blur);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05) inset;
+  backdrop-filter: var(--card-blur, blur(10px));
   position: relative;
   z-index: 10;
 }
@@ -5741,10 +5742,11 @@
 .login-left {
   flex: 1;
   padding: 44px;
-  background: linear-gradient(135deg, rgba(var(--blue2-rgb), 0.08) 0%, transparent 100%);
-  border-right: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(var(--blue2-rgb, 0, 159, 218), 0.1) 0%, transparent 100%);
+  border-right: 1px solid var(--border-light, rgba(255,255,255,0.1));
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 18px;
 }
 
@@ -5806,7 +5808,7 @@
   padding: 44px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .login-right h3 {

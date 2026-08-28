@@ -57,8 +57,15 @@ export default function LandingPage() {
   });
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
 
-  // Selected Domain & Role states (defaulting to user session context or 'AI for AD' &rarr; 'Product Owner')
-  const [selectedArea, setSelectedArea] = useState(user?.activeBusinessArea || "AI for AD");
+  // Selected Domain & Role states (defaulting to user session context or first allowed)
+  const allowedDomains = user?.isSuperAdmin
+    ? BUSINESS_AREAS.filter(a => a.status !== "coming_soon").map(a => a.name)
+    : user?.domains || ["AI for AD"];
+
+  const [selectedArea, setSelectedArea] = useState(() => {
+    return user?.activeBusinessArea || (allowedDomains.length > 0 ? allowedDomains[0] : "AI for AD");
+  });
+
   const [selectedRole, setSelectedRole] = useState(() => {
     const role = user?.activeRole;
     if (role === "Admin" || role === "Tester") return "Product Owner";
@@ -490,14 +497,15 @@ export default function LandingPage() {
     sessionStorage.removeItem("landing_active_tab");
     sessionStorage.removeItem("landing_selected_workspace");
     setSelectedArea(newArea);
-    let availableRoles = getRolesForBusinessArea(newArea);
-    if (newArea === "AI for AMS") {
-      availableRoles = availableRoles.filter((r) => r.value !== "Software Engineer");
-    } else if (newArea === "AI for AD") {
-      availableRoles = availableRoles.filter((r) => r.value !== "Developer");
-    }
+    
+    let availableRoles = getRolesForBusinessArea(newArea).filter(
+      r => user?.isSuperAdmin || (user?.roles || []).includes(r.value)
+    );
+    
     if (availableRoles && availableRoles.length > 0) {
       setSelectedRole(availableRoles[0].value);
+    } else {
+      setSelectedRole("");
     }
   };
 
@@ -662,7 +670,10 @@ export default function LandingPage() {
     tabData,
   } = data;
 
-  const currentAvailableRoles = getRolesForBusinessArea(selectedArea);
+  const currentAvailableRoles = getRolesForBusinessArea(selectedArea).filter(
+    r => user?.isSuperAdmin || (user?.roles || []).includes(r.value)
+  );
+  
   const isPOPage = selectedArea === "AI for AD" && selectedRole === "Product Owner";
   const activeApp = selectedApp || DEFAULT_APP;
   const currentAppData = APPLICATION_DATA_MAP[activeApp.name] || APPLICATION_DATA_MAP["BSpoke Application"];
@@ -727,34 +738,55 @@ export default function LandingPage() {
             </div>
 
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
-                  {selectedArea === "AI for AMS" ? "L0 Classification:" : "Domain:"}
-                </label>
-                <select
-                  value={selectedArea === "AI for AMS" ? selectedL0 : selectedArea}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (selectedArea === "AI for AMS") {
+              {selectedArea !== "AI for AMS" && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+                    Domain:
+                  </label>
+                  <div
+                    style={{
+                      background: "var(--surface-input)",
+                      color: "var(--text-primary)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "default",
+                      opacity: 0.9,
+                    }}
+                  >
+                    {selectedArea}
+                  </div>
+                </div>
+              )}
+
+              {selectedArea === "AI for AMS" && (
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                  <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
+                    L0:
+                  </label>
+                  <select
+                    value={selectedL0}
+                    onChange={(e) => {
+                      const val = e.target.value;
                       setSelectedL0(val);
                       sessionStorage.setItem("landing_selected_l0", val);
-                    } else {
-                      handleAreaChange(val);
-                    }
-                  }}
-                  style={{
-                    background: "var(--surface-input)",
-                    color: "var(--text-primary)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    padding: "6px 12px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    cursor: "pointer",
-                  }}
-                >
-                  {selectedArea === "AI for AMS" ? (
-                    L0_CLASSIFICATIONS.map((l0) => (
+                    }}
+                    style={{
+                      background: "var(--surface-input)",
+                      color: "var(--text-primary)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "8px",
+                      padding: "6px 12px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {L0_CLASSIFICATIONS.map((l0) => (
                       <option
                         key={l0}
                         value={l0}
@@ -762,32 +794,16 @@ export default function LandingPage() {
                       >
                         {l0}
                       </option>
-                    ))
-                  ) : (
-                    BUSINESS_AREAS.filter((a) => a.status !== "coming_soon" && (selectedArea !== "AI for AD" || a.name !== "AI for AMS")).map((area) => (
-                      <option
-                        key={area.id}
-                        value={area.name}
-                        style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-                      >
-                        {area.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <label style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-muted)" }}>
                   Role:
                 </label>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => {
-                    sessionStorage.removeItem("landing_active_tab");
-                    sessionStorage.removeItem("landing_selected_workspace");
-                    setSelectedRole(e.target.value);
-                  }}
+                <div
                   style={{
                     background: "var(--surface-input)",
                     color: "var(--text-primary)",
@@ -796,19 +812,14 @@ export default function LandingPage() {
                     padding: "6px 12px",
                     fontSize: "12px",
                     fontWeight: "600",
-                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "default",
+                    opacity: 0.9,
                   }}
                 >
-                  {currentAvailableRoles.map((r) => (
-                    <option
-                      key={r.value}
-                      value={r.value}
-                      style={{ background: "var(--surface-select-option)", color: "var(--text-primary)" }}
-                    >
-                      {r.value}
-                    </option>
-                  ))}
-                </select>
+                  {selectedRole}
+                </div>
               </div>
             </div>
           </div>

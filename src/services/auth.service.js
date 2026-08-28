@@ -23,7 +23,7 @@ const validatePassword = (password) => {
 
 export const authService = {
   // Register new user
-  register: async (email, password, fullName, birthYear, businessAreas = [], requestedRoles = {}) => {
+  register: async (email, password, fullName, birthYear, businessAreas = [], requestedRoles = []) => {
     try {
       // Validate inputs
       if (!validateTCSEmail(email)) {
@@ -60,9 +60,7 @@ export const authService = {
       
       // Create or update user profile with business_area and role
       const primaryArea = Array.isArray(businessAreas) && businessAreas.length > 0 ? businessAreas[0] : "AI for AD";
-      const primaryRole = requestedRoles && primaryArea && requestedRoles[primaryArea] && requestedRoles[primaryArea].length > 0
-        ? requestedRoles[primaryArea][0]
-        : "Developer";
+      const primaryRole = Array.isArray(requestedRoles) && requestedRoles.length > 0 ? requestedRoles[0] : "Developer";
 
       const { error: profileError } = await supabase
         .from('user_profiles')
@@ -73,20 +71,14 @@ export const authService = {
           birth_year: parseInt(birthYear),
           business_area: primaryArea,
           role: primaryRole,
+          domains: businessAreas,
+          roles: requestedRoles,
           access_status: isSuperAdmin ? 'approved' : 'pending'
         }], { onConflict: 'email' });
       
       if (profileError) {
         console.warn('Profile creation warning (continuing with local state):', profileError);
       }
-
-      // Persist requested business areas & roles locally / in localStorage for mock session lookup
-      const userPermissions = JSON.parse(localStorage.getItem('user_permissions_map') || '{}');
-      userPermissions[email.toLowerCase().trim()] = {
-        businessAreas,
-        requestedRoles
-      };
-      localStorage.setItem('user_permissions_map', JSON.stringify(userPermissions));
       
       const areaRoles = getRolesForBusinessArea(primaryArea).map((r) => r.value);
       const isDomainAdmin = primaryRole === 'Admin';
@@ -101,11 +93,10 @@ export const authService = {
         isAdmin: isSuperAdmin,
         isDomainAdmin,
         accessStatus: isSuperAdmin ? 'approved' : 'pending',
-        activeBusinessArea: primaryArea,
         activeRole: primaryRole,
         activeAreaRoles: areaRoles,
-        businessAreas,
-        requestedRoles
+        domains: businessAreas,
+        roles: requestedRoles
       };
       
       return { success: true, user };
@@ -140,15 +131,29 @@ export const authService = {
       
       if (profileError) throw profileError;
       
-      const activeBusinessArea = businessArea || 'AI for AD';
-      const activeRole = role || 'Admin';
+      // Cleanup legacy local storage
+      localStorage.removeItem('user_permissions_map');
+
+      // Arrays fallback
+      const userDomains = (profile.domains && profile.domains.length > 0)
+        ? profile.domains
+        : (profile.business_area ? [profile.business_area] : []);
+        
+      const userRoles = (profile.roles && profile.roles.length > 0)
+        ? profile.roles
+        : (profile.role ? [profile.role] : []);
+
+      const isSuperAdmin = isSuperAdminEmail(data.user.email);
+      
+      // Fallbacks if not provided
+      const activeBusinessArea = businessArea || (userDomains.length > 0 ? userDomains[0] : 'AI for AD');
+      let activeRole = role || (userRoles.length > 0 ? userRoles[0] : 'Admin');
 
       // Persist active session context
       localStorage.setItem('active_business_area', activeBusinessArea);
       localStorage.setItem('active_role', activeRole);
 
       const areaRoles = getRolesForBusinessArea(activeBusinessArea).map((r) => r.value);
-      const isSuperAdmin = isSuperAdminEmail(data.user.email);
       const isDomainAdmin = activeRole === 'Admin';
 
       // Return user data with admin flags, access status, and selected role context
@@ -163,7 +168,9 @@ export const authService = {
         accessStatus: profile.access_status || 'pending',
         activeBusinessArea,
         activeRole,
-        activeAreaRoles: areaRoles
+        activeAreaRoles: areaRoles,
+        domains: userDomains,
+        roles: userRoles
       };
       
       return { success: true, user };
@@ -204,8 +211,16 @@ export const authService = {
       
       if (error) return null;
 
-      const activeBusinessArea = localStorage.getItem('active_business_area') || 'AI for AD';
-      const activeRole = localStorage.getItem('active_role') || 'Admin';
+      const userDomains = (profile.domains && profile.domains.length > 0)
+        ? profile.domains
+        : (profile.business_area ? [profile.business_area] : []);
+        
+      const userRoles = (profile.roles && profile.roles.length > 0)
+        ? profile.roles
+        : (profile.role ? [profile.role] : []);
+        
+      const activeBusinessArea = localStorage.getItem('active_business_area') || (userDomains.length > 0 ? userDomains[0] : 'AI for AD');
+      const activeRole = localStorage.getItem('active_role') || (userRoles.length > 0 ? userRoles[0] : 'Admin');
       const areaRoles = getRolesForBusinessArea(activeBusinessArea).map((r) => r.value);
       const isSuperAdmin = isSuperAdminEmail(user.email);
       const isDomainAdmin = activeRole === 'Admin';
@@ -221,7 +236,9 @@ export const authService = {
         accessStatus: profile.access_status || 'pending',
         activeBusinessArea,
         activeRole,
-        activeAreaRoles: areaRoles
+        activeAreaRoles: areaRoles,
+        domains: userDomains,
+        roles: userRoles
       };
     } catch (error) {
       console.error('Get current user error:', error);
@@ -229,6 +246,25 @@ export const authService = {
     }
   },
   
+  // Get user profile by email (useful for pre-login checks)
+  getUserProfileByEmail: async (email) => {
+    try {
+      if (!validateTCSEmail(email)) return null;
+      
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('email', email.toLowerCase().trim())
+        .single();
+        
+      if (error) return null;
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile by email:', error);
+      return null;
+    }
+  },
+
   // Get birth year for forgot password flow
   getBirthYearForEmail: async (email) => {
     try {

@@ -130,51 +130,25 @@ export default function ForgotPasswordPage() {
       <div className="orb orb-2" style={{ opacity: 0.1 }} />
       <div className="login-split">
         <div className="login-left">
-          <div className="login-badge">Account Recovery</div>
-          <h2>Reset Your Password</h2>
+          <div className="login-badge">GuideWell AI Platform</div>
+          <h2>Account Recovery</h2>
           <p>
-            Verify your identity using your email and birth year, then set a new
-            password for your account.
+            Recover your account using your registered email and birth year.
           </p>
           <div className="login-feature">
-            <div
-              className="login-feature-icon"
-              style={{
-                opacity: step === 1 ? 1 : 0.4,
-                color: step === 1 ? "var(--cyan)" : "var(--muted)",
-              }}
-            >
-              1
-            </div>
-            <div
-              className="login-feature-text"
-              style={{ opacity: step === 1 ? 1 : 0.5 }}
-            >
-              Verify your identity
-            </div>
+            <div className="login-feature-icon">🔒</div>
+            <div className="login-feature-text">Secure Identity Verification</div>
           </div>
           <div className="login-feature">
-            <div
-              className="login-feature-icon"
-              style={{
-                opacity: step === 2 ? 1 : 0.4,
-                color: step === 2 ? "var(--cyan)" : "var(--muted)",
-              }}
-            >
-              2
-            </div>
-            <div
-              className="login-feature-text"
-              style={{ opacity: step === 2 ? 1 : 0.5 }}
-            >
-              Set new password
-            </div>
+            <div className="login-feature-icon">📧</div>
+            <div className="login-feature-text">Email Based Recovery</div>
           </div>
         </div>
+        <div className="login-right">
 
         {step === 1 && (
-          <div className="login-right">
-            <h3>Verify Your Identity</h3>
+          <div>
+            <h4 style={{ color: "var(--text-primary)", marginBottom: "8px" }}>Verify Your Identity</h4>
             <p className="login-subtitle">
               Enter your email and birth year to verify your account
             </p>
@@ -225,8 +199,8 @@ export default function ForgotPasswordPage() {
         )}
 
         {step === 2 && (
-          <div className="login-right">
-            <h3>Set New Password</h3>
+          <div>
+            <h4 style={{ color: "var(--text-primary)", marginBottom: "8px" }}>Set New Password</h4>
             <p className="login-subtitle">Enter your new password below</p>
             <form onSubmit={handleResetPassword}>
               <label className="form-label">New Password</label>
@@ -347,6 +321,7 @@ export default function ForgotPasswordPage() {
             </p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );
