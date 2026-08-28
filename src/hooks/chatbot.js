@@ -10,8 +10,7 @@ const DEFAULT_API_URL =
   "https://iscbfcgkfmzswnmarlbe.supabase.co/functions/v1/chatbot-agent";
 
 export const PREDEFINED_PROMPTS = [
-  "Provide a comprehensive summary of active security vulnerabilities, risk severities, and remediation patch statuses across the environment",
-  "Provide an operational overview of the latest system telemetry, incident resolution trends, and top autonomous runbooks from Insights",
+  "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
 ];
 
 const PROMPT_CHAR_LIMIT = 44;

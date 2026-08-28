@@ -24,7 +24,7 @@ import { domainDetailService } from "../services/domain-detail.service";
 import { amsOverviewData } from "../data/mock/landing-mock";
 
 // Controls visibility of the Chatbot floating circle based on business area and role.
-// Enabled for Support Engineer & Software Engineer under AI for AMS.
+// Enabled for Support Engineer & Software Engineer under AI for AMS only.
 const isChatbotEnabled = (businessArea, role) => {
   return (
     businessArea === "AI for AMS" &&
@@ -47,6 +47,8 @@ export default function LandingPage() {
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
   const [isBotOpen, setIsBotOpen] = useState(false);
+  const [isPrdChatOpen, setIsPrdChatOpen] = useState(false);
+  const [prdChatKey, setPrdChatKey] = useState(0);
 
   // Application Workspaces States for AD Developer
   const [workspaces, setWorkspaces] = useState([]);
@@ -1166,6 +1168,34 @@ export default function LandingPage() {
               >
                 <span>Overall Status</span>
               </button>
+
+              {/* PRD Creation tab — only for BSpoke Application */}
+              {activeApp?.id === "bspoke" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleTabClick("prd_creation");
+                    setIsPrdChatOpen(false);
+                  }}
+                  style={{
+                    background: activeTab === "prd_creation" ? "var(--blue)" : "var(--surface-input)",
+                    color: activeTab === "prd_creation" ? "#ffffff" : "var(--text-primary)",
+                    border: activeTab === "prd_creation" ? "none" : "1px solid var(--border)",
+                    borderRadius: "20px",
+                    padding: "8px 18px",
+                    fontSize: "13px",
+                    fontWeight: "700",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    transition: "all 0.2s ease",
+                  }}
+                >
+                  <span>✦</span>
+                  <span>PRD Creation</span>
+                </button>
+              )}
             </div>
 
             {/* Active Application Status & Clear Button */}
@@ -1245,8 +1275,150 @@ export default function LandingPage() {
           );
         })()}
 
+        {/* ─── PRD Creation Tab ─────────────────────────────────────── */}
+        {activeTab === "prd_creation" && isPOPage && (
+          <div className="fade-in" style={{ marginTop: "4px" }}>
+
+            {/* ── Outer Box ── */}
+            <div style={{
+              background: "var(--surface-card)",
+              border: "1px solid var(--border)",
+              borderRadius: "14px",
+              padding: "24px 28px",
+              boxShadow: "var(--shadow-card)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "20px",
+            }}>
+              {/* Section title */}
+              <div>
+                <h2 style={{ fontSize: "22px", fontWeight: "800", color: "var(--text-primary)", margin: 0, lineHeight: 1.3 }}>
+                  AI PRD Creation
+                </h2>
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "6px 0 0" }}>
+                  Analyse high-priority incidents and generate a Product Requirement Document with AI
+                </p>
+              </div>
+
+              {/* ── Inner Incident Card (centered inside outer box) ── */}
+              <div style={{
+                background: "rgba(255,255,255,0.03)",
+                border: "1px solid var(--border)",
+                borderRadius: "12px",
+                padding: "24px 28px",
+                maxWidth: "560px",
+                margin: "0 auto",
+                width: "100%",
+              }}>
+                {/* Card header row — ID + badge */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                  <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--text-primary)" }}>
+                    CARE-DASHBOARD-HIGH
+                  </span>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "700",
+                    background: "var(--cyan)", color: "var(--navy)",
+                    padding: "3px 12px", borderRadius: "20px",
+                  }}>
+                    High Priority
+                  </span>
+                </div>
+
+                {/* Cyan sub-title */}
+                <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)", marginBottom: "10px" }}>
+                  Top 10 Incidents — Care Dashboard, January 2025
+                </div>
+
+                {/* Description */}
+                <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.6 }}>
+                  Generate a PRD from the top 10 high-priority incidents in the Care Dashboard application for January 2025, including SLA breaches, MTTR and root cause analysis.
+                </p>
+
+                {/* Meta badges */}
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginBottom: "24px" }}>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "700",
+                    background: "rgba(16,185,129,0.12)", color: "#10b981",
+                    border: "1px solid rgba(16,185,129,0.3)",
+                    padding: "4px 12px", borderRadius: "20px",
+                  }}>
+                    Urgency: 1 – High
+                  </span>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "700",
+                    background: "rgba(6,182,212,0.12)", color: "var(--cyan)",
+                    border: "1px solid rgba(6,182,212,0.3)",
+                    padding: "4px 12px", borderRadius: "20px",
+                  }}>
+                    Application: Care Dashboard
+                  </span>
+                  <span style={{
+                    fontSize: "12px", fontWeight: "600",
+                    color: "var(--text-secondary)",
+                    border: "1px solid var(--border)",
+                    padding: "4px 12px", borderRadius: "20px",
+                  }}>
+                    CARE-DASH-JAN25
+                  </span>
+                </div>
+
+                {/* Footer row */}
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
+                  <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+                    Application: <strong style={{ color: "var(--text-primary)" }}>BSpoke Application</strong>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => { setIsPrdChatOpen(true); setPrdChatKey(k => k + 1); }}
+                    style={{
+                      padding: "9px 20px",
+                      background: "var(--cyan)",
+                      color: "var(--navy)",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontSize: "13px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "7px",
+                      transition: "all 0.2s ease",
+                      boxShadow: "0 2px 10px rgba(6,182,212,0.25)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.opacity = "0.88";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.opacity = "1";
+                      e.currentTarget.style.transform = "none";
+                    }}
+                  >
+                    🤖 Create PRD
+                  </button>
+                </div>
+              </div>
+              {/* ── End inner card ── */}
+
+            </div>
+            {/* ── End outer box ── */}
+
+            {/* Chatbot — mounts and auto-fires when Create PRD is clicked */}
+            {isPrdChatOpen && (
+              <Chatbot
+                key={prdChatKey}
+                hideFloat={true}
+                defaultOpen={true}
+              />
+            )}
+          </div>
+
+        )}
+
+
         {/* Tab View 1: Overview Grid View */}
         {activeTab === "overview" && (
+
           selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
             <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
               {/* 1. Middle 3 Columns Section */}
@@ -2165,9 +2337,6 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-
-      <Footer />
-      {/* Deprecated: <Chatbot hideFloat={!isChatbotEnabled(selectedArea, selectedRole)} /> */}
 
       {/* Unified Bot Widget - shown for AMS Support / Software Engineers */}
       {isChatbotEnabled(selectedArea, selectedRole) && data && (

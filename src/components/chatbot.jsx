@@ -373,7 +373,7 @@ function formatMarkdownText(text) {
   return ensureLinksOpenInNewTab(escaped);
 }
 
-export function Chatbot({ hideFloat }) {
+export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
   const [, setMarkedReady] = useState(false);
 
   const {
@@ -412,6 +412,16 @@ export function Chatbot({ hideFloat }) {
       .then(() => setMarkedReady(true))
       .catch(() => { });
   }, []);
+
+  // Auto-open and fire prompt when defaultOpen / autoPrompt is provided
+  useEffect(() => {
+    if (defaultOpen) {
+      open();
+    }
+  }, [defaultOpen]);
+
+
+
 
   const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
 
