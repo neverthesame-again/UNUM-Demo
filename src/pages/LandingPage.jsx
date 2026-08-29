@@ -46,6 +46,35 @@ export default function LandingPage() {
   const [selectedHealthApp, setSelectedHealthApp] = useState(null);
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
+  const [showLineItemModal, setShowLineItemModal] = useState(false);
+  const [selectedLineItem, setSelectedLineItem] = useState(null);
+
+  const handleLineItemClick = (e, title) => {
+    if (e && e.preventDefault) e.preventDefault();
+    let apps = [];
+    if (title === "Quoting") {
+      apps = [
+        { name: "QuoteMaster Pro", status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.8%", desc: "Handles initial quoting estimates." },
+        { name: "RapidQuote API", status: "Degraded", ticketed: "Ticketed (INC-4821)", uptime: "94.2%", desc: "Backend service for rate calculations." }
+      ];
+    } else if (title === "Applications") {
+      apps = [
+        { name: "AppCore Services", status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.9%", desc: "Core application processing engine." }
+      ];
+    } else if (title === "Direct Enrollment") {
+      apps = [
+        { name: "Enrollment Gateway", status: "Healthy", ticketed: "Non-Ticketed", uptime: "100%", desc: "Gateway for direct enrollment." },
+        { name: "Enrollment Sync", status: "Down", ticketed: "Ticketed (INC-4833)", uptime: "88.1%", desc: "Sync service for partner enrollments." }
+      ];
+    } else {
+      apps = [
+        { name: `${title} Service Alpha`, status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.9%", desc: "Primary service component." },
+        { name: `${title} Service Beta`, status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.5%", desc: "Secondary service component." }
+      ];
+    }
+    setSelectedLineItem({ title, apps });
+    setShowLineItemModal(true);
+  };
   const [isBotOpen, setIsBotOpen] = useState(false);
   const [isPrdChatOpen, setIsPrdChatOpen] = useState(false);
   const [prdChatKey, setPrdChatKey] = useState(0);
@@ -1422,11 +1451,11 @@ export default function LandingPage() {
           selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
             <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
               {/* 1. Middle 3 Columns Section */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px", alignItems: "start" }}>
                 {/* Column 1: Observability */}
                 <div
                   style={{
-                    background: "var(--surface-card)",
+                    background: "var(--surface)",
                     border: "1px solid var(--border)",
                     borderRadius: "12px",
                     overflow: "hidden",
@@ -1437,64 +1466,46 @@ export default function LandingPage() {
                 >
                   <div
                     style={{
-                      background: "#0891b2",
                       padding: "12px 16px",
+                      background: "#0ea5e9",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "space-between",
+                      gap: "8px",
                       color: "#ffffff",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", fontSize: "14px" }}>
-                      <Icon name="zap" size={18} />
+                    <Icon name="zap" size={18} />
+                    <div style={{ fontSize: "14px", fontWeight: "700" }}>
                       Observability
                     </div>
                   </div>
                   <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        window.open("https://ismartams.tcsapps.com/member-portal-observability/", "_blank") || (window.location.href = "https://ismartams.tcsapps.com/member-portal-observability/");
-                      }}
+                    {/* Products Card (Blue) */}
+                    <div
                       style={{
-                        background: "rgba(239, 68, 68, 0.08)",
-                        border: "1px solid rgba(239, 68, 68, 0.3)",
+                        background: "rgba(59, 130, 246, 0.05)",
+                        border: "1px solid rgba(59, 130, 246, 0.2)",
                         borderRadius: "10px",
                         padding: "14px 16px",
                         color: "var(--text-primary)",
                         display: "flex",
                         flexDirection: "column",
                         gap: "12px",
-                        cursor: "pointer",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
                         width: "100%",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "#ef4444";
-                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
-                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)";
-                        e.currentTarget.style.transform = "none";
                       }}
                     >
-                      {/* Top Row: Title + Active Badge + Redirect Icon */}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Experience</span>
+                          <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#3b82f6", display: "flex" }}><Icon name="cube" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Products</span>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
                           <span
                             style={{
                               fontSize: "11px",
                               fontWeight: "600",
-                              color: "#ef4444",
-                              background: "rgba(239, 68, 68, 0.12)",
+                              color: "#10b981",
+                              background: "rgba(16, 185, 129, 0.12)",
                               padding: "3px 8px",
                               borderRadius: "12px",
                               display: "flex",
@@ -1502,103 +1513,155 @@ export default function LandingPage() {
                               gap: "4px",
                             }}
                           >
-                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
-                            Active
+                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                            Human Only
                           </span>
-                          <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
-                        </div>
+                          <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
+                        </a>
                       </div>
-
-                      {/* Impacted Parameters Grid */}
-                      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px", fontSize: "11px", color: "var(--text-secondary)", fontWeight: "500" }}>
-                        <div style={{ fontSize: "11px", fontWeight: "700", color: "#ef4444", letterSpacing: "0.4px" }}>
-                          IMPACTS TO:
-                        </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            Progress: <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
-                          </span>
-                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
-                          </span>
-                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
-                          </span>
-                        </div>
+                      <div style={{ fontSize: "10px", fontWeight: "700", color: "#3b82f6", letterSpacing: "0.5px", marginTop: "4px", marginBottom: "-4px" }}>
+                        IMPACTS TO:
                       </div>
-                    </button>
-
-                    {/* Member Enrollment & Eligibility (Yellow) */}
-                    <div
-                      style={{
-                        background: "rgba(234, 179, 8, 0.08)",
-                        border: "1px solid rgba(234, 179, 8, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Enrollment & Eligibility</span>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#3b82f6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Quoting")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{color: "#3b82f6"}} /> Quoting</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Accuracy:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>99.1%</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Turnaround:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>1.2 hrs</span></div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#3b82f6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Applications")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{color: "#3b82f6"}} /> Applications</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Application Success:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>99.6%</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Avg. Application Time:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>6.3 mins</span></div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#3b82f6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Direct Enrollment")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{color: "#3b82f6"}} /> Direct Enrollment</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollment Throughput:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>100%</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollment Leakage:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>0.6%</span></div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Provider Management (Green) */}
+                    {/* Sales Card (Green) */}
                     <div
                       style={{
-                        background: "rgba(16, 185, 129, 0.08)",
-                        border: "1px solid rgba(16, 185, 129, 0.3)",
+                        background: "rgba(16, 185, 129, 0.05)",
+                        border: "1px solid rgba(16, 185, 129, 0.2)",
                         borderRadius: "10px",
                         padding: "14px 16px",
                         color: "var(--text-primary)",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
+                        flexDirection: "column",
+                        gap: "12px",
                         width: "100%",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Provider Management</span>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "6px", borderRadius: "8px", color: "#10b981", display: "flex" }}><Icon name="chart" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Sales</span>
+                        </div>
+                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              color: "#10b981",
+                              background: "rgba(16, 185, 129, 0.12)",
+                              padding: "3px 8px",
+                              borderRadius: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                            Human Only
+                          </span>
+                          <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
+                        </a>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#10b981"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Quoting")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{color: "#10b981"}} /> Quoting</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Win Rate:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>34.7%</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Avg. Premium Quoted:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$1,250</span></div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#10b981"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Applications")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{color: "#10b981"}} /> Applications</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Application Conversion:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>42.8%</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Abandonment Rate:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>12.3%</span></div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#10b981"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Direct Enrollment")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{color: "#10b981"}} /> Direct Enrollment</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Direct to Bind Rate:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>62.1%</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Enrollment:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$42.18</span></div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Billing & Premium Management (Purple) */}
+                    {/* Acquisition Card (Purple) */}
                     <div
                       style={{
-                        background: "rgba(139, 92, 246, 0.08)",
-                        border: "1px solid rgba(139, 92, 246, 0.3)",
+                        background: "rgba(139, 92, 246, 0.05)",
+                        border: "1px solid rgba(139, 92, 246, 0.2)",
                         borderRadius: "10px",
                         padding: "14px 16px",
                         color: "var(--text-primary)",
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
+                        flexDirection: "column",
+                        gap: "12px",
                         width: "100%",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Billing & Premium Management</span>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#8b5cf6", display: "flex" }}><Icon name="cart" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Acquisition</span>
+                        </div>
+                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              fontWeight: "600",
+                              color: "#10b981",
+                              background: "rgba(16, 185, 129, 0.12)",
+                              padding: "3px 8px",
+                              borderRadius: "12px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "4px",
+                            }}
+                          >
+                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                            Human Only
+                          </span>
+                          <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
+                        </a>
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#8b5cf6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Quoting")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{color: "#8b5cf6"}} /> Quoting</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Requests:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>24,812</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Quote:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$18.73</span></div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#8b5cf6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Applications")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{color: "#8b5cf6"}} /> Applications</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Applications Started:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>18,942</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per App:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$37.61</span></div>
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#8b5cf6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Direct Enrollment")}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{color: "#8b5cf6"}} /> Direct Enrollment</div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollments:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>6,531</span></div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Enrollment:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$42.18</span></div>
+                        </div>
                       </div>
                     </div>
 
                     {/* Customer Service (Orange) */}
-                    <div
+                    <a href="#" onClick={(e) => handleLineItemClick(e, "Customer Service")}
                       style={{
-                        background: "rgba(249, 115, 22, 0.08)",
-                        border: "1px solid rgba(249, 115, 22, 0.3)",
+                        background: "rgba(249, 115, 22, 0.05)",
+                        border: "1px solid rgba(249, 115, 22, 0.2)",
                         borderRadius: "10px",
                         padding: "14px 16px",
                         color: "var(--text-primary)",
@@ -1607,20 +1670,22 @@ export default function LandingPage() {
                         justifyContent: "space-between",
                         fontWeight: "700",
                         fontSize: "13px",
-                        textAlign: "left",
+                        textDecoration: "none",
                         width: "100%",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ color: "#f97316", display: "flex" }}><Icon name="message" size={16} /></div>
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Customer Service</span>
                       </div>
-                    </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
 
-                    {/* Finance & Compliance (Cyan) */}
-                    <div
+                    {/* Finance & Compliance (Orange/Brown) */}
+                    <a href="#" onClick={(e) => handleLineItemClick(e, "Finance & Compliance")}
                       style={{
-                        background: "rgba(6, 182, 212, 0.08)",
-                        border: "1px solid rgba(6, 182, 212, 0.3)",
+                        background: "rgba(217, 119, 6, 0.05)",
+                        border: "1px solid rgba(217, 119, 6, 0.2)",
                         borderRadius: "10px",
                         padding: "14px 16px",
                         color: "var(--text-primary)",
@@ -1629,14 +1694,65 @@ export default function LandingPage() {
                         justifyContent: "space-between",
                         fontWeight: "700",
                         fontSize: "13px",
-                        textAlign: "left",
+                        textDecoration: "none",
                         width: "100%",
                       }}
                     >
                       <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ color: "#d97706", display: "flex" }}><Icon name="file-text" size={16} /></div>
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Finance & Compliance</span>
                       </div>
-                    </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+                    
+                    {/* Operations (Teal) */}
+                    <a href="#" onClick={(e) => handleLineItemClick(e, "Operations")}
+                      style={{
+                        background: "rgba(20, 184, 166, 0.05)",
+                        border: "1px solid rgba(20, 184, 166, 0.2)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textDecoration: "none",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ color: "#14b8a6", display: "flex" }}><Icon name="users" size={16} /></div>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Operations</span>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+                    
+                    {/* Legal & Risk (Blue) */}
+                    <a href="#" onClick={(e) => handleLineItemClick(e, "Legal & Risk")}
+                      style={{
+                        background: "rgba(56, 189, 248, 0.05)",
+                        border: "1px solid rgba(56, 189, 248, 0.2)",
+                        borderRadius: "10px",
+                        padding: "14px 16px",
+                        color: "var(--text-primary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        fontWeight: "700",
+                        fontSize: "13px",
+                        textDecoration: "none",
+                        width: "100%",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                        <div style={{ color: "#38bdf8", display: "flex" }}><Icon name="shield" size={16} /></div>
+                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Legal & Risk</span>
+                      </div>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </a>
+
                   </div>
                 </div>
                 {/* Column 1: Needs My Action */}
@@ -3051,6 +3167,48 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+      )}
+      {/* Detailed Line Item Information Modal */}
+      {showLineItemModal && (
+        <Modal
+          isOpen={showLineItemModal}
+          onClose={() => setShowLineItemModal(false)}
+          title={selectedLineItem?.title ? `${selectedLineItem.title} - Applications` : "Details"}
+        >
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "10px 0" }}>
+            {selectedLineItem?.apps?.map((app, idx) => (
+              <div key={idx} style={{
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                padding: "16px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px"
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontWeight: "600", fontSize: "16px", color: "var(--text-primary)" }}>{app.name}</span>
+                  <span style={{ 
+                    fontSize: "12px", 
+                    padding: "4px 8px", 
+                    borderRadius: "12px",
+                    background: app.status === "Healthy" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                    color: app.status === "Healthy" ? "#10b981" : "#ef4444"
+                  }}>
+                    {app.status}
+                  </span>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "var(--text-secondary)" }}>
+                  <span>Ticket Status: <strong style={{color: "var(--text-primary)"}}>{app.ticketed}</strong></span>
+                  <span>Uptime: <strong style={{color: "var(--text-primary)"}}>{app.uptime}</strong></span>
+                </div>
+                <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "4px" }}>
+                  {app.desc}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Modal>
       )}
     </>
   );
