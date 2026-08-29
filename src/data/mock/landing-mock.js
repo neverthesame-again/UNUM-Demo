@@ -654,7 +654,7 @@ export const roleMockData = {
       },
       summary: {
         greeting: "Good Morning",
-        subtext: "28 incoming tickets · 18 auto-resolved by AI Agents · 6 items need review",
+        subtext: "28 incoming tickets · 12 auto-resolved by AI Agents · 5 items need review",
         chips: [
           { id: "c1", text: "Auto-Resolution Rate 64.2%", type: "info" },
           { id: "c3", text: "Password Reset Automation 100%", type: "info" },
@@ -840,7 +840,7 @@ export const roleMockData = {
       },
       summary: {
         greeting: "Good morning, L1 Engineer — Shift queue is active.",
-        subtext: "28 incoming tickets · 18 auto-resolved by AI Agents · 6 items need L1 review",
+        subtext: "28 incoming tickets · 12 auto-resolved by AI Agents · 5 items need L1 review",
         chips: [
           { id: "c1", text: "Auto-Resolution Rate 64.2%", type: "info" },
           { id: "c3", text: "Password Reset Automation 100%", type: "info" },
