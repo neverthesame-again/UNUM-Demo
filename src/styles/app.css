@@ -6567,3 +6567,82 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Custom Stylish FTRDR Tooltip (Guidewell Theme) */
+.ftrdr-card-wrapper {
+  position: relative;
+}
+
+.ftrdr-tooltip-popup {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  width: 250px;
+  padding: 10px 14px;
+  background: var(--navy3, #0d1e3a);
+  border: 1px solid var(--border-accent, rgba(0, 196, 255, 0.3));
+  border-radius: 10px;
+  box-shadow: var(--shadow-dropdown, 0 12px 28px -5px rgba(0, 0, 0, 0.45));
+  z-index: 9999;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+  text-align: center;
+}
+
+/* Arrow pointer pointing UP to the card box above (matching Image 2) */
+.ftrdr-tooltip-popup::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-bottom: 7px solid var(--navy3, #0d1e3a);
+}
+
+/* Light theme overrides: White background tooltip */
+[data-theme='light'] .ftrdr-tooltip-popup {
+  background: #ffffff;
+  border: 1px solid #d7deea;
+  box-shadow: 0 10px 25px -5px rgba(16, 33, 76, 0.15), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='light'] .ftrdr-tooltip-popup::before {
+  border-bottom-color: #ffffff;
+}
+
+.ftrdr-card-wrapper:hover .ftrdr-tooltip-popup {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ftrdr-tooltip-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--cyan, #00c4ff);
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+[data-theme='light'] .ftrdr-tooltip-title {
+  color: #10214c; /* Guidewell Light Theme Deep Navy */
+}
+
+.ftrdr-tooltip-body {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #ffffff;
+}
+
+[data-theme='light'] .ftrdr-tooltip-body {
+  color: #475569; /* Crisp Dark Slate Text for Light Theme */
+}

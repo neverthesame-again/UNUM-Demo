@@ -653,12 +653,12 @@ export const roleMockData = {
         statusBadge: "● SUPPORT BOT MESH · LIVE",
       },
       summary: {
-        greeting: "Good morning, Support Engineer ",
-        subtext: "28 incoming tickets · 18 auto-resolved by AI agent · 6 items need triage decision",
+        greeting: "Good Morning",
+        subtext: "28 incoming tickets · 18 auto-resolved by AI Agents · 6 items need review",
         chips: [
           { id: "c1", text: "Auto-Resolution Rate 64.2%", type: "info" },
           { id: "c3", text: "Password Reset Automation 100%", type: "info" },
-          { id: "c4", text: "First Contact Resolution 4.2 min", type: "warn" },
+          { id: "c4", text: "FTRDR 99.5%", type: "info" },
         ],
       },
       tabs: [
@@ -842,12 +842,12 @@ export const roleMockData = {
         statusBadge: "● L1 BOT MESH · LIVE",
       },
       summary: {
-        greeting: "Good morning, L1 Engineer ",
-        subtext: "28 incoming tickets · 18 auto-resolved by AI agent · 6 items need L1 triage decision",
+        greeting: "Good morning, L1 Engineer — Shift queue is active.",
+        subtext: "28 incoming tickets · 18 auto-resolved by AI Agents · 6 items need L1 review",
         chips: [
           { id: "c1", text: "Auto-Resolution Rate 64.2%", type: "info" },
           { id: "c3", text: "Password Reset Automation 100%", type: "info" },
-          { id: "c4", text: "First Contact Resolution 4.2 min", type: "warn" },
+          { id: "c4", text: "FTRDR 99.5%", type: "info" },
         ],
       },
       tabs: [
