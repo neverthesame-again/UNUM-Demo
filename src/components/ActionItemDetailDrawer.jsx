@@ -1,12 +1,6 @@
 import { useEffect } from "react";
 import { Icon } from "./Icon";
 
-const PRIORITY_COLORS = {
-  P1: { bg: "#fee2e2", color: "#b91c1c", border: "#fca5a5" },
-  P2: { bg: "#fef3c7", color: "#b45309", border: "#fcd34d" },
-  P3: { bg: "#dbeafe", color: "#1d4ed8", border: "#93c5fd" },
-};
-
 function Field({ label, children }) {
   return (
     <div style={{ marginBottom: "14px" }}>
@@ -42,7 +36,13 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
 
   if (!item) return null;
 
-  const priorityStyle = PRIORITY_COLORS[item.priority] || PRIORITY_COLORS.P3;
+  // Priority badge — uses semi-transparent colors that work in both light & dark mode
+  const PRIORITY_STYLES = {
+    P1: { bg: "rgba(185,28,28,0.15)",  color: "#ef4444", border: "rgba(185,28,28,0.4)"  },
+    P2: { bg: "rgba(180,83,9,0.15)",   color: "#f59e0b", border: "rgba(180,83,9,0.4)"   },
+    P3: { bg: "rgba(29,78,216,0.15)",  color: "#60a5fa", border: "rgba(29,78,216,0.4)"  },
+  };
+  const priorityStyle = PRIORITY_STYLES[item.priority] || PRIORITY_STYLES.P3;
 
   return (
     <>
@@ -52,14 +52,15 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.45)",
+          background: "rgba(0,0,0,0.55)",
           zIndex: 1000,
           animation: "fadeInDrawer 0.2s ease",
         }}
       />
 
-      {/* Drawer */}
+      {/* Drawer panel */}
       <div
+        className="action-drawer-panel"
         style={{
           position: "fixed",
           top: 0,
@@ -67,9 +68,8 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
           height: "100vh",
           width: "420px",
           maxWidth: "95vw",
-          background: "var(--surface-card, #1e1e2e)",
-          borderLeft: "1px solid var(--border, #2d2d3d)",
-          boxShadow: "-8px 0 32px rgba(0,0,0,0.4)",
+          borderLeft: "1px solid var(--border)",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.5)",
           zIndex: 1001,
           display: "flex",
           flexDirection: "column",
@@ -77,7 +77,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
           overflowY: "auto",
         }}
       >
-        {/* Header */}
+        {/* Coloured header */}
         <div
           style={{
             background: accentColor,
@@ -115,7 +115,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
           <button
             onClick={onClose}
             style={{
-              background: "rgba(255,255,255,0.15)",
+              background: "rgba(255,255,255,0.2)",
               border: "none",
               borderRadius: "6px",
               color: "#fff",
@@ -138,8 +138,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
         {/* Action Required Banner */}
         <div
           style={{
-            background: "rgba(255,255,255,0.05)",
-            borderBottom: "1px solid var(--border, #2d2d3d)",
+            borderBottom: "1px solid var(--border)",
             padding: "10px 20px",
             display: "flex",
             alignItems: "center",
@@ -158,6 +157,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
 
         {/* Body */}
         <div style={{ padding: "20px", flex: 1 }}>
+
           {/* Priority + Ticketed badges */}
           <div style={{ display: "flex", gap: "8px", marginBottom: "20px", flexWrap: "wrap" }}>
             <span
@@ -181,8 +181,8 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
             <span
               style={{
                 background: item.ticketed ? "rgba(22,163,74,0.15)" : "rgba(107,114,128,0.15)",
-                color: item.ticketed ? "#16a34a" : "#9ca3af",
-                border: `1px solid ${item.ticketed ? "rgba(22,163,74,0.4)" : "rgba(107,114,128,0.3)"}`,
+                color: item.ticketed ? "#22c55e" : "var(--text-muted)",
+                border: `1px solid ${item.ticketed ? "rgba(22,163,74,0.35)" : "rgba(107,114,128,0.3)"}`,
                 borderRadius: "6px",
                 padding: "3px 10px",
                 fontSize: "11px",
@@ -197,7 +197,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
             </span>
           </div>
 
-          <div style={{ height: "1px", background: "var(--border, #2d2d3d)", marginBottom: "16px" }} />
+          <div style={{ height: "1px", background: "var(--border)", marginBottom: "16px" }} />
 
           <Field label="Application">
             <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
@@ -211,9 +211,10 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
               <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <Icon name="tag" size={13} />
                 <span
+                  className="action-ticket-chip"
                   style={{
                     fontFamily: "monospace",
-                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid var(--border)",
                     padding: "1px 6px",
                     borderRadius: "4px",
                     fontSize: "13px",
@@ -227,12 +228,12 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
 
           <Field label="Status">
             <span
+              className="action-status-chip"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "5px",
-                background: "rgba(255,255,255,0.07)",
-                border: "1px solid var(--border, #2d2d3d)",
+                border: "1px solid var(--border)",
                 borderRadius: "6px",
                 padding: "3px 10px",
                 fontSize: "12px",
@@ -257,7 +258,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
             </span>
           </Field>
 
-          <div style={{ height: "1px", background: "var(--border, #2d2d3d)", marginBottom: "16px" }} />
+          <div style={{ height: "1px", background: "var(--border)", marginBottom: "16px" }} />
 
           <Field label="Description">
             <p
@@ -265,7 +266,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
                 margin: 0,
                 fontSize: "13px",
                 lineHeight: "1.6",
-                color: "var(--text-secondary, #9ca3af)",
+                color: "var(--text-secondary)",
               }}
             >
               {item.description}
@@ -277,7 +278,7 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
         <div
           style={{
             padding: "16px 20px",
-            borderTop: "1px solid var(--border, #2d2d3d)",
+            borderTop: "1px solid var(--border)",
             display: "flex",
             gap: "10px",
             flexShrink: 0,
@@ -305,10 +306,8 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
           </button>
           <button
             onClick={onClose}
+            className="action-dismiss-btn"
             style={{
-              background: "transparent",
-              color: "var(--text-muted)",
-              border: "1px solid var(--border, #2d2d3d)",
               borderRadius: "8px",
               padding: "10px 16px",
               fontSize: "13px",
@@ -329,6 +328,42 @@ export function ActionItemDetailDrawer({ item, onClose, accentColor = "#2563eb" 
         @keyframes fadeInDrawer {
           from { opacity: 0; }
           to   { opacity: 1; }
+        }
+
+        /* Solid opaque background — overrides the near-transparent --surface-card in dark mode */
+        .action-drawer-panel {
+          background: #ffffff;
+          color: #111827;
+        }
+        [data-theme='dark'] .action-drawer-panel {
+          background: #0d1e3a;
+          color: #f1f5f9;
+        }
+        .action-drawer-panel .action-ticket-chip {
+          background: #f1f5f9;
+          color: #111827;
+        }
+        [data-theme='dark'] .action-drawer-panel .action-ticket-chip {
+          background: #091428;
+          color: #e2e8f0;
+        }
+        .action-drawer-panel .action-status-chip {
+          background: #f1f5f9;
+          color: #111827;
+        }
+        [data-theme='dark'] .action-drawer-panel .action-status-chip {
+          background: #091428;
+          color: #e2e8f0;
+        }
+        .action-drawer-panel .action-dismiss-btn {
+          background: #f1f5f9;
+          color: #475569;
+          border: 1px solid #e2e8f0;
+        }
+        [data-theme='dark'] .action-drawer-panel .action-dismiss-btn {
+          background: #091428;
+          color: #94a3b8;
+          border: 1px solid rgba(255,255,255,0.12);
         }
       `}</style>
     </>
