@@ -54,19 +54,23 @@ export default function LandingPage() {
   const [prdChatKey, setPrdChatKey] = useState(0);
   const [selectedActionItem, setSelectedActionItem] = useState(null);
 
-  // The 3 deterministic tickets that live in Human-in-The-Loop.
+  // All tickets that live in Human-in-The-Loop.
   // They are NOT in the agent_resolve tab initially — they move there only after resolution.
   const HITL_SOURCE_ITEMS = [
     { id: "ar1", num: "Member Portal Auth & Email Service", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
     { id: "ar2", num: "Member Registration & Data Validation Engine", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
     { id: "ar3", num: "Member Registration Engine & Account Identity Mesh", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "arb1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Batch Job Auto-Restart" },
+    { id: "arb2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Enrollment Batch Resume" },
   ];
 
-  // Human in The Loop — Agent Resolve flow
+  // Human in The Loop — Agent Resolve / Auto Resolve flow
   const [hitlItems, setHitlItems] = useState(HITL_SOURCE_ITEMS);
   const [hitlResolvedItems, setHitlResolvedItems] = useState([]); // items moved to agent_resolve tab after resolution
-  const [hitlSourceItem, setHitlSourceItem] = useState(null); // tracks which HITL card opened the modal
+  const [hitlSourceItem, setHitlSourceItem] = useState(null);       // deterministic HITL card that opened the modal
+  const [hitlIgnioSourceItem, setHitlIgnioSourceItem] = useState(null); // ignio HITL card that opened the modal
   const [metricToggle, setMetricToggle] = useState("AUTO-RESOLVED"); // "AUTO-RESOLVED" or "FTRDR"
+
 
 
 
@@ -538,8 +542,15 @@ export default function LandingPage() {
   };
 
   const handleHitlAgentResolve = (item) => {
-    setHitlSourceItem(item);
-    startDeterministicAutoResolve(item); // item is already an agent_resolve item with correct id/num/subject/desc
+    if (item.isIgnio) {
+      // Ignio / Auto Resolve flow
+      setHitlIgnioSourceItem(item);
+      startIgnioAutoResolve(item);
+    } else {
+      // Deterministic chat modal flow
+      setHitlSourceItem(item);
+      startDeterministicAutoResolve(item);
+    }
   };
 
   // When the deterministic chat modal resolves AND it was triggered from a HITL card,
@@ -548,15 +559,23 @@ export default function LandingPage() {
   useEffect(() => {
     if (deterministicIsResolved && hitlSourceItem) {
       setHitlItems((prev) => prev.filter((i) => i.id !== hitlSourceItem.id));
-      setHitlResolvedItems((prev) => [
-        { ...hitlSourceItem, isResolved: true, status: "Resolved", statusType: "good" },
-        ...prev,
-      ]);
       setHitlSourceItem(null);
-      handleTabClick("agent_resolve");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deterministicIsResolved]);
+
+
+  // When the ignio auto-resolve modal resolves AND it was triggered from a HITL card,
+  // remove that card from the HITL list, push it (as resolved) into the agent_resolve tab,
+  // and navigate there.
+  useEffect(() => {
+    if (ignioIsResolved && hitlIgnioSourceItem) {
+      setHitlItems((prev) => prev.filter((i) => i.id !== hitlIgnioSourceItem.id));
+      setHitlIgnioSourceItem(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ignioIsResolved]);
+
 
   const handleSetSelectedWorkspace = (workspace) => {
     setSelectedWorkspace(workspace);
@@ -732,14 +751,8 @@ export default function LandingPage() {
       displayTabData = { ...displayTabData, items: currentAppData.acceptance_criteria };
     }
   }
-  // Prepend HITL-resolved items at the top of the agent_resolve tab when they arrive
-  if (activeTab === "agent_resolve" && displayTabData && hitlResolvedItems.length > 0) {
-    displayTabData = {
-      ...displayTabData,
-      items: [...hitlResolvedItems, ...(displayTabData.items || [])],
-    };
-  }
   const activeTabData = displayTabData;
+
 
 
   const displayTabs = tabs.filter((t) => {
@@ -885,6 +898,77 @@ export default function LandingPage() {
       </main>
     );
   }
+
+  if (selectedArea === "AI for AMS" && selectedL0 !== "Acquisition") {
+    return (
+      <main className="re-landing-page fade-in" style={{ minHeight: "85vh", display: "flex", flexDirection: "column" }}>
+        {contextSelectorBar}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "60px 20px",
+            minHeight: "450px",
+            background: "rgba(255, 255, 255, 0.02)",
+            border: "1px dashed var(--border)",
+            borderRadius: "16px",
+            margin: "24px 0",
+            overflow: "hidden",
+            width: "100%",
+          }}
+        >
+          {/* Marquee Banner */}
+          <div
+            style={{
+              width: "100%",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              padding: "18px 0",
+              background: "linear-gradient(90deg, rgba(0, 196, 255, 0.08), rgba(139, 92, 246, 0.08))",
+              borderTop: "1px solid var(--border)",
+              borderBottom: "1px solid var(--border)",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                animation: "l0Marquee 15s linear infinite",
+                fontSize: "24px",
+                fontWeight: "800",
+                letterSpacing: "3px",
+                color: "var(--cyan, #00c4ff)",
+                textTransform: "uppercase",
+              }}
+            >
+              Coming Soon &nbsp; • &nbsp; {selectedL0} &nbsp; • &nbsp; Under Development &nbsp; • &nbsp; Stay Tuned &nbsp; • &nbsp; Coming Soon &nbsp; • &nbsp; {selectedL0} &nbsp; • &nbsp; Under Development &nbsp; • &nbsp; Stay Tuned &nbsp; • &nbsp; Coming Soon &nbsp; • &nbsp; {selectedL0} &nbsp; • &nbsp; Under Development &nbsp; • &nbsp; Stay Tuned &nbsp; • &nbsp;
+            </div>
+          </div>
+
+          <div style={{ marginTop: "32px", textAlign: "center" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
+              {selectedL0}
+            </h2>
+            <p style={{ fontSize: "14px", color: "var(--text-muted)", maxWidth: "450px", margin: "0 auto" }}>
+              This L0 classification workspace is currently blank and coming soon.
+            </p>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes l0Marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
+      </main>
+    );
+  }
+
 
   return (
     <>
@@ -1578,7 +1662,7 @@ export default function LandingPage() {
                           <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#3b82f6", display: "flex" }}><Icon name="cube" size={16} /></div>
                           <span style={{ fontWeight: "700", fontSize: "14px" }}>Products</span>
                         </div>
-                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
                           <span
                             style={{
                               fontSize: "11px",
@@ -1595,8 +1679,7 @@ export default function LandingPage() {
                             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
                             Active
                           </span>
-                          <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
-                        </a>
+                        </div>
                       </div>
                       <div style={{ fontSize: "10px", fontWeight: "700", color: "#3b82f6", letterSpacing: "0.5px", marginTop: "4px", marginBottom: "-4px" }}>
                         IMPACTS TO:
@@ -1639,7 +1722,7 @@ export default function LandingPage() {
                           <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "6px", borderRadius: "8px", color: "#10b981", display: "flex" }}><Icon name="chart" size={16} /></div>
                           <span style={{ fontWeight: "700", fontSize: "14px" }}>Sales</span>
                         </div>
-                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
                           <span
                             style={{
                               fontSize: "11px",
@@ -1656,8 +1739,7 @@ export default function LandingPage() {
                             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
                             Active
                           </span>
-                          <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
-                        </a>
+                        </div>
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
@@ -1697,7 +1779,7 @@ export default function LandingPage() {
                           <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#8b5cf6", display: "flex" }}><Icon name="cart" size={16} /></div>
                           <span style={{ fontWeight: "700", fontSize: "14px" }}>Acquisition</span>
                         </div>
-                        <a href="#" onClick={(e) => e.preventDefault()} style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "6px" }}>
+                        <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
                           <span
                             style={{
                               fontSize: "11px",
@@ -1714,8 +1796,7 @@ export default function LandingPage() {
                             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
                             Active
                           </span>
-                          <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
-                        </a>
+                        </div>
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
@@ -2018,12 +2099,14 @@ export default function LandingPage() {
                           {/* Divider */}
                           <div style={{ height: "1px", background: "var(--border)" }} />
 
-                          {/* Agent Resolve button — opens deterministic chat modal */}
+                          {/* Agent Resolve / Auto Resolve button — opens the right modal */}
                           <button
                             onClick={() => handleHitlAgentResolve(item)}
                             style={{
                               alignSelf: "flex-start",
-                              background: "linear-gradient(135deg, #6d28d9, #4f46e5)",
+                              background: item.isIgnio
+                                ? "linear-gradient(135deg, #0ea5e9, #06b6d4)"   // cyan for Auto Resolve
+                                : "linear-gradient(135deg, #6d28d9, #4f46e5)",  // purple for Agent Resolve
                               color: "#fff",
                               border: "none",
                               borderRadius: "8px",
@@ -2037,7 +2120,7 @@ export default function LandingPage() {
                             }}
                           >
                             <Icon name="zap" size={13} />
-                            Agent Resolve
+                            {item.isIgnio ? "Auto Resolve" : "Agent + Human Resolve"}
                           </button>
                         </div>
                       ))

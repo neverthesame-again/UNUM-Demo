@@ -28,23 +28,28 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     }
     const seed = Math.abs(hash);
 
-    // Good: 99ΓÇô100%, Slow: 92ΓÇô97%, Down: 65ΓÇô80% with sharp drops
+    // Good: 99–100%, Slow: 95–99%, Down: 90–95%
     const isGood = app.statusType === 'good';
     const isWarn = app.statusType === 'warn';
 
     const uptime = Array(7).fill(0).map((_, i) => {
       let base, variance;
-      if (isGood)       { base = 99.5; variance = 0.5; }
-      else if (isWarn)  { base = 92.0; variance = 5.0; }
-      else              { base = 65.0; variance = 15.0; }
+      if (isGood)       { base = 99.2; variance = 0.8; }
+      else if (isWarn)  { base = 95.0; variance = 4.0; } // 95 - 99
+      else              { base = 90.0; variance = 5.0; } // 90 - 95
 
       let val = base + (((seed * (i + 1) * 17) % 100) / 100) * variance;
-      // Down: make last 2 days worse
-      if (!isGood && !isWarn && i >= 5) val -= 12;
-      return parseFloat(Math.min(100, Math.max(0, val)).toFixed(1));
+      if (isGood) {
+        val = Math.min(100.0, Math.max(99.0, val));
+      } else if (isWarn) {
+        val = Math.min(99.0, Math.max(95.0, val));
+      } else {
+        val = Math.min(95.0, Math.max(90.0, val));
+      }
+      return parseFloat(val.toFixed(1));
     });
 
-    // Good: 0ΓÇô3 errors, Slow: 5ΓÇô18 errors, Down: 30ΓÇô60 errors, spike at end
+    // Good: 0–3 errors, Slow: 5–18 errors, Down: 30–60 errors, spike at end
     const maxErr = isGood ? 3 : isWarn ? 18 : 60;
     const errors = Array(7).fill(0).map((_, i) => {
       let val = Math.floor(((seed * (i + 3) * 23) % 100) / 100 * maxErr);
@@ -55,8 +60,8 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     return { uptime, errors };
   }, [app.title, app.statusType]);
 
-  // SVG polyline coords: Y-axis 50ΓÇô100 for good/slow, 0ΓÇô100 for down
-  const yMin = app.statusType === 'danger' ? 40 : 85;
+  // SVG polyline coords: Y-axis 85–100 covers 90–100% ranges smoothly
+  const yMin = 85;
   const yMax = 100;
   const yRange = yMax - yMin;
 
@@ -94,9 +99,6 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "12px", padding: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Uptime & Performance (Last 7 Days)</h3>
-              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Min: <strong style={{ color }}>{Math.min(...uptime)}%</strong> &nbsp;|&nbsp; Max: <strong style={{ color }}>{Math.max(...uptime)}%</strong>
-              </span>
             </div>
 
             {/* SVG Line Chart */}

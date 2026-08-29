@@ -663,7 +663,7 @@ export const roleMockData = {
       },
       tabs: [
         { id: "overview", label: "Overview", active: true },
-        { id: "agent_resolve", label: "Agent Resolve", badge: 2 },
+        { id: "agent_resolve", label: "Agent Resolve", badge: 0 },
         { id: "vulnerabilities", label: "Vulnerabilities", badge: 3 },
         { id: "insights", label: "Insights", badge: 4 },
       ],
@@ -671,10 +671,7 @@ export const roleMockData = {
         agent_resolve: {
           title: "AI Agent Resolve & Automated Executions",
           sub: "Log of auto-resolve tickets and agent-resolved support cases",
-          items: [
-            { id: "arb1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Batch Job Auto-Restart" },
-            { id: "arb2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Enrollment Batch Resume" },
-          ],
+          items: [],
         },
         vulnerabilities: {
           title: "AMS Vulnerabilities & Security Findings",
