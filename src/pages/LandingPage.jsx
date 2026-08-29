@@ -888,9 +888,15 @@ export default function LandingPage() {
                     "Tester": [{ label: "PASS RATE", value: "96.8%", color: "var(--cyan)" }, { label: "API COVERAGE", value: "94.5%", color: "#50c878" }],
                   },
                   "AI for AMS": {
-                    "Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "Support Engineer": [
+                      { label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" },
+                      { label: "FTRDR", value: "99.5%", color: "#50c878", tooltip: "First Time Right Delivery Rate — Percentage of tickets resolved accurately on the first attempt without rework" }
+                    ],
                     "Software Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "PATCH SUCCESS", value: "98.8%", color: "var(--cyan)" }],
-                    "L1 Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "L1 Support Engineer": [
+                      { label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" },
+                      { label: "FTRDR", value: "99.5%", color: "#50c878", tooltip: "First Time Right Delivery Rate — Percentage of tickets resolved accurately on the first attempt without rework" }
+                    ],
                     "L2 Support Engineer": [{ label: "RCA CONFIDENCE", value: "92%", color: "var(--cyan)" }, { label: "SLA REMAINING", value: "2h 45m", color: "var(--gold)" }],
                     "L3 Support Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "ZERO-DAY VULNS", value: "0", color: "var(--cyan)" }],
                     "L4 Support Engineer": [{ label: "VENDOR SLA", value: "99.9%", color: "#50c878" }, { label: "COST VARIANCE", value: "-4.2%", color: "var(--cyan)" }],
@@ -903,6 +909,7 @@ export default function LandingPage() {
                 return stats.map((s) => (
                   <div
                     key={s.label}
+                    className={s.tooltip ? "ftrdr-card-wrapper" : ""}
                     style={{
                       background: "var(--surface-card)",
                       border: "1px solid var(--border)",
@@ -912,6 +919,7 @@ export default function LandingPage() {
                       display: "flex",
                       flexDirection: "column",
                       gap: "2px",
+                      position: "relative",
                     }}
                   >
                     <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -920,6 +928,15 @@ export default function LandingPage() {
                     <span style={{ fontSize: "22px", fontWeight: "800", color: s.color, lineHeight: 1.1 }}>
                       {s.value}
                     </span>
+                    {s.tooltip && (
+                      <div className="ftrdr-tooltip-popup">
+                        <div className="ftrdr-tooltip-title">First Time Right Delivery Rate</div>
+                        <div className="ftrdr-tooltip-body">
+                          Percentage of tickets resolved accurately<br />
+                          on the first attempt without rework.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ));
               })()}
