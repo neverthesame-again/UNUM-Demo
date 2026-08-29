@@ -66,6 +66,8 @@ export default function LandingPage() {
   const [hitlItems, setHitlItems] = useState(HITL_SOURCE_ITEMS);
   const [hitlResolvedItems, setHitlResolvedItems] = useState([]); // items moved to agent_resolve tab after resolution
   const [hitlSourceItem, setHitlSourceItem] = useState(null); // tracks which HITL card opened the modal
+  const [metricToggle, setMetricToggle] = useState("AUTO-RESOLVED"); // "AUTO-RESOLVED" or "FTRDR"
+
 
 
   // Application Workspaces States for AD Developer
@@ -916,7 +918,7 @@ export default function LandingPage() {
             <div>
               <div className="re-summary-title">
                 {selectedArea === "AI for AD" && selectedRole === "Product Owner"
-                  ? `Good morning, Product Owner - ${activeApp.name} Backlog & Sprint 42 Summary`
+                  ? `Good morning, Product Owner`
                   : summary.greeting}
               </div>
               <div className="re-summary-sub">
@@ -935,14 +937,51 @@ export default function LandingPage() {
                     "Tester": [{ label: "PASS RATE", value: "96.8%", color: "var(--cyan)" }, { label: "API COVERAGE", value: "94.5%", color: "#50c878" }],
                   },
                   "AI for AMS": {
-                    "Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
                     "Software Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "PATCH SUCCESS", value: "98.8%", color: "var(--cyan)" }],
-                    "L1 Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
                     "L2 Support Engineer": [{ label: "RCA CONFIDENCE", value: "92%", color: "var(--cyan)" }, { label: "SLA REMAINING", value: "2h 45m", color: "var(--gold)" }],
                     "L3 Support Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "ZERO-DAY VULNS", value: "0", color: "var(--cyan)" }],
                     "L4 Support Engineer": [{ label: "VENDOR SLA", value: "99.9%", color: "#50c878" }, { label: "COST VARIANCE", value: "-4.2%", color: "var(--cyan)" }],
                   },
                 };
+                
+                if (selectedArea === "AI for AMS" && (selectedRole === "Support Engineer" || selectedRole === "L1 Support Engineer")) {
+                  return (
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                       <div style={{ display: "flex", background: "var(--surface-sunken)", borderRadius: "8px", padding: "4px", gap: "4px", border: "1px solid var(--border)" }}>
+                          <button 
+                            onClick={() => setMetricToggle("AUTO-RESOLVED")}
+                            style={{ background: metricToggle === "AUTO-RESOLVED" ? "var(--surface-card)" : "transparent", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", boxShadow: metricToggle === "AUTO-RESOLVED" ? "0 1px 3px rgba(0,0,0,0.1)" : "none", color: metricToggle === "AUTO-RESOLVED" ? "var(--text-primary)" : "var(--text-muted)", transition: "all 0.2s" }}>
+                            Auto-Resolved
+                          </button>
+                          <button 
+                            onClick={() => setMetricToggle("FTRDR")}
+                            style={{ background: metricToggle === "FTRDR" ? "var(--surface-card)" : "transparent", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", boxShadow: metricToggle === "FTRDR" ? "0 1px 3px rgba(0,0,0,0.1)" : "none", color: metricToggle === "FTRDR" ? "var(--text-primary)" : "var(--text-muted)", transition: "all 0.2s" }}>
+                            FTRDR
+                          </button>
+                       </div>
+                       <div
+                          style={{
+                            background: "var(--surface-card)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "10px",
+                            padding: "8px 16px",
+                            minWidth: "130px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "2px",
+                          }}
+                        >
+                          <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                            {metricToggle}
+                          </span>
+                          <span style={{ fontSize: "22px", fontWeight: "800", color: metricToggle === "AUTO-RESOLVED" ? "var(--cyan)" : "var(--gold)", lineHeight: 1.1 }}>
+                            {metricToggle === "AUTO-RESOLVED" ? "64.2%" : "99.5%"}
+                          </span>
+                        </div>
+                    </div>
+                  );
+                }
+
                 const stats = ROLE_STATS[selectedArea]?.[selectedRole];
                 if (!stats) return summary.chips.map((chip) => (
                   <span key={chip.id} className={`re-pill ${chip.type === "warn" || chip.type === "danger" ? "warn" : ""}`}>{chip.text}</span>
