@@ -46,35 +46,7 @@ export default function LandingPage() {
   const [selectedHealthApp, setSelectedHealthApp] = useState(null);
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
-  const [showLineItemModal, setShowLineItemModal] = useState(false);
-  const [selectedLineItem, setSelectedLineItem] = useState(null);
 
-  const handleLineItemClick = (e, title) => {
-    if (e && e.preventDefault) e.preventDefault();
-    let apps = [];
-    if (title === "Quoting") {
-      apps = [
-        { name: "QuoteMaster Pro", status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.8%", desc: "Handles initial quoting estimates." },
-        { name: "RapidQuote API", status: "Degraded", ticketed: "Ticketed (INC-4821)", uptime: "94.2%", desc: "Backend service for rate calculations." }
-      ];
-    } else if (title === "Applications") {
-      apps = [
-        { name: "AppCore Services", status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.9%", desc: "Core application processing engine." }
-      ];
-    } else if (title === "Direct Enrollment") {
-      apps = [
-        { name: "Enrollment Gateway", status: "Healthy", ticketed: "Non-Ticketed", uptime: "100%", desc: "Gateway for direct enrollment." },
-        { name: "Enrollment Sync", status: "Down", ticketed: "Ticketed (INC-4833)", uptime: "88.1%", desc: "Sync service for partner enrollments." }
-      ];
-    } else {
-      apps = [
-        { name: `${title} Service Alpha`, status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.9%", desc: "Primary service component." },
-        { name: `${title} Service Beta`, status: "Healthy", ticketed: "Non-Ticketed", uptime: "99.5%", desc: "Secondary service component." }
-      ];
-    }
-    setSelectedLineItem({ title, apps });
-    setShowLineItemModal(true);
-  };
   const [isBotOpen, setIsBotOpen] = useState(false);
   const [isPrdChatOpen, setIsPrdChatOpen] = useState(false);
   const [prdChatKey, setPrdChatKey] = useState(0);
@@ -1514,7 +1486,7 @@ export default function LandingPage() {
                             }}
                           >
                             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
-                            Human Only
+                            Active
                           </span>
                           <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
                         </a>
@@ -1523,17 +1495,17 @@ export default function LandingPage() {
                         IMPACTS TO:
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#3b82f6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Quoting")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{color: "#3b82f6"}} /> Quoting</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Accuracy:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>99.1%</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Turnaround:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>1.2 hrs</span></div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#3b82f6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Applications")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{color: "#3b82f6"}} /> Applications</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Application Success:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>99.6%</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Avg. Application Time:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>6.3 mins</span></div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#3b82f6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Direct Enrollment")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{color: "#3b82f6"}} /> Direct Enrollment</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollment Throughput:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>100%</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollment Leakage:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>0.6%</span></div>
@@ -1575,23 +1547,23 @@ export default function LandingPage() {
                             }}
                           >
                             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
-                            Human Only
+                            Active
                           </span>
                           <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
                         </a>
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#10b981"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Quoting")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{color: "#10b981"}} /> Quoting</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Win Rate:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>34.7%</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Avg. Premium Quoted:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$1,250</span></div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#10b981"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Applications")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{color: "#10b981"}} /> Applications</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Application Conversion:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>42.8%</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Abandonment Rate:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>12.3%</span></div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#10b981"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Direct Enrollment")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{color: "#10b981"}} /> Direct Enrollment</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Direct to Bind Rate:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>62.1%</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Enrollment:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$42.18</span></div>
@@ -1633,23 +1605,23 @@ export default function LandingPage() {
                             }}
                           >
                             <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
-                            Human Only
+                            Active
                           </span>
                           <Icon name="externalLink" size={14} style={{ color: "#10b981" }} />
                         </a>
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#8b5cf6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Quoting")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{color: "#8b5cf6"}} /> Quoting</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Requests:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>24,812</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Quote:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$18.73</span></div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#8b5cf6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Applications")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{color: "#8b5cf6"}} /> Applications</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Applications Started:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>18,942</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per App:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$37.61</span></div>
                         </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", cursor: "pointer", transition: "all 0.2s ease", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }} onMouseEnter={(e)=>e.currentTarget.style.borderColor="#8b5cf6"} onMouseLeave={(e)=>e.currentTarget.style.borderColor="var(--border)"} onClick={(e) => handleLineItemClick(e, "Direct Enrollment")}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{color: "#8b5cf6"}} /> Direct Enrollment</div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollments:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>6,531</span></div>
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Enrollment:</span> <span style={{color: "#10b981", fontWeight: "600", fontSize: "11px"}}>$42.18</span></div>
@@ -1658,7 +1630,7 @@ export default function LandingPage() {
                     </div>
 
                     {/* Customer Service (Orange) */}
-                    <a href="#" onClick={(e) => handleLineItemClick(e, "Customer Service")}
+                    <div
                       style={{
                         background: "rgba(249, 115, 22, 0.05)",
                         border: "1px solid rgba(249, 115, 22, 0.2)",
@@ -1670,7 +1642,6 @@ export default function LandingPage() {
                         justifyContent: "space-between",
                         fontWeight: "700",
                         fontSize: "13px",
-                        textDecoration: "none",
                         width: "100%",
                       }}
                     >
@@ -1679,10 +1650,10 @@ export default function LandingPage() {
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Customer Service</span>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </a>
+                    </div>
 
                     {/* Finance & Compliance (Orange/Brown) */}
-                    <a href="#" onClick={(e) => handleLineItemClick(e, "Finance & Compliance")}
+                    <div
                       style={{
                         background: "rgba(217, 119, 6, 0.05)",
                         border: "1px solid rgba(217, 119, 6, 0.2)",
@@ -1694,7 +1665,6 @@ export default function LandingPage() {
                         justifyContent: "space-between",
                         fontWeight: "700",
                         fontSize: "13px",
-                        textDecoration: "none",
                         width: "100%",
                       }}
                     >
@@ -1703,10 +1673,10 @@ export default function LandingPage() {
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Finance & Compliance</span>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </a>
+                    </div>
                     
                     {/* Operations (Teal) */}
-                    <a href="#" onClick={(e) => handleLineItemClick(e, "Operations")}
+                    <div
                       style={{
                         background: "rgba(20, 184, 166, 0.05)",
                         border: "1px solid rgba(20, 184, 166, 0.2)",
@@ -1718,7 +1688,6 @@ export default function LandingPage() {
                         justifyContent: "space-between",
                         fontWeight: "700",
                         fontSize: "13px",
-                        textDecoration: "none",
                         width: "100%",
                       }}
                     >
@@ -1727,10 +1696,10 @@ export default function LandingPage() {
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Operations</span>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </a>
+                    </div>
                     
                     {/* Legal & Risk (Blue) */}
-                    <a href="#" onClick={(e) => handleLineItemClick(e, "Legal & Risk")}
+                    <div
                       style={{
                         background: "rgba(56, 189, 248, 0.05)",
                         border: "1px solid rgba(56, 189, 248, 0.2)",
@@ -1742,7 +1711,6 @@ export default function LandingPage() {
                         justifyContent: "space-between",
                         fontWeight: "700",
                         fontSize: "13px",
-                        textDecoration: "none",
                         width: "100%",
                       }}
                     >
@@ -1751,7 +1719,7 @@ export default function LandingPage() {
                         <span style={{ fontWeight: "700", fontSize: "14px" }}>Legal & Risk</span>
                       </div>
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
-                    </a>
+                    </div>
 
                   </div>
                 </div>
@@ -3168,48 +3136,7 @@ export default function LandingPage() {
           </div>
         </div>
       )}
-      {/* Detailed Line Item Information Modal */}
-      {showLineItemModal && (
-        <Modal
-          isOpen={showLineItemModal}
-          onClose={() => setShowLineItemModal(false)}
-          title={selectedLineItem?.title ? `${selectedLineItem.title} - Applications` : "Details"}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: "16px", padding: "10px 0" }}>
-            {selectedLineItem?.apps?.map((app, idx) => (
-              <div key={idx} style={{
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "8px",
-                padding: "16px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px"
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontWeight: "600", fontSize: "16px", color: "var(--text-primary)" }}>{app.name}</span>
-                  <span style={{ 
-                    fontSize: "12px", 
-                    padding: "4px 8px", 
-                    borderRadius: "12px",
-                    background: app.status === "Healthy" ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
-                    color: app.status === "Healthy" ? "#10b981" : "#ef4444"
-                  }}>
-                    {app.status}
-                  </span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "13px", color: "var(--text-secondary)" }}>
-                  <span>Ticket Status: <strong style={{color: "var(--text-primary)"}}>{app.ticketed}</strong></span>
-                  <span>Uptime: <strong style={{color: "var(--text-primary)"}}>{app.uptime}</strong></span>
-                </div>
-                <div style={{ fontSize: "13px", color: "var(--text-secondary)", marginTop: "4px" }}>
-                  {app.desc}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Modal>
-      )}
+
     </>
   );
 }
