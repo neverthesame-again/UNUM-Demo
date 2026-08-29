@@ -22,6 +22,8 @@ import {
 import { WorkspacePanel } from "../components/WorkspacePanel";
 import { domainDetailService } from "../services/domain-detail.service";
 import { amsOverviewData } from "../data/mock/landing-mock";
+import { ActionItemDetailDrawer } from "../components/ActionItemDetailDrawer";
+
 
 // Controls visibility of the Chatbot floating circle based on business area and role.
 // Enabled for Support Engineer & Software Engineer under AI for AMS only.
@@ -49,6 +51,21 @@ export default function LandingPage() {
   const [isBotOpen, setIsBotOpen] = useState(false);
   const [isPrdChatOpen, setIsPrdChatOpen] = useState(false);
   const [prdChatKey, setPrdChatKey] = useState(0);
+  const [selectedActionItem, setSelectedActionItem] = useState(null);
+
+  // The 3 deterministic tickets that live in Human-in-The-Loop.
+  // They are NOT in the agent_resolve tab initially — they move there only after resolution.
+  const HITL_SOURCE_ITEMS = [
+    { id: "ar1", num: "Member Portal Auth & Email Service", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar2", num: "Member Registration & Data Validation Engine", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar3", num: "Member Registration Engine & Account Identity Mesh", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+  ];
+
+  // Human in The Loop — Agent Resolve flow
+  const [hitlItems, setHitlItems] = useState(HITL_SOURCE_ITEMS);
+  const [hitlResolvedItems, setHitlResolvedItems] = useState([]); // items moved to agent_resolve tab after resolution
+  const [hitlSourceItem, setHitlSourceItem] = useState(null); // tracks which HITL card opened the modal
+
 
   // Application Workspaces States for AD Developer
   const [workspaces, setWorkspaces] = useState([]);
@@ -495,6 +512,7 @@ export default function LandingPage() {
     fetchData();
   }, [selectedArea, selectedRole]);
 
+
   const handleAreaChange = (newArea) => {
     sessionStorage.removeItem("landing_active_tab");
     sessionStorage.removeItem("landing_selected_workspace");
@@ -515,6 +533,27 @@ export default function LandingPage() {
     setActiveTab(tabId);
     sessionStorage.setItem("landing_active_tab", tabId);
   };
+
+  const handleHitlAgentResolve = (item) => {
+    setHitlSourceItem(item);
+    startDeterministicAutoResolve(item); // item is already an agent_resolve item with correct id/num/subject/desc
+  };
+
+  // When the deterministic chat modal resolves AND it was triggered from a HITL card,
+  // remove that card from the HITL list, push it (as resolved) into the agent_resolve tab,
+  // and navigate there.
+  useEffect(() => {
+    if (deterministicIsResolved && hitlSourceItem) {
+      setHitlItems((prev) => prev.filter((i) => i.id !== hitlSourceItem.id));
+      setHitlResolvedItems((prev) => [
+        { ...hitlSourceItem, isResolved: true, status: "Resolved", statusType: "good" },
+        ...prev,
+      ]);
+      setHitlSourceItem(null);
+      handleTabClick("agent_resolve");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deterministicIsResolved]);
 
   const handleSetSelectedWorkspace = (workspace) => {
     setSelectedWorkspace(workspace);
@@ -690,7 +729,15 @@ export default function LandingPage() {
       displayTabData = { ...displayTabData, items: currentAppData.acceptance_criteria };
     }
   }
+  // Prepend HITL-resolved items at the top of the agent_resolve tab when they arrive
+  if (activeTab === "agent_resolve" && displayTabData && hitlResolvedItems.length > 0) {
+    displayTabData = {
+      ...displayTabData,
+      items: [...hitlResolvedItems, ...(displayTabData.items || [])],
+    };
+  }
   const activeTabData = displayTabData;
+
 
   const displayTabs = tabs.filter((t) => {
     if (isPOPage) {
@@ -1420,7 +1467,9 @@ export default function LandingPage() {
         {activeTab === "overview" && (
 
           selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
+            <>
             <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
+
               {/* 1. Middle 3 Columns Section */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
                 {/* Column 1: Observability */}
@@ -1639,7 +1688,7 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-                {/* Column 1: Needs My Action */}
+                {/* Column 1: Human Only */}
                 <div
                   style={{
                     background: "var(--surface-card)",
@@ -1686,13 +1735,25 @@ export default function LandingPage() {
                     {amsOverviewData.needsMyAction.items.map((item) => (
                       <div
                         key={item.id}
+                        onClick={() => setSelectedActionItem({ ...item, _accentColor: "#2563eb" })}
                         style={{
                           background: "rgba(255, 255, 255, 0.03)",
                           border: "1px solid var(--border)",
                           borderRadius: "8px",
                           padding: "10px 12px",
+                          cursor: "pointer",
+                          transition: "background 0.15s, border-color 0.15s",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "rgba(37,99,235,0.1)";
+                          e.currentTarget.style.borderColor = "#2563eb";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                          e.currentTarget.style.borderColor = "var(--border)";
                         }}
                       >
+
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
                           <span
                             style={{
@@ -1719,7 +1780,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Column 2: Waiting for My Approval */}
+                {/* Column 2: Human in The Loop */}
                 <div
                   style={{
                     background: "var(--surface-card)",
@@ -1759,48 +1820,103 @@ export default function LandingPage() {
                         fontSize: "12px",
                       }}
                     >
-                      {amsOverviewData.waitingForMyApproval.badge}
+                      {hitlItems.length}
                     </span>
                   </div>
-                  <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
-                    {amsOverviewData.waitingForMyApproval.items.map((item) => (
-                      <div
-                        key={item.id}
-                        style={{
-                          background: "rgba(255, 255, 255, 0.03)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "8px",
-                          padding: "10px 12px",
-                        }}
-                      >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                          <span
+                  <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+                    {hitlItems.length === 0 ? (
+
+                      <div style={{ textAlign: "center", padding: "32px 16px", color: "var(--text-muted)", fontSize: "13px" }}>
+                        <Icon name="check-circle" size={32} style={{ marginBottom: "8px", color: "#16a34a", display: "block", margin: "0 auto 8px" }} />
+                        <div style={{ fontWeight: "700", color: "#16a34a", marginBottom: "4px" }}>All items resolved!</div>
+                        <div>All tickets have been sent to Agent Resolve.</div>
+                      </div>
+                    ) : (
+                      hitlItems.map((item) => (
+                        <div
+                          key={item.id}
+                          style={{
+                            background: "var(--surface-card)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "10px",
+                            padding: "14px 14px 12px",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          }}
+                        >
+                          {/* Title row + Action Required badge */}
+                          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
+                            <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary)", lineHeight: "1.4", flex: 1 }}>
+                              {item.subject}
+                            </div>
+                            <span
+                              style={{
+                                flexShrink: 0,
+                                background: "#fff7ed",
+                                color: "#c2410c",
+                                border: "1px solid #fed7aa",
+                                borderRadius: "20px",
+                                padding: "2px 10px",
+                                fontSize: "10px",
+                                fontWeight: "700",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {item.status}
+                            </span>
+                          </div>
+
+                          {/* Description */}
+                          <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.5" }}>
+                            {item.desc}
+                          </div>
+
+
+                          {/* Divider */}
+                          <div style={{ height: "1px", background: "var(--border)" }} />
+
+                          {/* Agent Resolve button — opens deterministic chat modal */}
+                          <button
+                            onClick={() => handleHitlAgentResolve(item)}
                             style={{
-                              background: "#c2410c",
-                              color: "#ffffff",
-                              fontSize: "10px",
+                              alignSelf: "flex-start",
+                              background: "linear-gradient(135deg, #6d28d9, #4f46e5)",
+                              color: "#fff",
+                              border: "none",
+                              borderRadius: "8px",
+                              padding: "7px 14px",
+                              fontSize: "12px",
                               fontWeight: "700",
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              letterSpacing: "0.5px",
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
                             }}
                           >
-                            {item.tag}
-                          </span>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", fontStyle: "italic" }}>
-                            {item.meta}
-                          </span>
+                            <Icon name="zap" size={13} />
+                            Agent Resolve
+                          </button>
                         </div>
-                        <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: "500", lineHeight: "1.4" }}>
-                          {item.text}
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
+
                   </div>
                 </div>
               </div>
             </div>
+
+
+            {/* Action Item Detail Drawer */}
+            <ActionItemDetailDrawer
+              item={selectedActionItem}
+              accentColor={selectedActionItem?._accentColor ?? "#2563eb"}
+              onClose={() => setSelectedActionItem(null)}
+            />
+            </>
           ) : (
+
+
             <section className="re-grid fade-in">
               {/* Panel 1: State of Environment */}
               <article className="re-panel">
@@ -2737,6 +2853,10 @@ export default function LandingPage() {
                 0%, 80%, 100% { transform: translateY(0); }
                 40% { transform: translateY(-4px); }
               }
+              @keyframes spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+              }
               .typing-dot {
                 width: 6px;
                 height: 6px;
@@ -2748,6 +2868,7 @@ export default function LandingPage() {
               .typing-dot:nth-child(1) { animation-delay: -0.32s; }
               .typing-dot:nth-child(2) { animation-delay: -0.16s; }
             `}</style>
+
 
             {/* Header */}
             <div
