@@ -1281,6 +1281,9 @@ export default function LandingPage() {
       if (t.id === "agent_resolve") {
         return { ...t, label: "Agent Resolved", badge: 12 };
       }
+      if (t.id === "insights") {
+        return { ...t, badge: 8 };
+      }
       return t;
     });
 
@@ -3920,4 +3923,3 @@ export default function LandingPage() {
     </>
   );
 }
-
