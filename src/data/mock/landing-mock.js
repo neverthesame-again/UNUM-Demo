@@ -665,7 +665,7 @@ export const roleMockData = {
         { id: "overview", label: "Overview", active: true },
         { id: "agent_resolve", label: "Agent Resolve", badge: 0 },
         { id: "vulnerabilities", label: "Vulnerabilities", badge: 3 },
-        { id: "insights", label: "Insights", badge: 4 },
+        { id: "insights", label: "Insights", badge: 8 },
       ],
       tabData: {
         agent_resolve: {
@@ -753,7 +753,7 @@ export const roleMockData = {
         { id: "code_hotfixes", label: "Hotfixes & Patches", badge: 4 },
         { id: "rca_investigations", label: "RCA Workbench", badge: 2 },
         { id: "architecture_reviews", label: "Architecture Reviews", badge: 3 },
-        { id: "insights", label: "Insights", badge: 4 },
+        { id: "insights", label: "Insights", badge: 8 },
       ],
       tabData: {
         code_hotfixes: {
