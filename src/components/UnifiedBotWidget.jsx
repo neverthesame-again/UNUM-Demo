@@ -91,7 +91,7 @@ function ensureLinksNewTab(html) {
 function formatMarkdown(text) {
   if (!text) return "";
   if (typeof window !== "undefined" && window.marked?.parse) {
-    try { return ensureLinksNewTab(window.marked.parse(text)); } catch (_) {}
+    try { return ensureLinksNewTab(window.marked.parse(text)); } catch (_) { }
   }
   let escaped = escapeHtml(text);
   escaped = escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
@@ -131,7 +131,7 @@ function toGeminiHistory(messages) {
  *   selectedRole {string}  – the active AD role from LandingPage
  *   data         {object}  – the live role data object from LandingPage (dynamic)
  */
-export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange }) {
+export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange, hideFloat = false }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = (state) => {
@@ -147,7 +147,7 @@ export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange }) {
 
   // Load marked.js for markdown rendering AND chatbot.css for styles
   useEffect(() => {
-    loadScript(MARKED_SRC).catch(() => {});
+    loadScript(MARKED_SRC).catch(() => { });
     // Load chatbot.css stylesheet (same one used by the old chatbot component)
     const href = "/chatbot/chatbot.css";
     if (!document.querySelector(`link[href="${href}"]`)) {
@@ -275,7 +275,7 @@ export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange }) {
   return (
     <>
       {/* ── Floating Trigger Button ── */}
-      {!isOpen && (
+      {!isOpen && !hideFloat && (
         <div
           className="ad-bot-float"
           onClick={() => toggleOpen(true)}

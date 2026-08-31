@@ -1564,11 +1564,13 @@ export default function LandingPage() {
                         </button>
                         <button
                           onClick={() => setMetricToggle("FTRDR")}
+                          title="First Time Right Delivery Rate — Percentage of tickets resolved on first attempt without rework"
                           style={{ background: metricToggle === "FTRDR" ? "var(--surface-card)" : "transparent", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", boxShadow: metricToggle === "FTRDR" ? "0 1px 3px rgba(0,0,0,0.1)" : "none", color: metricToggle === "FTRDR" ? "var(--text-primary)" : "var(--text-muted)", transition: "all 0.2s" }}>
                           FTRDR
                         </button>
                       </div>
                       <div
+                        className={metricToggle === "FTRDR" ? "ftrdr-card-wrapper" : ""}
                         style={{
                           background: "var(--surface-card)",
                           border: "1px solid var(--border)",
@@ -1578,14 +1580,24 @@ export default function LandingPage() {
                           display: "flex",
                           flexDirection: "column",
                           gap: "2px",
+                          position: "relative",
+                          cursor: metricToggle === "FTRDR" ? "help" : "default",
                         }}
                       >
                         <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                           {metricToggle}
                         </span>
-                        <span style={{ fontSize: "22px", fontWeight: "800", color: metricToggle === "AUTO-RESOLVED" ? "var(--cyan)" : "var(--gold)", lineHeight: 1.1 }}>
+                        <span style={{ fontSize: "22px", fontWeight: "800", color: metricToggle === "AUTO-RESOLVED" ? "var(--cyan)" : "#50c878", lineHeight: 1.1 }}>
                           {metricToggle === "AUTO-RESOLVED" ? "64.2%" : "99.5%"}
                         </span>
+                        {metricToggle === "FTRDR" && (
+                          <div className="ftrdr-tooltip-popup">
+                            <div className="ftrdr-tooltip-title">First Time Right Delivery Rate</div>
+                            <div className="ftrdr-tooltip-body">
+                              Percentage of tickets or requests resolved on the first attempt without rework.
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   );
@@ -3176,12 +3188,23 @@ export default function LandingPage() {
 
       {/* Unified Bot Widget - shown for AMS Support / Software Engineers */}
       {isChatbotEnabled(selectedArea, selectedRole) && data && (
-        <UnifiedBotWidget selectedRole={selectedRole} data={data} domain={selectedArea} onOpenChange={setIsBotOpen} />
+        <UnifiedBotWidget
+          selectedRole={selectedRole}
+          data={data}
+          domain={selectedArea}
+          onOpenChange={setIsBotOpen}
+          hideFloat={Boolean(selectedActionItem || showPrdModal || showAppHealthModal || showClaimsModal || selNexusOpen || hitlSourceItem || hitlIgnioSourceItem)}
+        />
       )}
 
       {/* AI for AD Role Bot Widget - shown when "AI for AD" domain is selected */}
       {selectedArea === "AI for AD" && data && (
-        <AdRoleBotWidget selectedRole={selectedRole} data={data} onOpenChange={setIsBotOpen} />
+        <AdRoleBotWidget
+          selectedRole={selectedRole}
+          data={data}
+          onOpenChange={setIsBotOpen}
+          hideFloat={Boolean(selectedActionItem || showPrdModal || showAppHealthModal || showClaimsModal || selNexusOpen || hitlSourceItem || hitlIgnioSourceItem)}
+        />
       )}
 
       {/* SEL Nexus Floating Button & Popups for L3 & L4 Support Engineer, or Developer / Product Owner in AI for AD */}

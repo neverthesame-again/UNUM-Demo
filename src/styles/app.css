@@ -6646,3 +6646,9 @@
 [data-theme='light'] .ftrdr-tooltip-body {
   color: #475569; /* Crisp Dark Slate Text for Light Theme */
 }
+
+/* Hide floating AI Assistant button when any right-side drawer or modal overlay is open */
+body:has(.action-drawer-panel) .ad-bot-float,
+body:has(.modal-overlay) .ad-bot-float {
+  display: none !important;
+}
