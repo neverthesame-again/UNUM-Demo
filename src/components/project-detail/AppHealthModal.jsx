@@ -20,48 +20,42 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
   const color = getColor(app.statusType);
   const bg = getBg(app.statusType);
 
-  // Generate deterministic data based on app name + strictly correlated to health
-  const { uptime, errors } = useMemo(() => {
+  // Generate deterministic data based on app name
+  // Requirement: Most uptime data > 99.5%, exactly 1 day < 99.5% (red), and low error counts (~3-5 total errors).
+  const { uptime, errors, dipIndex } = useMemo(() => {
     let hash = 0;
     for (let i = 0; i < app.title.length; i++) {
       hash = app.title.charCodeAt(i) + ((hash << 5) - hash);
     }
     const seed = Math.abs(hash);
 
-    // Good: 99–100%, Slow: 95–99%, Down: 90–95%
-    const isGood = app.statusType === 'good';
-    const isWarn = app.statusType === 'warn';
+    // Pick 1 specific day out of 7 (e.g. index 2, 3, 4, or 5) to dip < 99.5%
+    const dipIndex = (seed % 4) + 2; 
 
     const uptime = Array(7).fill(0).map((_, i) => {
-      let base, variance;
-      if (isGood)       { base = 99.2; variance = 0.8; }
-      else if (isWarn)  { base = 95.0; variance = 4.0; } // 95 - 99
-      else              { base = 90.0; variance = 5.0; } // 90 - 95
-
-      let val = base + (((seed * (i + 1) * 17) % 100) / 100) * variance;
-      if (isGood) {
-        val = Math.min(100.0, Math.max(99.0, val));
-      } else if (isWarn) {
-        val = Math.min(99.0, Math.max(95.0, val));
-      } else {
-        val = Math.min(95.0, Math.max(90.0, val));
+      if (i === dipIndex) {
+        // Only this day is < 99.5% (e.g. 98.4%)
+        const dipVal = 98.0 + ((seed * 13) % 12) / 10;
+        return parseFloat(dipVal.toFixed(1));
       }
-      return parseFloat(val.toFixed(1));
+      // All other 6 days are strictly > 99.5% (e.g., 99.6% to 99.9%)
+      const normalVal = 99.6 + (((seed * (i + 1) * 7) % 4) / 10);
+      return parseFloat(Math.min(99.9, normalVal).toFixed(1));
     });
 
-    // Good: 0–3 errors, Slow: 5–18 errors, Down: 30–60 errors, spike at end
-    const maxErr = isGood ? 3 : isWarn ? 18 : 60;
+    // Low error count so app feels like it's running great
     const errors = Array(7).fill(0).map((_, i) => {
-      let val = Math.floor(((seed * (i + 3) * 23) % 100) / 100 * maxErr);
-      if (!isGood && !isWarn && i >= 5) val += 25;
-      return val;
+      if (i === dipIndex) {
+        return 2 + (seed % 2); // 2 or 3 errors on the dip day
+      }
+      return (seed + i) % 2; // 0 or 1 error on normal days
     });
 
-    return { uptime, errors };
-  }, [app.title, app.statusType]);
+    return { uptime, errors, dipIndex };
+  }, [app.title]);
 
-  // SVG polyline coords: Y-axis 85–100 covers 90–100% ranges smoothly
-  const yMin = 85;
+  // SVG coordinates setup for Uptime line graph: Y-axis 95–100%
+  const yMin = 95;
   const yMax = 100;
   const yRange = yMax - yMin;
 
@@ -71,7 +65,8 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     return `${x},${y}`;
   }).join(' ');
 
-  const maxErrGlobal = Math.max(10, ...errors);
+  const totalErrors = errors.reduce((a, b) => a + b, 0);
+  const maxErrGlobal = Math.max(5, ...errors);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`App Health: ${app.title}`}>
@@ -99,6 +94,9 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "12px", padding: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Uptime & Performance (Last 7 Days)</h3>
+              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                Target: <strong style={{ color: "#10b981" }}>&gt;99.5%</strong>
+              </span>
             </div>
 
             {/* SVG Line Chart */}
@@ -116,28 +114,42 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                 {/* Gradient fill under line */}
                 <defs>
                   <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={color} stopOpacity="0.25" />
-                    <stop offset="100%" stopColor={color} stopOpacity="0.01" />
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity="0.01" />
                   </linearGradient>
                 </defs>
                 <polygon
                   points={`0,100 ${points} 100,100`}
                   fill="url(#areaGrad)"
                 />
-                <polyline
-                  fill="none"
-                  stroke={color}
-                  strokeWidth="2"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  points={points}
-                />
+
+                {/* Individual line segments - Red if connecting to/from dip day (<99.5%), Green otherwise */}
+                {uptime.slice(0, 6).map((val, i) => {
+                  const nextVal = uptime[i + 1];
+                  const x1 = (i / 6) * 100;
+                  const y1 = 100 - (Math.max(0, val - yMin) / yRange) * 100;
+                  const x2 = ((i + 1) / 6) * 100;
+                  const y2 = 100 - (Math.max(0, nextVal - yMin) / yRange) * 100;
+                  const isRedSegment = val < 99.5 || nextVal < 99.5;
+                  const segColor = isRedSegment ? "#ef4444" : "#10b981";
+
+                  return (
+                    <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+                      stroke={segColor} strokeWidth="2.5" strokeLinecap="round" />
+                  );
+                })}
+
+                {/* Circles at data points */}
                 {uptime.map((val, i) => {
                   const cx = (i / 6) * 100;
                   const cy = 100 - (Math.max(0, val - yMin) / yRange) * 100;
+                  const isRed = val < 99.5;
+                  const ptColor = isRed ? "#ef4444" : "#10b981";
                   return (
-                    <circle key={i} cx={cx} cy={cy} r="2.5"
-                      fill="#1e293b" stroke={color} strokeWidth="1.8" />
+                    <g key={i}>
+                      <circle cx={cx} cy={cy} r={isRed ? "4" : "3"}
+                        fill={isRed ? "#ef4444" : "#1e293b"} stroke={ptColor} strokeWidth="2" />
+                    </g>
                   );
                 })}
               </svg>
@@ -145,12 +157,26 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
 
             {/* X-axis labels */}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-              {uptime.map((val, i) => (
-                <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
-                  <span style={{ fontSize: "11px", fontWeight: "600", color }}>{val}%</span>
-                  <span style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "2px" }}>Day {i + 1}</span>
-                </div>
-              ))}
+              {uptime.map((val, i) => {
+                const isRed = val < 99.5;
+                const labelColor = isRed ? "#ef4444" : "#10b981";
+                return (
+                  <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+                    <span style={{
+                      fontSize: "11px", fontWeight: isRed ? "800" : "600", color: labelColor,
+                      background: isRed ? "rgba(239, 68, 68, 0.15)" : "transparent",
+                      padding: isRed ? "2px 6px" : "0",
+                      borderRadius: "6px",
+                      display: "inline-block"
+                    }}>
+                      {val}%
+                    </span>
+                    <span style={{ fontSize: "10px", color: isRed ? "#ef4444" : "var(--text-muted)", marginTop: "2px", fontWeight: isRed ? "700" : "400" }}>
+                      Day {i + 1}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -158,22 +184,30 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
           <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid var(--border)", borderRadius: "12px", padding: "16px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Error Rate / Incidents (Last 7 Days)</h3>
-              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Total: <strong style={{ color }}>{errors.reduce((a, b) => a + b, 0)} errors</strong>
-              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                  Total: <strong style={{ color: "#10b981" }}>{totalErrors} errors</strong>
+                </span>
+                <span style={{ fontSize: "11px", background: "rgba(16,185,129,0.15)", color: "#10b981", padding: "2px 8px", borderRadius: "10px", fontWeight: "600" }}>
+                  Healthy
+                </span>
+              </div>
             </div>
 
             <div style={{ height: "130px", display: "flex", alignItems: "flex-end", gap: "8px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
               {errors.map((val, i) => {
-                const heightPct = Math.max(val > 0 ? 4 : 0, (val / maxErrGlobal) * 100);
+                const heightPct = Math.max(val > 0 ? 8 : 0, (val / maxErrGlobal) * 100);
+                const isDipDay = i === dipIndex;
+                const barColor = isDipDay ? "#f59e0b" : "#10b981";
+
                 return (
                   <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", alignItems: "center", height: "100%" }}>
                     <div style={{
-                      width: "70%", background: color,
+                      width: "60%", background: barColor,
                       height: `${heightPct}%`,
                       borderRadius: "4px 4px 0 0",
                       opacity: 0.85,
-                      minHeight: val > 0 ? "4px" : "0"
+                      minHeight: val > 0 ? "6px" : "0"
                     }} />
                   </div>
                 );
@@ -184,7 +218,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px" }}>
               {errors.map((val, i) => (
                 <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
-                  <span style={{ fontSize: "11px", fontWeight: "600", color }}>{val}</span>
+                  <span style={{ fontSize: "11px", fontWeight: "600", color: "#10b981" }}>{val}</span>
                   <span style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "2px" }}>Day {i + 1}</span>
                 </div>
               ))}
@@ -205,3 +239,4 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     </Modal>
   );
 };
+
