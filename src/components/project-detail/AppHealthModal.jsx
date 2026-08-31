@@ -29,14 +29,19 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
     }
     const seed = Math.abs(hash);
 
-    // Pick 1 specific day out of 7 (e.g. index 2, 3, 4, or 5) to dip < 99.5%
-    const dipIndex = (seed % 4) + 2; 
+    // If app status is good, all days should be above 99.5% and green. Otherwise, pick 1 day to dip.
+    const dipIndex = app.statusType === 'good' ? -1 : (seed % 4) + 2;
 
     const uptime = Array(7).fill(0).map((_, i) => {
       if (i === dipIndex) {
-        // Only this day is < 99.5% (e.g. 98.4%)
-        const dipVal = 98.0 + ((seed * 13) % 12) / 10;
-        return parseFloat(dipVal.toFixed(1));
+        if (app.statusType === 'warn') {
+          const dipVal = 99.3 + ((seed * 13) % 5) / 10;
+          return parseFloat(dipVal.toFixed(1));
+        } else {
+          // Only this day is < 99.5% (e.g. 98.4%)
+          const dipVal = 98.0 + ((seed * 13) % 12) / 10;
+          return parseFloat(dipVal.toFixed(1));
+        }
       }
       // All other 6 days are strictly > 99.5% (e.g., 99.6% to 99.9%)
       const normalVal = 99.6 + (((seed * (i + 1) * 7) % 4) / 10);
@@ -123,15 +128,18 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                   fill="url(#areaGrad)"
                 />
 
-                {/* Individual line segments - Red if connecting to/from dip day (<99.5%), Green otherwise */}
+                {/* Individual line segments - Highlight if connecting to/from dip day (<99.5%), Green otherwise */}
                 {uptime.slice(0, 6).map((val, i) => {
                   const nextVal = uptime[i + 1];
                   const x1 = (i / 6) * 100;
                   const y1 = 100 - (Math.max(0, val - yMin) / yRange) * 100;
                   const x2 = ((i + 1) / 6) * 100;
                   const y2 = 100 - (Math.max(0, nextVal - yMin) / yRange) * 100;
-                  const isRedSegment = val < 99.5 || nextVal < 99.5;
-                  const segColor = isRedSegment ? "#ef4444" : "#10b981";
+                  const isDipSegment = val < 99.5 || nextVal < 99.5;
+                  let segColor = "#10b981";
+                  if (isDipSegment) {
+                    segColor = app.statusType === 'warn' ? "#f59e0b" : "#ef4444";
+                  }
 
                   return (
                     <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
@@ -143,12 +151,15 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                 {uptime.map((val, i) => {
                   const cx = (i / 6) * 100;
                   const cy = 100 - (Math.max(0, val - yMin) / yRange) * 100;
-                  const isRed = val < 99.5;
-                  const ptColor = isRed ? "#ef4444" : "#10b981";
+                  const isDip = val < 99.5;
+                  let ptColor = "#10b981";
+                  if (isDip) {
+                    ptColor = app.statusType === 'warn' ? "#f59e0b" : "#ef4444";
+                  }
                   return (
                     <g key={i}>
-                      <circle cx={cx} cy={cy} r={isRed ? "4" : "3"}
-                        fill={isRed ? "#ef4444" : "#1e293b"} stroke={ptColor} strokeWidth="2" />
+                      <circle cx={cx} cy={cy} r={isDip ? "4" : "3"}
+                        fill={isDip ? ptColor : "#1e293b"} stroke={ptColor} strokeWidth="2" />
                     </g>
                   );
                 })}
@@ -158,20 +169,25 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
             {/* X-axis labels */}
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               {uptime.map((val, i) => {
-                const isRed = val < 99.5;
-                const labelColor = isRed ? "#ef4444" : "#10b981";
+                const isDip = val < 99.5;
+                let labelColor = "#10b981";
+                let labelBg = "transparent";
+                if (isDip) {
+                  labelColor = app.statusType === 'warn' ? "#f59e0b" : "#ef4444";
+                  labelBg = app.statusType === 'warn' ? "rgba(245, 158, 11, 0.15)" : "rgba(239, 68, 68, 0.15)";
+                }
                 return (
                   <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
                     <span style={{
-                      fontSize: "11px", fontWeight: isRed ? "800" : "600", color: labelColor,
-                      background: isRed ? "rgba(239, 68, 68, 0.15)" : "transparent",
-                      padding: isRed ? "2px 6px" : "0",
+                      fontSize: "11px", fontWeight: isDip ? "800" : "600", color: labelColor,
+                      background: labelBg,
+                      padding: isDip ? "2px 6px" : "0",
                       borderRadius: "6px",
                       display: "inline-block"
                     }}>
                       {val}%
                     </span>
-                    <span style={{ fontSize: "10px", color: isRed ? "#ef4444" : "var(--text-muted)", marginTop: "2px", fontWeight: isRed ? "700" : "400" }}>
+                    <span style={{ fontSize: "10px", color: isDip ? labelColor : "var(--text-muted)", marginTop: "2px", fontWeight: isDip ? "700" : "400" }}>
                       Day {i + 1}
                     </span>
                   </div>
