@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 import { landingPageService } from "../services/landing-page.service";
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { Footer } from "../components/Footer";
@@ -22,6 +23,8 @@ import {
 import { WorkspacePanel } from "../components/WorkspacePanel";
 import { domainDetailService } from "../services/domain-detail.service";
 import { amsOverviewData } from "../data/mock/landing-mock";
+import { ActionItemDetailDrawer } from "../components/ActionItemDetailDrawer";
+
 
 // Controls visibility of the Chatbot floating circle based on business area and role.
 // Enabled for Support Engineer & Software Engineer under AI for AMS only.
@@ -35,7 +38,516 @@ const isChatbotEnabled = (businessArea, role) => {
   );
 };
 
+// ─── Automation Data Grid ────────────────────────────────────────────────────
+const AUTOMATION_DATA = [
+  {
+    "Issue or Task Summary": "Missing product attributes in catalog",
+    "Domain": "Product",
+    "Category": "Data Quality",
+    "Issue Description": "Required product attributes are blank or inconsistent, delaying downstream publishing and analysis.",
+    "Automation Trigger": "Record updated",
+    "Automated Resolution": "Validate required fields, normalize known values, and route only unresolved exceptions for review.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "High",
+    "Automation Readiness": "Ready to Build",
+    "Frequency": "Real time",
+    "Implementation Effort": "Medium",
+    "Business Impact": "Improves catalog completeness and reduces manual data cleanup.",
+    "Success Metric": "Percent of records auto-corrected; attribute completeness rate",
+    "Systems or Data Sources": "Product catalog; master data platform",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Duplicate product records",
+    "Domain": "Product",
+    "Category": "Data Quality",
+    "Issue Description": "Similar product records are created more than once, causing reporting and fulfillment errors.",
+    "Automation Trigger": "New item or record",
+    "Automated Resolution": "Match on product identifiers and similarity rules, merge safe duplicates, and flag uncertain matches.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "High",
+    "Automation Readiness": "Needs Review",
+    "Frequency": "Real time",
+    "Implementation Effort": "High",
+    "Business Impact": "Reduces duplicate SKUs and downstream reconciliation.",
+    "Success Metric": "Duplicate rate; percent merged automatically",
+    "Systems or Data Sources": "Product catalog; ERP",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Stale product documentation",
+    "Domain": "Product",
+    "Category": "Product Operations",
+    "Issue Description": "Product guides and specifications remain active after their review date.",
+    "Automation Trigger": "Scheduled",
+    "Automated Resolution": "Identify overdue documents, notify owners, and move confirmed obsolete content to an archive.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "Medium",
+    "Automation Readiness": "Ready to Build",
+    "Frequency": "Weekly",
+    "Implementation Effort": "Low",
+    "Business Impact": "Keeps customer-facing and internal product content current.",
+    "Success Metric": "Percent reviewed on time; stale document count",
+    "Systems or Data Sources": "SharePoint; product knowledge base",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Product launch checklist gaps",
+    "Domain": "Product",
+    "Category": "Product Operations",
+    "Issue Description": "Launch tasks are missed because checklist completion isn't monitored consistently.",
+    "Automation Trigger": "Threshold reached",
+    "Automated Resolution": "Detect overdue or incomplete launch tasks, assign reminders, and escalate critical blockers.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "Critical",
+    "Automation Readiness": "Candidate",
+    "Frequency": "Daily",
+    "Implementation Effort": "Medium",
+    "Business Impact": "Reduces launch delays and missed readiness activities.",
+    "Success Metric": "On-time launch task completion; blocker age",
+    "Systems or Data Sources": "SharePoint; Planner; Teams",
+    "Human Review Required": "FALSE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Product feedback not categorized",
+    "Domain": "Product",
+    "Category": "Customer Engagement",
+    "Issue Description": "Customer feedback arrives as free text and isn't consistently tagged or routed.",
+    "Automation Trigger": "New item or record",
+    "Automated Resolution": "Classify feedback by theme and sentiment, then route it to the correct product owner.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "Medium",
+    "Automation Readiness": "Candidate",
+    "Frequency": "Real time",
+    "Implementation Effort": "Medium",
+    "Business Impact": "Speeds product insight and closes routing gaps.",
+    "Success Metric": "Classification accuracy; routing time",
+    "Systems or Data Sources": "CRM; survey platform; product backlog",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Release notes assembly",
+    "Domain": "Product",
+    "Category": "Reporting",
+    "Issue Description": "Release notes are manually compiled from completed backlog items.",
+    "Automation Trigger": "Manual selection",
+    "Automated Resolution": "Collect selected completed items, format a standard release-note draft, and send it for approval.",
+    "Recommended Mechanism": "Quick Step",
+    "Priority": "Medium",
+    "Automation Readiness": "Ready to Build",
+    "Frequency": "On demand",
+    "Implementation Effort": "Low",
+    "Business Impact": "Shortens release communication preparation.",
+    "Success Metric": "Hours saved per release; edit rate",
+    "Systems or Data Sources": "Azure DevOps; SharePoint",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Unassigned inbound leads",
+    "Domain": "Sales",
+    "Category": "Pipeline Management",
+    "Issue Description": "New leads remain without an owner, increasing response time and loss risk.",
+    "Automation Trigger": "New item or record",
+    "Automated Resolution": "Assign leads using territory, segment, and workload rules, then notify the seller.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "Critical",
+    "Automation Readiness": "Ready to Build",
+    "Frequency": "Real time",
+    "Implementation Effort": "Medium",
+    "Business Impact": "Improves speed to lead and ownership accountability.",
+    "Success Metric": "Median assignment time; unassigned lead count",
+    "Systems or Data Sources": "CRM; territory data; Teams",
+    "Human Review Required": "FALSE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Stalled sales opportunities",
+    "Domain": "Sales",
+    "Category": "Pipeline Management",
+    "Issue Description": "Opportunities remain in the same stage without recent activity.",
+    "Automation Trigger": "Scheduled",
+    "Automated Resolution": "Detect inactivity by stage, create follow-up tasks, and escalate high-value stalled deals.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "High",
+    "Automation Readiness": "Candidate",
+    "Frequency": "Daily",
+    "Implementation Effort": "Low",
+    "Business Impact": "Reduces pipeline leakage and improves forecast hygiene.",
+    "Success Metric": "Stalled opportunity count; stage aging",
+    "Systems or Data Sources": "CRM; Outlook; Planner",
+    "Human Review Required": "FALSE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Quote approval delays",
+    "Domain": "Sales",
+    "Category": "Pricing and Quotes",
+    "Issue Description": "Discounted quotes wait too long for review and approval.",
+    "Automation Trigger": "Approval requested",
+    "Automated Resolution": "Route quotes by discount and deal size, send reminders, and record the final decision.",
+    "Recommended Mechanism": "Approval",
+    "Priority": "Critical",
+    "Automation Readiness": "Ready to Build",
+    "Frequency": "Real time",
+    "Implementation Effort": "Medium",
+    "Business Impact": "Shortens quote turnaround while preserving pricing controls.",
+    "Success Metric": "Approval cycle time; overdue approvals",
+    "Systems or Data Sources": "CPQ; SharePoint Approvals; Teams",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "CRM contact data incomplete",
+    "Domain": "Sales",
+    "Category": "Data Quality",
+    "Issue Description": "Account and contact records are missing required fields or use inconsistent formats.",
+    "Automation Trigger": "Record updated",
+    "Automated Resolution": "Validate email, phone, industry, and territory fields; enrich trusted values and flag exceptions.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "High",
+    "Automation Readiness": "Needs Review",
+    "Frequency": "Real time",
+    "Implementation Effort": "High",
+    "Business Impact": "Improves reconciliation, segmentation, and target quality.",
+    "Success Metric": "CRM completeness score; auto-enrichment rate",
+    "Systems or Data Sources": "CRM; enrichment provider",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Meeting follow-up tasks not created",
+    "Domain": "Sales",
+    "Category": "Customer Engagement",
+    "Issue Description": "Action items from customer meetings aren't consistently captured and assigned.",
+    "Automation Trigger": "New item or record",
+    "Automated Resolution": "Extract agreed actions from meeting notes, create tasks, and notify owners with due dates.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "Medium",
+    "Automation Readiness": "Candidate",
+    "Frequency": "Real time",
+    "Implementation Effort": "Medium",
+    "Business Impact": "Improves follow-through and customer responsiveness.",
+    "Success Metric": "Percent of meetings with follow-up; overdue action count",
+    "Systems or Data Sources": "Teams; Outlook; Planner; CRM",
+    "Human Review Required": "TRUE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  },
+  {
+    "Issue or Task Summary": "Weekly pipeline summary preparation",
+    "Domain": "Sales",
+    "Category": "Reporting",
+    "Issue Description": "Sales managers manually assemble pipeline changes, risks, and next actions.",
+    "Automation Trigger": "Scheduled",
+    "Automated Resolution": "Generate a weekly summary of stage movement, aging, risk, wins, and required follow-ups.",
+    "Recommended Mechanism": "Workflow",
+    "Priority": "Medium",
+    "Automation Readiness": "Ready to Build",
+    "Frequency": "Weekly",
+    "Implementation Effort": "Low",
+    "Business Impact": "Saves manager time and improves pipeline visibility.",
+    "Success Metric": "Preparation hours saved; report delivery rate",
+    "Systems or Data Sources": "CRM; SharePoint; Teams",
+    "Human Review Required": "FALSE",
+    "Item Type": "Item",
+    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+  }
+];
+
+const GRID_COLUMNS = [
+  { key: "Issue or Task Summary", label: "Issue / Task Summary", width: "240px" },
+  { key: "Domain", label: "Domain", width: "100px" },
+  { key: "Category", label: "Category", width: "160px" },
+  { key: "Issue Description", label: "Issue Description", width: "280px" },
+  { key: "Automation Trigger", label: "Automation Trigger", width: "160px" },
+  { key: "Automated Resolution", label: "Automated Resolution", width: "280px" },
+  { key: "Recommended Mechanism", label: "Recommended Mechanism", width: "190px" },
+  { key: "Priority", label: "Priority", width: "100px" },
+  { key: "Automation Readiness", label: "Automation Readiness", width: "175px" },
+  { key: "Frequency", label: "Frequency", width: "110px" },
+  { key: "Implementation Effort", label: "Implementation Effort", width: "185px" },
+  { key: "Business Impact", label: "Business Impact", width: "280px" },
+  { key: "Success Metric", label: "Success Metric", width: "240px" },
+  { key: "Systems or Data Sources", label: "Systems / Data Sources", width: "210px" },
+  { key: "Human Review Required", label: "Human Review Required", width: "185px" },
+  { key: "Item Type", label: "Item Type", width: "110px" },
+  { key: "Path", label: "Path", width: "320px" },
+];
+
+const PRIORITY_STYLES = {
+  Critical: { bg: "rgba(239, 68, 68, 0.12)", color: "#dc2626", border: "rgba(239, 68, 68, 0.25)" },
+  High: { bg: "rgba(249, 115, 22, 0.12)", color: "#d97706", border: "rgba(249, 115, 22, 0.25)" },
+  Medium: { bg: "rgba(202, 138, 4, 0.12)", color: "#b45309", border: "rgba(202, 138, 4, 0.25)" },
+  Low: { bg: "rgba(34, 197, 94, 0.12)", color: "#15803d", border: "rgba(34, 197, 94, 0.25)" },
+};
+
+const READINESS_STYLES = {
+  "Ready to Build": { bg: "rgba(34, 197, 94, 0.12)", color: "#15803d" },
+  "Candidate": { bg: "rgba(99, 102, 241, 0.12)", color: "#4f46e5" },
+  "Needs Review": { bg: "rgba(249, 115, 22, 0.12)", color: "#d97706" },
+};
+
+function AutomationDataGrid() {
+  const { theme } = useTheme();
+  const isLight = theme === "light";
+
+  const [search, setSearch] = useState("");
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState("asc");
+
+  const handleSort = (key) => {
+    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDir("asc"); }
+  };
+
+  const filtered = AUTOMATION_DATA
+    .filter(row => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return Object.values(row).some(v => String(v).toLowerCase().includes(q));
+    })
+    .sort((a, b) => {
+      if (!sortKey) return 0;
+      const av = String(a[sortKey] ?? "").toLowerCase();
+      const bv = String(b[sortKey] ?? "").toLowerCase();
+      return sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+    });
+
+  // CSV download
+  const downloadCSV = () => {
+    const headers = GRID_COLUMNS.map(c => `"${c.label}"`).join(",");
+    const rows = filtered.map(row =>
+      GRID_COLUMNS.map(c => `"${String(row[c.key] ?? "").replace(/"/g, '""')}"`).join(",")
+    );
+    const blob = new Blob([headers + "\n" + rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "automation_grid.csv"; a.click(); URL.revokeObjectURL(url);
+  };
+
+  // Excel download (TSV wrapped as .xls for broad compatibility)
+  const downloadExcel = () => {
+    const headers = GRID_COLUMNS.map(c => c.label).join("\t");
+    const rows = filtered.map(row => GRID_COLUMNS.map(c => String(row[c.key] ?? "")).join("\t"));
+    const blob = new Blob([headers + "\n" + rows.join("\n")], { type: "application/vnd.ms-excel;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "automation_grid.xls"; a.click(); URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "16px" }}>
+      {/* Grid Header Bar */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {/* Search */}
+          <div style={{ position: "relative" }}>
+            <svg style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--text-secondary)", opacity: 0.5, pointerEvents: "none" }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search grid…"
+              style={{
+                background: "var(--surface-input)",
+                border: "1px solid var(--border-input)",
+                borderRadius: "8px",
+                color: "var(--text-primary)",
+                fontSize: "12px",
+                padding: "7px 12px 7px 30px",
+                width: "180px",
+                outline: "none",
+                transition: "border-color 0.2s",
+              }}
+              onFocus={e => e.target.style.borderColor = "var(--border-hover)"}
+              onBlur={e => e.target.style.borderColor = "var(--border-input)"}
+            />
+          </div>
+          {/* CSV Button */}
+          <button
+            onClick={downloadCSV}
+            title="Download as CSV"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(34,197,94,0.12)", border: "1px solid rgba(34,197,94,0.3)", color: isLight ? "#16a34a" : "#4ade80", borderRadius: "8px", padding: "7px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(34,197,94,0.22)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(34,197,94,0.12)"; }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+            CSV
+          </button>
+          {/* Excel Button */}
+          <button
+            onClick={downloadExcel}
+            title="Download as Excel"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(99,102,241,0.12)", border: "1px solid rgba(99,102,241,0.3)", color: isLight ? "#4f46e5" : "#a5b4fc", borderRadius: "8px", padding: "7px 14px", fontSize: "12px", fontWeight: "700", cursor: "pointer", transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(99,102,241,0.22)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(99,102,241,0.12)"; }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M3 15h18M9 3v18" /></svg>
+            Excel
+          </button>
+        </div>
+      </div>
+
+      {/* Data Table */}
+      <div style={{
+        width: "100%",
+        overflowX: "auto",
+        overflowY: "auto",
+        maxHeight: "480px",
+        borderRadius: "12px",
+        border: "1px solid var(--border)",
+        boxShadow: "var(--shadow-card)",
+        background: "var(--surface-card)",
+        scrollbarWidth: "thin",
+        scrollbarColor: "var(--border) transparent",
+      }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "2800px" }}>
+          <thead>
+            <tr style={{ position: "sticky", top: 0, zIndex: 10, background: isLight ? "#f8fafc" : "var(--surface-card)", borderBottom: "1px solid var(--border)" }}>
+              {GRID_COLUMNS.map((col, i) => (
+                <th
+                  key={col.key}
+                  onClick={() => handleSort(col.key)}
+                  style={{
+                    padding: "12px 14px",
+                    textAlign: "left",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: sortKey === col.key ? "var(--cyan)" : "var(--text-secondary)",
+                    borderBottom: "1px solid var(--border)",
+                    borderRight: i < GRID_COLUMNS.length - 1 ? "1px solid var(--border-subtle)" : "none",
+                    cursor: "pointer",
+                    userSelect: "none",
+                    whiteSpace: "nowrap",
+                    minWidth: col.width,
+                    transition: "color 0.15s",
+                    background: sortKey === col.key ? "var(--hover-bg)" : "transparent",
+                  }}
+                >
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                    {col.label}
+                    <span style={{ opacity: sortKey === col.key ? 1 : 0.3, fontSize: "10px" }}>
+                      {sortKey === col.key ? (sortDir === "asc" ? "▲" : "▼") : "⇅"}
+                    </span>
+                  </span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((row, idx) => {
+              const pStyle = PRIORITY_STYLES[row.Priority] || {};
+              const rStyle = READINESS_STYLES[row["Automation Readiness"]] || {};
+              return (
+                <tr
+                  key={idx}
+                  style={{
+                    transition: "background 0.15s",
+                    borderBottom: "1px solid var(--border-subtle)",
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "var(--hover-bg)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                >
+                  {GRID_COLUMNS.map((col, ci) => {
+                    const val = row[col.key] ?? "—";
+                    const isLast = ci === GRID_COLUMNS.length - 1;
+
+                    let cellContent = (
+                      <span style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: "1.5" }}>
+                        {val}
+                      </span>
+                    );
+
+                    if (col.key === "Issue or Task Summary") {
+                      cellContent = (
+                        <span style={{ fontSize: "12px", fontWeight: "600", color: "var(--text-primary)", lineHeight: "1.5" }}>
+                          {val}
+                        </span>
+                      );
+                    } else if (col.key === "Priority") {
+                      cellContent = (
+                        <span style={{ display: "inline-block", background: pStyle.bg, color: pStyle.color, border: `1px solid ${pStyle.border}`, borderRadius: "6px", padding: "2px 8px", fontSize: "11px", fontWeight: "700" }}>
+                          {val}
+                        </span>
+                      );
+                    } else if (col.key === "Automation Readiness") {
+                      cellContent = (
+                        <span style={{ display: "inline-block", background: rStyle.bg, color: rStyle.color, borderRadius: "6px", padding: "2px 8px", fontSize: "11px", fontWeight: "600" }}>
+                          {val}
+                        </span>
+                      );
+                    } else if (col.key === "Human Review Required") {
+                      const isTrue = String(val).toUpperCase() === "TRUE";
+                      cellContent = (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", fontSize: "11px", fontWeight: "600", color: isTrue ? "#ea580c" : "#16a34a" }}>
+                          <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: isTrue ? "#ea580c" : "#16a34a", flexShrink: 0 }} />
+                          {isTrue ? "Yes" : "No"}
+                        </span>
+                      );
+                    } else if (col.key === "Domain") {
+                      cellContent = (
+                        <span style={{ display: "inline-block", background: val === "Product" ? "rgba(147, 51, 234, 0.1)" : "rgba(13, 148, 136, 0.1)", color: val === "Product" ? "#7c3aed" : "#0f766e", borderRadius: "6px", padding: "2px 8px", fontSize: "11px", fontWeight: "700" }}>
+                          {val}
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <td
+                        key={col.key}
+                        style={{
+                          padding: "11px 14px",
+                          borderBottom: "1px solid var(--border-subtle)",
+                          borderRight: isLast ? "none" : "1px solid var(--border-subtle)",
+                          verticalAlign: "top",
+                          maxWidth: col.width,
+                        }}
+                      >
+                        {cellContent}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={GRID_COLUMNS.length} style={{ padding: "48px 20px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+                  No results match your search.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "8px" }}>
+        <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+          Showing {filtered.length} of {AUTOMATION_DATA.length} records · Click column headers to sort
+        </span>
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function LandingPage() {
+
   const { user } = useAuth();
   const { showToast } = useToast();
   const [data, setData] = useState(null);
@@ -46,9 +558,31 @@ export default function LandingPage() {
   const [selectedHealthApp, setSelectedHealthApp] = useState(null);
   const [selectedPrdItem, setSelectedPrdItem] = useState(null);
   const [showClaimsModal, setShowClaimsModal] = useState(false);
+
   const [isBotOpen, setIsBotOpen] = useState(false);
   const [isPrdChatOpen, setIsPrdChatOpen] = useState(false);
   const [prdChatKey, setPrdChatKey] = useState(0);
+  const [selectedActionItem, setSelectedActionItem] = useState(null);
+
+  // All tickets that live in Human-in-The-Loop.
+  // They are NOT in the agent_resolve tab initially — they move there only after resolution.
+  const HITL_SOURCE_ITEMS = [
+    { id: "ar1", num: "Member Portal Auth & Email Service", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar2", num: "Member Registration & Data Validation Engine", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar3", num: "Member Registration Engine & Account Identity Mesh", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "arb1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Batch Job Auto-Restart" },
+    { id: "arb2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Enrollment Batch Resume" },
+  ];
+
+  // Human in The Loop — Agent Resolve / Auto Resolve flow
+  const [hitlItems, setHitlItems] = useState(HITL_SOURCE_ITEMS);
+  const [hitlResolvedItems, setHitlResolvedItems] = useState([]); // items moved to agent_resolve tab after resolution
+  const [hitlSourceItem, setHitlSourceItem] = useState(null);       // deterministic HITL card that opened the modal
+  const [hitlIgnioSourceItem, setHitlIgnioSourceItem] = useState(null); // ignio HITL card that opened the modal
+  const [metricToggle, setMetricToggle] = useState("AUTO-RESOLVED"); // "AUTO-RESOLVED" or "FTRDR"
+
+
+
 
   // Application Workspaces States for AD Developer
   const [workspaces, setWorkspaces] = useState([]);
@@ -495,6 +1029,7 @@ export default function LandingPage() {
     fetchData();
   }, [selectedArea, selectedRole]);
 
+
   const handleAreaChange = (newArea) => {
     sessionStorage.removeItem("landing_active_tab");
     sessionStorage.removeItem("landing_selected_workspace");
@@ -515,6 +1050,42 @@ export default function LandingPage() {
     setActiveTab(tabId);
     sessionStorage.setItem("landing_active_tab", tabId);
   };
+
+  const handleHitlAgentResolve = (item) => {
+    if (item.isIgnio) {
+      // Ignio / Auto Resolve flow
+      setHitlIgnioSourceItem(item);
+      startIgnioAutoResolve(item);
+    } else {
+      // Deterministic chat modal flow
+      setHitlSourceItem(item);
+      startDeterministicAutoResolve(item);
+    }
+  };
+
+  // When the deterministic chat modal resolves AND it was triggered from a HITL card,
+  // remove that card from the HITL list, push it (as resolved) into the agent_resolve tab,
+  // and navigate there.
+  useEffect(() => {
+    if (deterministicIsResolved && hitlSourceItem) {
+      setHitlItems((prev) => prev.filter((i) => i.id !== hitlSourceItem.id));
+      setHitlSourceItem(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deterministicIsResolved]);
+
+
+  // When the ignio auto-resolve modal resolves AND it was triggered from a HITL card,
+  // remove that card from the HITL list, push it (as resolved) into the agent_resolve tab,
+  // and navigate there.
+  useEffect(() => {
+    if (ignioIsResolved && hitlIgnioSourceItem) {
+      setHitlItems((prev) => prev.filter((i) => i.id !== hitlIgnioSourceItem.id));
+      setHitlIgnioSourceItem(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ignioIsResolved]);
+
 
   const handleSetSelectedWorkspace = (workspace) => {
     setSelectedWorkspace(workspace);
@@ -692,17 +1263,29 @@ export default function LandingPage() {
   }
   const activeTabData = displayTabData;
 
-  const displayTabs = tabs.filter((t) => {
-    if (isPOPage) {
-      if (t.id === "epics" || t.id === "user_stories" || t.id === "acceptance_criteria") {
+
+
+  const displayTabs = tabs
+    .filter((t) => {
+      if (isPOPage) {
+        if (t.id === "epics" || t.id === "user_stories" || t.id === "acceptance_criteria") {
+          return false;
+        }
+      }
+      if (selectedArea === "AI for AMS" && t.id === "applications") {
         return false;
       }
-    }
-    if (selectedArea === "AI for AMS" && t.id === "applications") {
-      return false;
-    }
-    return true;
-  });
+      return true;
+    })
+    .map((t) => {
+      if (t.id === "agent_resolve") {
+        return { ...t, label: "Agent Resolved", badge: 12 };
+      }
+      if (t.id === "insights") {
+        return { ...t, badge: 8 };
+      }
+      return t;
+    });
 
   if (isPOPage) {
     if (!displayTabs.some((t) => t.id === "applications")) {
@@ -836,6 +1419,77 @@ export default function LandingPage() {
     );
   }
 
+  if (selectedArea === "AI for AMS" && selectedL0 !== "Acquisition") {
+    return (
+      <main className="re-landing-page fade-in" style={{ minHeight: "85vh", display: "flex", flexDirection: "column" }}>
+        {contextSelectorBar}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "60px 20px",
+            minHeight: "450px",
+            background: "rgba(255, 255, 255, 0.02)",
+            border: "1px dashed var(--border)",
+            borderRadius: "16px",
+            margin: "24px 0",
+            overflow: "hidden",
+            width: "100%",
+          }}
+        >
+          {/* Marquee Banner */}
+          <div
+            style={{
+              width: "100%",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              padding: "18px 0",
+              background: "linear-gradient(90deg, rgba(0, 196, 255, 0.08), rgba(139, 92, 246, 0.08))",
+              borderTop: "1px solid var(--border)",
+              borderBottom: "1px solid var(--border)",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                display: "inline-block",
+                whiteSpace: "nowrap",
+                animation: "l0Marquee 15s linear infinite",
+                fontSize: "24px",
+                fontWeight: "800",
+                letterSpacing: "3px",
+                color: "var(--cyan, #00c4ff)",
+                textTransform: "uppercase",
+              }}
+            >
+              Coming Soon &nbsp; • &nbsp; {selectedL0} &nbsp; • &nbsp; Under Development &nbsp; • &nbsp; Stay Tuned &nbsp; • &nbsp; Coming Soon &nbsp; • &nbsp; {selectedL0} &nbsp; • &nbsp; Under Development &nbsp; • &nbsp; Stay Tuned &nbsp; • &nbsp; Coming Soon &nbsp; • &nbsp; {selectedL0} &nbsp; • &nbsp; Under Development &nbsp; • &nbsp; Stay Tuned &nbsp; • &nbsp;
+            </div>
+          </div>
+
+          <div style={{ marginTop: "32px", textAlign: "center" }}>
+            <h2 style={{ fontSize: "20px", fontWeight: "700", color: "var(--text-primary)", marginBottom: "8px" }}>
+              {selectedL0}
+            </h2>
+            <p style={{ fontSize: "14px", color: "var(--text-muted)", maxWidth: "450px", margin: "0 auto" }}>
+              This L0 classification workspace is currently blank and coming soon.
+            </p>
+          </div>
+        </div>
+
+        <style>{`
+          @keyframes l0Marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
+      </main>
+    );
+  }
+
+
   return (
     <>
       <main className="re-landing-page fade-in">
@@ -868,7 +1522,7 @@ export default function LandingPage() {
             <div>
               <div className="re-summary-title">
                 {selectedArea === "AI for AD" && selectedRole === "Product Owner"
-                  ? `Good morning, Product Owner - ${activeApp.name} Backlog & Sprint 42 Summary`
+                  ? `Good morning, Product Owner`
                   : summary.greeting}
               </div>
               <div className="re-summary-sub">
@@ -887,14 +1541,71 @@ export default function LandingPage() {
                     "Tester": [{ label: "PASS RATE", value: "96.8%", color: "var(--cyan)" }, { label: "API COVERAGE", value: "94.5%", color: "#50c878" }],
                   },
                   "AI for AMS": {
-                    "Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "Support Engineer": [
+                      { label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" },
+                      { label: "FTRDR", value: "99.5%", color: "#50c878", tooltip: "First Time Right Delivery Rate — Percentage of tickets resolved accurately on the first attempt without rework" }
+                    ],
                     "Software Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "PATCH SUCCESS", value: "98.8%", color: "var(--cyan)" }],
-                    "L1 Support Engineer": [{ label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" }, { label: "FCR TIME", value: "4.2 min", color: "var(--gold)" }],
+                    "L1 Support Engineer": [
+                      { label: "AUTO-RESOLVED", value: "64.2%", color: "var(--cyan)" },
+                      { label: "FTRDR", value: "99.5%", color: "#50c878", tooltip: "First Time Right Delivery Rate — Percentage of tickets resolved accurately on the first attempt without rework" }
+                    ],
                     "L2 Support Engineer": [{ label: "RCA CONFIDENCE", value: "92%", color: "var(--cyan)" }, { label: "SLA REMAINING", value: "2h 45m", color: "var(--gold)" }],
                     "L3 Support Engineer": [{ label: "DB THROUGHPUT", value: "+45%", color: "#50c878" }, { label: "ZERO-DAY VULNS", value: "0", color: "var(--cyan)" }],
                     "L4 Support Engineer": [{ label: "VENDOR SLA", value: "99.9%", color: "#50c878" }, { label: "COST VARIANCE", value: "-4.2%", color: "var(--cyan)" }],
                   },
                 };
+
+                if (selectedArea === "AI for AMS" && (selectedRole === "Support Engineer" || selectedRole === "L1 Support Engineer")) {
+                  return (
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                      <div style={{ display: "flex", background: "var(--surface-sunken)", borderRadius: "8px", padding: "4px", gap: "4px", border: "1px solid var(--border)" }}>
+                        <button
+                          onClick={() => setMetricToggle("AUTO-RESOLVED")}
+                          style={{ background: metricToggle === "AUTO-RESOLVED" ? "var(--surface-card)" : "transparent", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", boxShadow: metricToggle === "AUTO-RESOLVED" ? "0 1px 3px rgba(0,0,0,0.1)" : "none", color: metricToggle === "AUTO-RESOLVED" ? "var(--text-primary)" : "var(--text-muted)", transition: "all 0.2s" }}>
+                          Auto-Resolved
+                        </button>
+                        <button
+                          onClick={() => setMetricToggle("FTRDR")}
+                          title="First Time Right Delivery Rate — Percentage of tickets resolved on first attempt without rework"
+                          style={{ background: metricToggle === "FTRDR" ? "var(--surface-card)" : "transparent", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer", boxShadow: metricToggle === "FTRDR" ? "0 1px 3px rgba(0,0,0,0.1)" : "none", color: metricToggle === "FTRDR" ? "var(--text-primary)" : "var(--text-muted)", transition: "all 0.2s" }}>
+                          FTRDR
+                        </button>
+                      </div>
+                      <div
+                        className={metricToggle === "FTRDR" ? "ftrdr-card-wrapper" : ""}
+                        style={{
+                          background: "var(--surface-card)",
+                          border: "1px solid var(--border)",
+                          borderRadius: "10px",
+                          padding: "8px 16px",
+                          minWidth: "130px",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "2px",
+                          position: "relative",
+                          cursor: metricToggle === "FTRDR" ? "help" : "default",
+                        }}
+                      >
+                        <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                          {metricToggle}
+                        </span>
+                        <span style={{ fontSize: "22px", fontWeight: "800", color: metricToggle === "AUTO-RESOLVED" ? "var(--cyan)" : "#50c878", lineHeight: 1.1 }}>
+                          {metricToggle === "AUTO-RESOLVED" ? "64.2%" : "99.5%"}
+                        </span>
+                        {metricToggle === "FTRDR" && (
+                          <div className="ftrdr-tooltip-popup">
+                            <div className="ftrdr-tooltip-title">First Time Right Delivery Rate</div>
+                            <div className="ftrdr-tooltip-body">
+                              Percentage of tickets or requests resolved on the first attempt without rework.
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                }
+
                 const stats = ROLE_STATS[selectedArea]?.[selectedRole];
                 if (!stats) return summary.chips.map((chip) => (
                   <span key={chip.id} className={`re-pill ${chip.type === "warn" || chip.type === "danger" ? "warn" : ""}`}>{chip.text}</span>
@@ -902,6 +1613,7 @@ export default function LandingPage() {
                 return stats.map((s) => (
                   <div
                     key={s.label}
+                    className={s.tooltip ? "ftrdr-card-wrapper" : ""}
                     style={{
                       background: "var(--surface-card)",
                       border: "1px solid var(--border)",
@@ -911,6 +1623,7 @@ export default function LandingPage() {
                       display: "flex",
                       flexDirection: "column",
                       gap: "2px",
+                      position: "relative",
                     }}
                   >
                     <span style={{ fontSize: "9px", fontWeight: "800", color: "var(--text-secondary)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -919,6 +1632,15 @@ export default function LandingPage() {
                     <span style={{ fontSize: "22px", fontWeight: "800", color: s.color, lineHeight: 1.1 }}>
                       {s.value}
                     </span>
+                    {s.tooltip && (
+                      <div className="ftrdr-tooltip-popup">
+                        <div className="ftrdr-tooltip-title">First Time Right Delivery Rate</div>
+                        <div className="ftrdr-tooltip-body">
+                          Percentage of tickets resolved accurately<br />
+                          on the first attempt without rework.
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ));
               })()}
@@ -1420,387 +2142,538 @@ export default function LandingPage() {
         {activeTab === "overview" && (
 
           selectedArea === "AI for AMS" && selectedRole === "Support Engineer" ? (
-            <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
-              {/* 1. Middle 3 Columns Section */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px" }}>
-                {/* Column 1: Observability */}
-                <div
-                  style={{
-                    background: "var(--surface-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    boxShadow: "var(--shadow-card)",
-                  }}
-                >
+            <>
+              <div className="fade-in" style={{ display: "flex", flexDirection: "column", gap: "20px", marginTop: "12px" }}>
+
+                {/* 1. Middle 3 Columns Section */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "16px", alignItems: "start" }}>
+                  {/* Column 1: Observability */}
                   <div
                     style={{
-                      background: "#0891b2",
-                      padding: "12px 16px",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "12px",
+                      overflow: "hidden",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      color: "#ffffff",
+                      flexDirection: "column",
+                      boxShadow: "var(--shadow-card)",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", fontSize: "14px" }}>
-                      <Icon name="zap" size={18} />
-                      Observability
-                    </div>
-                  </div>
-                  <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        window.open("https://ismartams.tcsapps.com/member-portal-observability/", "_blank") || (window.location.href = "https://ismartams.tcsapps.com/member-portal-observability/");
-                      }}
+                    <div
                       style={{
-                        background: "rgba(239, 68, 68, 0.08)",
-                        border: "1px solid rgba(239, 68, 68, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
+                        padding: "12px 16px",
+                        background: "#0ea5e9",
                         display: "flex",
-                        flexDirection: "column",
-                        gap: "12px",
-                        cursor: "pointer",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                        transition: "all 0.2s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "#ef4444";
-                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
-                        e.currentTarget.style.transform = "translateY(-1px)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
-                        e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)";
-                        e.currentTarget.style.transform = "none";
+                        alignItems: "center",
+                        gap: "8px",
+                        color: "#ffffff",
                       }}
                     >
-                      {/* Top Row: Title + Active Badge + Redirect Icon */}
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Experience</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                          <span
-                            style={{
-                              fontSize: "11px",
-                              fontWeight: "600",
-                              color: "#ef4444",
-                              background: "rgba(239, 68, 68, 0.12)",
-                              padding: "3px 8px",
-                              borderRadius: "12px",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "4px",
-                            }}
-                          >
-                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#ef4444", display: "inline-block" }}></span>
-                            Active
-                          </span>
-                          <Icon name="externalLink" size={14} style={{ color: "#ef4444" }} />
-                        </div>
+                      <Icon name="zap" size={18} />
+                      <div style={{ fontSize: "14px", fontWeight: "700" }}>
+                        Observability
                       </div>
-
-                      {/* Impacted Parameters Grid */}
-                      <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "6px", fontSize: "11px", color: "var(--text-secondary)", fontWeight: "500" }}>
-                        <div style={{ fontSize: "11px", fontWeight: "700", color: "#ef4444", letterSpacing: "0.4px" }}>
+                    </div>
+                    <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+                      {/* Products Card (Blue) */}
+                      <div
+                        style={{
+                          background: "rgba(59, 130, 246, 0.05)",
+                          border: "1px solid rgba(59, 130, 246, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                          width: "100%",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#3b82f6", display: "flex" }}><Icon name="cube" size={16} /></div>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Products</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: "600",
+                                color: "#10b981",
+                                background: "rgba(16, 185, 129, 0.12)",
+                                padding: "3px 8px",
+                                borderRadius: "12px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                            >
+                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                              Active
+                            </span>
+                          </div>
+                        </div>
+                        <div style={{ fontSize: "10px", fontWeight: "700", color: "#3b82f6", letterSpacing: "0.5px", marginTop: "4px", marginBottom: "-4px" }}>
                           IMPACTS TO:
                         </div>
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            Progress: <strong>Quoting:</strong> <span style={{ color: "#10b981" }}>99.8% Uptime</span>
-                          </span>
-                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            <strong>Applications:</strong> <span style={{ color: "#10b981" }}>99.9% Success</span>
-                          </span>
-                          <span style={{ background: "rgba(255,255,255,0.06)", padding: "4px 8px", borderRadius: "6px", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: "4px" }}>
-                            <strong>Direct Enrollment:</strong> <span style={{ color: "#10b981" }}>100% Throughput</span>
-                          </span>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{ color: "#3b82f6" }} /> Quoting</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Accuracy:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>99.1%</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Turnaround:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>1.2 hrs</span></div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{ color: "#3b82f6" }} /> Applications</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Application Success:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>99.6%</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Avg. Application Time:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>6.3 mins</span></div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{ color: "#3b82f6" }} /> Direct Enrollment</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollment Throughput:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>100%</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollment Leakage:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>0.6%</span></div>
+                          </div>
                         </div>
                       </div>
-                    </button>
 
-                    {/* Member Enrollment & Eligibility (Yellow) */}
-                    <div
-                      style={{
-                        background: "rgba(234, 179, 8, 0.08)",
-                        border: "1px solid rgba(234, 179, 8, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Member Enrollment & Eligibility</span>
-                      </div>
-                    </div>
-
-                    {/* Provider Management (Green) */}
-                    <div
-                      style={{
-                        background: "rgba(16, 185, 129, 0.08)",
-                        border: "1px solid rgba(16, 185, 129, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Provider Management</span>
-                      </div>
-                    </div>
-
-                    {/* Billing & Premium Management (Purple) */}
-                    <div
-                      style={{
-                        background: "rgba(139, 92, 246, 0.08)",
-                        border: "1px solid rgba(139, 92, 246, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Billing & Premium Management</span>
-                      </div>
-                    </div>
-
-                    {/* Customer Service (Orange) */}
-                    <div
-                      style={{
-                        background: "rgba(249, 115, 22, 0.08)",
-                        border: "1px solid rgba(249, 115, 22, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Customer Service</span>
-                      </div>
-                    </div>
-
-                    {/* Finance & Compliance (Cyan) */}
-                    <div
-                      style={{
-                        background: "rgba(6, 182, 212, 0.08)",
-                        border: "1px solid rgba(6, 182, 212, 0.3)",
-                        borderRadius: "10px",
-                        padding: "14px 16px",
-                        color: "var(--text-primary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        fontWeight: "700",
-                        fontSize: "13px",
-                        textAlign: "left",
-                        width: "100%",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <span style={{ fontWeight: "700", fontSize: "14px" }}>Finance & Compliance</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {/* Column 1: Needs My Action */}
-                <div
-                  style={{
-                    background: "var(--surface-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    boxShadow: "var(--shadow-card)",
-                  }}
-                >
-                  <div
-                    style={{
-                      background: "#2563eb",
-                      padding: "12px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      color: "#ffffff",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", fontSize: "14px" }}>
-                      <Icon name="list" size={18} />
-                      {amsOverviewData.needsMyAction.title}
-                    </div>
-                    <span
-                      style={{
-                        background: "#ffffff",
-                        color: "#2563eb",
-                        borderRadius: "50%",
-                        width: "24px",
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: "800",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {amsOverviewData.needsMyAction.badge}
-                    </span>
-                  </div>
-                  <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
-                    {amsOverviewData.needsMyAction.items.map((item) => (
+                      {/* Sales Card (Green) */}
                       <div
-                        key={item.id}
                         style={{
-                          background: "rgba(255, 255, 255, 0.03)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "8px",
-                          padding: "10px 12px",
+                          background: "rgba(16, 185, 129, 0.05)",
+                          border: "1px solid rgba(16, 185, 129, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                          width: "100%",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                          <span
-                            style={{
-                              background: "#1d4ed8",
-                              color: "#ffffff",
-                              fontSize: "10px",
-                              fontWeight: "700",
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            {item.tag}
-                          </span>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", fontStyle: "italic" }}>
-                            {item.meta}
-                          </span>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "6px", borderRadius: "8px", color: "#10b981", display: "flex" }}><Icon name="chart" size={16} /></div>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Sales</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: "600",
+                                color: "#10b981",
+                                background: "rgba(16, 185, 129, 0.12)",
+                                padding: "3px 8px",
+                                borderRadius: "12px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                            >
+                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                              Active
+                            </span>
+                          </div>
                         </div>
-                        <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: "500", lineHeight: "1.4" }}>
-                          {item.text}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{ color: "#10b981" }} /> Quoting</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Win Rate:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>34.7%</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Avg. Premium Quoted:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>$1,250</span></div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{ color: "#10b981" }} /> Applications</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Application Conversion:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>42.8%</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Abandonment Rate:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>12.3%</span></div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{ color: "#10b981" }} /> Direct Enrollment</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Direct to Bind Rate:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>62.1%</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Enrollment:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>$42.18</span></div>
+                          </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </div>
 
-                {/* Column 2: Waiting for My Approval */}
-                <div
-                  style={{
-                    background: "var(--surface-card)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    boxShadow: "var(--shadow-card)",
-                  }}
-                >
-                  <div
-                    style={{
-                      background: "#d97706",
-                      padding: "12px 16px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      color: "#ffffff",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", fontSize: "14px" }}>
-                      <Icon name="clock" size={18} />
-                      {amsOverviewData.waitingForMyApproval.title}
-                    </div>
-                    <span
-                      style={{
-                        background: "#ffffff",
-                        color: "#d97706",
-                        borderRadius: "50%",
-                        width: "24px",
-                        height: "24px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontWeight: "800",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {amsOverviewData.waitingForMyApproval.badge}
-                    </span>
-                  </div>
-                  <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
-                    {amsOverviewData.waitingForMyApproval.items.map((item) => (
+                      {/* Acquisition Card (Purple) */}
                       <div
-                        key={item.id}
                         style={{
-                          background: "rgba(255, 255, 255, 0.03)",
-                          border: "1px solid var(--border)",
-                          borderRadius: "8px",
-                          padding: "10px 12px",
+                          background: "rgba(139, 92, 246, 0.05)",
+                          border: "1px solid rgba(139, 92, 246, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                          width: "100%",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
-                          <span
-                            style={{
-                              background: "#c2410c",
-                              color: "#ffffff",
-                              fontSize: "10px",
-                              fontWeight: "700",
-                              padding: "2px 8px",
-                              borderRadius: "4px",
-                              letterSpacing: "0.5px",
-                            }}
-                          >
-                            {item.tag}
-                          </span>
-                          <span style={{ fontSize: "11px", color: "var(--text-muted)", fontStyle: "italic" }}>
-                            {item.meta}
-                          </span>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#8b5cf6", display: "flex" }}><Icon name="cart" size={16} /></div>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Acquisition</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
+                            <span
+                              style={{
+                                fontSize: "11px",
+                                fontWeight: "600",
+                                color: "#10b981",
+                                background: "rgba(16, 185, 129, 0.12)",
+                                padding: "3px 8px",
+                                borderRadius: "12px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                            >
+                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10b981", display: "inline-block" }}></span>
+                              Active
+                            </span>
+                          </div>
                         </div>
-                        <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: "500", lineHeight: "1.4" }}>
-                          {item.text}
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "6px", fontSize: "10px", color: "var(--text-secondary)", fontWeight: "500" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="trendingUp" size={14} style={{ color: "#8b5cf6" }} /> Quoting</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Quote Requests:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>24,812</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Quote:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>$18.73</span></div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="file-text" size={14} style={{ color: "#8b5cf6" }} /> Applications</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Applications Started:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>18,942</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per App:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>$37.61</span></div>
+                          </div>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "8px", border: "1px solid var(--border)", borderRadius: "8px", padding: "8px", background: "var(--surface)" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px", color: "var(--text-primary)", fontWeight: "700", fontSize: "11px", marginBottom: "2px" }}><Icon name="users" size={14} style={{ color: "#8b5cf6" }} /> Direct Enrollment</div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Enrollments:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>6,531</span></div>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}><span>Cost per Enrollment:</span> <span style={{ color: "#10b981", fontWeight: "600", fontSize: "11px" }}>$42.18</span></div>
+                          </div>
                         </div>
                       </div>
-                    ))}
+
+                      {/* Customer Service (Orange) */}
+                      <div
+                        style={{
+                          background: "rgba(249, 115, 22, 0.05)",
+                          border: "1px solid rgba(249, 115, 22, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          fontWeight: "700",
+                          fontSize: "13px",
+                          width: "100%",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ color: "#f97316", display: "flex" }}><Icon name="message" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Customer Service</span>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </div>
+
+                      {/* Finance & Compliance (Orange/Brown) */}
+                      <div
+                        style={{
+                          background: "rgba(217, 119, 6, 0.05)",
+                          border: "1px solid rgba(217, 119, 6, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          fontWeight: "700",
+                          fontSize: "13px",
+                          width: "100%",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ color: "#d97706", display: "flex" }}><Icon name="file-text" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Finance & Compliance</span>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </div>
+
+                      {/* Operations (Teal) */}
+                      <div
+                        style={{
+                          background: "rgba(20, 184, 166, 0.05)",
+                          border: "1px solid rgba(20, 184, 166, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          fontWeight: "700",
+                          fontSize: "13px",
+                          width: "100%",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ color: "#14b8a6", display: "flex" }}><Icon name="users" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Operations</span>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </div>
+
+                      {/* Legal & Risk (Blue) */}
+                      <div
+                        style={{
+                          background: "rgba(56, 189, 248, 0.05)",
+                          border: "1px solid rgba(56, 189, 248, 0.2)",
+                          borderRadius: "10px",
+                          padding: "14px 16px",
+                          color: "var(--text-primary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          fontWeight: "700",
+                          fontSize: "13px",
+                          width: "100%",
+                        }}
+                      >
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <div style={{ color: "#38bdf8", display: "flex" }}><Icon name="shield" size={16} /></div>
+                          <span style={{ fontWeight: "700", fontSize: "14px" }}>Legal & Risk</span>
+                        </div>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: "var(--text-secondary)" }}><polyline points="6 9 12 15 18 9"></polyline></svg>
+                      </div>
+
+                    </div>
+                  </div>
+                  {/* Column 1: Human Only */}
+                  <div
+                    style={{
+                      background: "var(--surface-card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "12px",
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                      boxShadow: "var(--shadow-card)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#2563eb",
+                        padding: "12px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", fontSize: "14px" }}>
+                        <Icon name="list" size={18} />
+                        {amsOverviewData.needsMyAction.title}
+                      </div>
+                      <span
+                        style={{
+                          background: "#ffffff",
+                          color: "#2563eb",
+                          borderRadius: "50%",
+                          width: "24px",
+                          height: "24px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: "800",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {amsOverviewData.needsMyAction.badge}
+                      </span>
+                    </div>
+                    <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+                      {amsOverviewData.needsMyAction.items.map((item) => (
+                        <div
+                          key={item.id}
+                          onClick={() => setSelectedActionItem({ ...item, _accentColor: "#2563eb" })}
+                          style={{
+                            background: "rgba(255, 255, 255, 0.03)",
+                            border: "1px solid var(--border)",
+                            borderRadius: "8px",
+                            padding: "10px 12px",
+                            cursor: "pointer",
+                            transition: "background 0.15s, border-color 0.15s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = "rgba(37,99,235,0.1)";
+                            e.currentTarget.style.borderColor = "#2563eb";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = "rgba(255,255,255,0.03)";
+                            e.currentTarget.style.borderColor = "var(--border)";
+                          }}
+                        >
+
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "6px" }}>
+                            <span
+                              style={{
+                                background: "#1d4ed8",
+                                color: "#ffffff",
+                                fontSize: "10px",
+                                fontWeight: "700",
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                letterSpacing: "0.5px",
+                              }}
+                            >
+                              {item.tag}
+                            </span>
+                            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontStyle: "italic" }}>
+                              {item.meta}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: "12px", color: "var(--text-primary)", fontWeight: "500", lineHeight: "1.4" }}>
+                            {item.text}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Column 2: Human in The Loop */}
+                  <div
+                    style={{
+                      background: "var(--surface-card)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "12px",
+                      overflow: "hidden",
+                      display: "flex",
+                      flexDirection: "column",
+                      boxShadow: "var(--shadow-card)",
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#d97706",
+                        padding: "12px 16px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        color: "#ffffff",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "700", fontSize: "14px" }}>
+                        <Icon name="clock" size={18} />
+                        {amsOverviewData.waitingForMyApproval.title}
+                      </div>
+                      <span
+                        style={{
+                          background: "#ffffff",
+                          color: "#d97706",
+                          borderRadius: "50%",
+                          width: "24px",
+                          height: "24px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontWeight: "800",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {hitlItems.length}
+                      </span>
+                    </div>
+                    <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
+                      {hitlItems.length === 0 ? (
+
+                        <div style={{ textAlign: "center", padding: "32px 16px", color: "var(--text-muted)", fontSize: "13px" }}>
+                          <Icon name="check-circle" size={32} style={{ marginBottom: "8px", color: "#16a34a", display: "block", margin: "0 auto 8px" }} />
+                          <div style={{ fontWeight: "700", color: "#16a34a", marginBottom: "4px" }}>All items resolved!</div>
+                          <div>All tickets have been sent to Agent Resolve.</div>
+                        </div>
+                      ) : (
+                        hitlItems.map((item) => (
+                          <div
+                            key={item.id}
+                            style={{
+                              background: "var(--surface-card)",
+                              border: "1px solid var(--border)",
+                              borderRadius: "10px",
+                              padding: "14px 14px 12px",
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: "8px",
+                            }}
+                          >
+                            {/* Title row + Action Required badge */}
+                            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
+                              <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary)", lineHeight: "1.4", flex: 1 }}>
+                                {item.subject}
+                              </div>
+                              <span
+                                style={{
+                                  flexShrink: 0,
+                                  background: "#fff7ed",
+                                  color: "#c2410c",
+                                  border: "1px solid #fed7aa",
+                                  borderRadius: "20px",
+                                  padding: "2px 10px",
+                                  fontSize: "10px",
+                                  fontWeight: "700",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {item.status}
+                              </span>
+                            </div>
+
+                            {/* Description */}
+                            <div style={{ fontSize: "12px", color: "var(--text-muted)", lineHeight: "1.5" }}>
+                              {item.desc}
+                            </div>
+
+
+                            {/* Divider */}
+                            <div style={{ height: "1px", background: "var(--border)" }} />
+
+                            {/* Agent Resolve / Auto Resolve button — opens the right modal */}
+                            <button
+                              onClick={() => handleHitlAgentResolve(item)}
+                              style={{
+                                alignSelf: "flex-start",
+                                background: item.isIgnio
+                                  ? "linear-gradient(135deg, #0ea5e9, #06b6d4)"   // cyan for Auto Resolve
+                                  : "linear-gradient(135deg, #6d28d9, #4f46e5)",  // purple for Agent Resolve
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "8px",
+                                padding: "7px 14px",
+                                fontSize: "12px",
+                                fontWeight: "700",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                              }}
+                            >
+                              <Icon name="zap" size={13} />
+                              {item.isIgnio ? "Auto Resolve" : "Agent + Human Resolve"}
+                            </button>
+                          </div>
+                        ))
+                      )}
+
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+
+
+              {/* Action Item Detail Drawer */}
+              <ActionItemDetailDrawer
+                item={selectedActionItem}
+                accentColor={selectedActionItem?._accentColor ?? "#2563eb"}
+                onClose={() => setSelectedActionItem(null)}
+              />
+            </>
           ) : (
+
+
             <section className="re-grid fade-in">
               {/* Panel 1: State of Environment */}
               <article className="re-panel">
@@ -2009,29 +2882,7 @@ export default function LandingPage() {
               )}
 
               {(!activeTabData.items || activeTabData.items.length === 0) && (
-                <div
-                  style={{
-                    minHeight: "280px",
-                    background: "rgba(255, 255, 255, 0.02)",
-                    border: "1px dashed var(--border)",
-                    borderRadius: "16px",
-                    padding: "40px 20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "var(--text-muted)",
-                    width: "100%",
-                  }}
-                >
-                  <div style={{ fontSize: "32px", marginBottom: "12px", opacity: 0.6 }}></div>
-                  <div style={{ fontSize: "15px", fontWeight: "600", color: "var(--text-secondary)", marginBottom: "4px" }}>
-                    Workspace Empty
-                  </div>
-                  <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                    This workspace is currently blank and ready for custom metrics.
-                  </div>
-                </div>
+                <AutomationDataGrid />
               )}
 
               {activeTab !== "insights" && activeTabData.items && activeTabData.items.length > 0 && (
@@ -2340,12 +3191,23 @@ export default function LandingPage() {
 
       {/* Unified Bot Widget - shown for AMS Support / Software Engineers */}
       {isChatbotEnabled(selectedArea, selectedRole) && data && (
-        <UnifiedBotWidget selectedRole={selectedRole} data={data} domain={selectedArea} onOpenChange={setIsBotOpen} />
+        <UnifiedBotWidget
+          selectedRole={selectedRole}
+          data={data}
+          domain={selectedArea}
+          onOpenChange={setIsBotOpen}
+          hideFloat={Boolean(selectedActionItem || showPrdModal || showAppHealthModal || showClaimsModal || selNexusOpen || hitlSourceItem || hitlIgnioSourceItem)}
+        />
       )}
 
       {/* AI for AD Role Bot Widget - shown when "AI for AD" domain is selected */}
       {selectedArea === "AI for AD" && data && (
-        <AdRoleBotWidget selectedRole={selectedRole} data={data} onOpenChange={setIsBotOpen} />
+        <AdRoleBotWidget
+          selectedRole={selectedRole}
+          data={data}
+          onOpenChange={setIsBotOpen}
+          hideFloat={Boolean(selectedActionItem || showPrdModal || showAppHealthModal || showClaimsModal || selNexusOpen || hitlSourceItem || hitlIgnioSourceItem)}
+        />
       )}
 
       {/* SEL Nexus Floating Button & Popups for L3 & L4 Support Engineer, or Developer / Product Owner in AI for AD */}
@@ -2737,6 +3599,10 @@ export default function LandingPage() {
                 0%, 80%, 100% { transform: translateY(0); }
                 40% { transform: translateY(-4px); }
               }
+              @keyframes spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+              }
               .typing-dot {
                 width: 6px;
                 height: 6px;
@@ -2748,6 +3614,7 @@ export default function LandingPage() {
               .typing-dot:nth-child(1) { animation-delay: -0.32s; }
               .typing-dot:nth-child(2) { animation-delay: -0.16s; }
             `}</style>
+
 
             {/* Header */}
             <div
@@ -3052,7 +3919,7 @@ export default function LandingPage() {
           </div>
         </div>
       )}
+
     </>
   );
 }
-

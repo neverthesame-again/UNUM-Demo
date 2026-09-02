@@ -119,7 +119,7 @@ function toGeminiHistory(messages) {
  *   selectedRole {string}  – the active AD role from LandingPage
  *   data         {object}  – the live role data object from LandingPage (dynamic)
  */
-export function AdRoleBotWidget({ selectedRole, data, onOpenChange }) {
+export function AdRoleBotWidget({ selectedRole, data, onOpenChange, hideFloat = false }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleOpen = (state) => {
@@ -238,7 +238,7 @@ export function AdRoleBotWidget({ selectedRole, data, onOpenChange }) {
   return (
     <>
       {/* ── Floating Trigger Button ── */}
-      {!isOpen && (
+      {!isOpen && !hideFloat && (
         <div
           className="ad-bot-float"
           onClick={() => toggleOpen(true)}
