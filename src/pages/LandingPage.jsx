@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 // Domain & Role Dynamic Landing Page Component with Multi-Tab Mock Views
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { landingPageService } from "../services/landing-page.service";
@@ -567,11 +567,11 @@ export default function LandingPage() {
   // All tickets that live in Human-in-The-Loop.
   // They are NOT in the agent_resolve tab initially — they move there only after resolution.
   const HITL_SOURCE_ITEMS = [
-    { id: "ar1", num: "Member Portal Auth & Email Service", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
-    { id: "ar2", num: "Member Registration & Data Validation Engine", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
-    { id: "ar3", num: "Member Registration Engine & Account Identity Mesh", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
-    { id: "arb1", num: "INC009405", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Job Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Batch Job Auto-Restart" },
-    { id: "arb2", num: "RITM004120", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment Batch Service", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Enrollment Batch Resume" },
+    { id: "ar1", num: "INC0048219", service: "Member Portal Auth", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar2", num: "INC0047582", service: "Member Registration", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar3", num: "INC0049301", service: "Account Identity", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "arb1", num: "INC0046824", service: "Batch Scheduler", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Batch Job Auto-Restart" },
+    { id: "arb2", num: "INC0048915", service: "HR Enrollment", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Enrollment Batch Resume" },
   ];
 
   // Human in The Loop — Agent Resolve / Auto Resolve flow
@@ -647,6 +647,8 @@ export default function LandingPage() {
   const [deterministicItem, setDeterministicItem] = useState(null);
   const [deterministicInputValue, setDeterministicInputValue] = useState("");
   const [deterministicAgentTyping, setDeterministicAgentTyping] = useState(false);
+  const deterministicChatBodyRef = useRef(null);
+  const deterministicChatEndRef = useRef(null);
   // Applications Dropdown Menu States
   const [appDropdownOpen, setAppDropdownOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState(null);
@@ -810,9 +812,9 @@ export default function LandingPage() {
     let timer;
     if (deterministicIsRunning && deterministicModalOpen) {
       const stepCount = deterministicMessages.length;
-      const isVerificationFlow = deterministicItem?.id === "ar1" || deterministicItem?.num?.includes("Member Portal") || !deterministicItem?.id;
-      const isDobFlow = deterministicItem?.id === "ar2" || deterministicItem?.num?.includes("Data Validation");
-      const isAccountConflictFlow = deterministicItem?.id === "ar3" || deterministicItem?.num?.includes("Account Identity");
+      const isVerificationFlow = deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("Member Portal") || deterministicItem?.subject?.includes("Verification Code") || !deterministicItem?.id;
+      const isDobFlow = deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Registration") || deterministicItem?.subject?.includes("Date of Birth");
+      const isAccountConflictFlow = deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Account Identity") || deterministicItem?.subject?.includes("Existing Account");
 
       const addMsg = (sender, text) => {
         setDeterministicMessages((prev) => [
@@ -971,6 +973,34 @@ export default function LandingPage() {
     return () => clearTimeout(timer);
   }, [deterministicIsRunning, deterministicModalOpen, deterministicMessages.length, deterministicItem]);
 
+  // Auto-scroll chat down whenever messages change, agent types, or modal opens
+  useEffect(() => {
+    if (!deterministicModalOpen) return;
+
+    const scrollToBottom = (behavior = "smooth") => {
+      if (deterministicChatEndRef.current) {
+        deterministicChatEndRef.current.scrollIntoView({ behavior, block: "end" });
+      }
+      if (deterministicChatBodyRef.current) {
+        deterministicChatBodyRef.current.scrollTop = deterministicChatBodyRef.current.scrollHeight;
+      }
+    };
+
+    // Keep scrolled to latest message
+    scrollToBottom(deterministicMessages.length <= 1 ? "auto" : "smooth");
+    const frameId = requestAnimationFrame(() => {
+      scrollToBottom(deterministicMessages.length <= 1 ? "auto" : "smooth");
+    });
+    const timer = setTimeout(() => {
+      scrollToBottom(deterministicMessages.length <= 1 ? "auto" : "smooth");
+    }, 80);
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      clearTimeout(timer);
+    };
+  }, [deterministicModalOpen, deterministicMessages, deterministicAgentTyping]);
+
   useEffect(() => {
     let timer;
     if (ignioIsRunning && ignioCurrentStep > 0 && ignioCurrentStep < 4) {
@@ -1064,11 +1094,20 @@ export default function LandingPage() {
   };
 
   // When the deterministic chat modal resolves AND it was triggered from a HITL card,
-  // remove that card from the HITL list, push it (as resolved) into the agent_resolve tab,
-  // and navigate there.
+  // update its state to Resolved and keep it in the list below unresolved items.
   useEffect(() => {
     if (deterministicIsResolved && hitlSourceItem) {
-      setHitlItems((prev) => prev.filter((i) => i.id !== hitlSourceItem.id));
+      setHitlItems((prev) => {
+        const updated = prev.map((i) =>
+          i.id === hitlSourceItem.id
+            ? { ...i, status: "Resolved", statusType: "good", isResolved: true }
+            : i
+        );
+        return [
+          ...updated.filter((i) => i.status !== "Resolved"),
+          ...updated.filter((i) => i.status === "Resolved"),
+        ];
+      });
       setHitlSourceItem(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1076,11 +1115,20 @@ export default function LandingPage() {
 
 
   // When the ignio auto-resolve modal resolves AND it was triggered from a HITL card,
-  // remove that card from the HITL list, push it (as resolved) into the agent_resolve tab,
-  // and navigate there.
+  // update its state to Resolved and keep it in the list below unresolved items.
   useEffect(() => {
     if (ignioIsResolved && hitlIgnioSourceItem) {
-      setHitlItems((prev) => prev.filter((i) => i.id !== hitlIgnioSourceItem.id));
+      setHitlItems((prev) => {
+        const updated = prev.map((i) =>
+          i.id === hitlIgnioSourceItem.id
+            ? { ...i, status: "Resolved", statusType: "good", isResolved: true }
+            : i
+        );
+        return [
+          ...updated.filter((i) => i.status !== "Resolved"),
+          ...updated.filter((i) => i.status === "Resolved"),
+        ];
+      });
       setHitlIgnioSourceItem(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2575,12 +2623,11 @@ export default function LandingPage() {
                           fontSize: "12px",
                         }}
                       >
-                        {hitlItems.length}
+                        {hitlItems.filter((i) => i.status !== "Resolved").length}
                       </span>
                     </div>
                     <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
                       {hitlItems.length === 0 ? (
-
                         <div style={{ textAlign: "center", padding: "32px 16px", color: "var(--text-muted)", fontSize: "13px" }}>
                           <Icon name="check-circle" size={32} style={{ marginBottom: "8px", color: "#16a34a", display: "block", margin: "0 auto 8px" }} />
                           <div style={{ fontWeight: "700", color: "#16a34a", marginBottom: "4px" }}>All items resolved!</div>
@@ -2591,35 +2638,74 @@ export default function LandingPage() {
                           <div
                             key={item.id}
                             style={{
-                              background: "var(--surface-card)",
-                              border: "1px solid var(--border)",
+                              background: item.status === "Resolved" ? "rgba(16, 185, 129, 0.04)" : "var(--surface-card)",
+                              border: item.status === "Resolved" ? "1px solid rgba(16, 185, 129, 0.25)" : "1px solid var(--border)",
                               borderRadius: "10px",
                               padding: "14px 14px 12px",
                               display: "flex",
                               flexDirection: "column",
                               gap: "8px",
+                              transition: "all 0.3s ease",
                             }}
                           >
-                            {/* Title row + Action Required badge */}
-                            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "10px" }}>
-                              <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary)", lineHeight: "1.4", flex: 1 }}>
-                                {item.subject}
+                            {/* Incident Number + Service Tag (Left) + Action Required / Resolved badge (Right) */}
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1, overflow: "hidden" }}>
+                                <span
+                                  style={{
+                                    flexShrink: 0,
+                                    background: item.status === "Resolved" ? "rgba(16, 185, 129, 0.15)" : "rgba(217, 119, 6, 0.15)",
+                                    color: item.status === "Resolved" ? "#10b981" : "#d97706",
+                                    border: item.status === "Resolved" ? "1px solid rgba(16, 185, 129, 0.35)" : "1px solid rgba(217, 119, 6, 0.35)",
+                                    borderRadius: "6px",
+                                    padding: "2px 8px",
+                                    fontSize: "11px",
+                                    fontWeight: "800",
+                                    letterSpacing: "0.5px",
+                                    fontFamily: "monospace",
+                                  }}
+                                >
+                                  {item.num}
+                                </span>
+                                {(item.service || item.system) && (
+                                  <span
+                                    style={{
+                                      fontSize: "11px",
+                                      color: "var(--text-muted)",
+                                      fontWeight: "600",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}
+                                    title={item.service || item.system}
+                                  >
+                                    {item.service || item.system}
+                                  </span>
+                                )}
                               </div>
-                              <span
-                                style={{
-                                  flexShrink: 0,
-                                  background: "#fff7ed",
-                                  color: "#c2410c",
-                                  border: "1px solid #fed7aa",
-                                  borderRadius: "20px",
-                                  padding: "2px 10px",
-                                  fontSize: "10px",
-                                  fontWeight: "700",
-                                  whiteSpace: "nowrap",
-                                }}
-                              >
-                                {item.status}
-                              </span>
+                              {item.status !== "Resolved" && (
+                                <span
+                                  style={{
+                                    flexShrink: 0,
+                                    marginLeft: "auto",
+                                    background: "#fff7ed",
+                                    color: "#c2410c",
+                                    border: "1px solid #fed7aa",
+                                    borderRadius: "20px",
+                                    padding: "2px 10px",
+                                    fontSize: "10px",
+                                    fontWeight: "700",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {item.status}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Title / Subject */}
+                            <div style={{ fontSize: "13px", fontWeight: "700", color: "var(--text-primary)", lineHeight: "1.4" }}>
+                              {item.subject}
                             </div>
 
                             {/* Description */}
@@ -2627,33 +2713,53 @@ export default function LandingPage() {
                               {item.desc}
                             </div>
 
-
                             {/* Divider */}
-                            <div style={{ height: "1px", background: "var(--border)" }} />
+                            <div style={{ height: "1px", background: item.status === "Resolved" ? "rgba(16, 185, 129, 0.15)" : "var(--border)" }} />
 
-                            {/* Agent Resolve / Auto Resolve button — opens the right modal */}
-                            <button
-                              onClick={() => handleHitlAgentResolve(item)}
-                              style={{
-                                alignSelf: "flex-start",
-                                background: item.isIgnio
-                                  ? "linear-gradient(135deg, #0ea5e9, #06b6d4)"   // cyan for Auto Resolve
-                                  : "linear-gradient(135deg, #6d28d9, #4f46e5)",  // purple for Agent Resolve
-                                color: "#fff",
-                                border: "none",
-                                borderRadius: "8px",
-                                padding: "7px 14px",
-                                fontSize: "12px",
-                                fontWeight: "700",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                              }}
-                            >
-                              <Icon name="zap" size={13} />
-                              {item.isIgnio ? "Auto Resolve" : "Agent + Human Resolve"}
-                            </button>
+                            {/* Action Button OR Resolved Indicator */}
+                            {item.status === "Resolved" ? (
+                              <div
+                                style={{
+                                  alignSelf: "flex-start",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                  color: "#10b981",
+                                  fontSize: "12px",
+                                  fontWeight: "700",
+                                  background: "rgba(16, 185, 129, 0.1)",
+                                  border: "1px solid rgba(16, 185, 129, 0.25)",
+                                  borderRadius: "8px",
+                                  padding: "6px 12px",
+                                }}
+                              >
+                                <Icon name="check" size={14} />
+                                <span>Resolved</span>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleHitlAgentResolve(item)}
+                                style={{
+                                  alignSelf: "flex-start",
+                                  background: item.isIgnio
+                                    ? "linear-gradient(135deg, #0ea5e9, #06b6d4)"   // cyan for Auto Resolve
+                                    : "linear-gradient(135deg, #6d28d9, #4f46e5)",  // purple for Agent Resolve
+                                  color: "#fff",
+                                  border: "none",
+                                  borderRadius: "8px",
+                                  padding: "7px 14px",
+                                  fontSize: "12px",
+                                  fontWeight: "700",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                }}
+                              >
+                                <Icon name="zap" size={13} />
+                                {item.isIgnio ? "Auto Resolve" : "Agent + Human Resolve"}
+                              </button>
+                            )}
                           </div>
                         ))
                       )}
@@ -3418,37 +3524,37 @@ export default function LandingPage() {
                 {[
                   {
                     step: 1,
-                    title: ignioItem?.num === "RITM004120"
+                    title: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "1. Ingest & Connect: Member Ingestion Queue"
                       : "1. Ingest & Connect: Batch Scheduler Telemetry",
-                    desc: ignioItem?.num === "RITM004120"
+                    desc: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "Connecting to HR Connect ingestion service and checking file transfer queue status."
                       : "Connecting to Control-M Batch Scheduler and fetching worker thread status logs."
                   },
                   {
                     step: 2,
-                    title: ignioItem?.num === "RITM004120"
+                    title: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "2. Observe & Detect: File Lock & Stream Stall"
                       : "2. Observe & Detect: Stalled Batch Job Identification",
-                    desc: ignioItem?.num === "RITM004120"
+                    desc: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "Identifying file read-lock on enrollment batch feed and unreleased stream handle."
                       : "Detecting thread memory deadlock, unreleased database locks, and batch job failure."
                   },
                   {
                     step: 3,
-                    title: ignioItem?.num === "RITM004120"
+                    title: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "3. Auto-Resume & Self-Heal: Releasing Lock & Resuming Stream"
                       : "3. Auto-Restart & Self-Heal: Clearing Locks & Resuming Job",
-                    desc: ignioItem?.num === "RITM004120"
+                    desc: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "Clearing file lock, resetting staging pointer, and issuing automated stream resume."
                       : "Releasing stale database locks, clearing worker cache, and issuing automated job restart."
                   },
                   {
                     step: 4,
-                    title: ignioItem?.num === "RITM004120"
+                    title: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "4. Govern & Verify: Confirming HR Data Flow & Sign-off"
                       : "4. Govern & Verify: Confirming Successful Execution",
-                    desc: ignioItem?.num === "RITM004120"
+                    desc: (ignioItem?.id === "arb2" || ignioItem?.subject?.includes("Enrollment") || ignioItem?.num === "INC0048915" || ignioItem?.num === "RITM004120")
                       ? "Verifying member enrollment records processed successfully and setting ticket status to Resolved."
                       : "Verifying batch job resumed successfully, all records ingested, and setting ticket status to Resolved."
                   },
@@ -3642,9 +3748,25 @@ export default function LandingPage() {
                   <Icon name="bot" size={22} />
                 </div>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#f8fafc" }}>
-                    {deterministicItem?.num || "Automated Resolution Assistant"}
-                  </h3>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span
+                      style={{
+                        background: "rgba(139, 92, 246, 0.2)",
+                        border: "1px solid rgba(139, 92, 246, 0.4)",
+                        color: "#c4b5fd",
+                        padding: "2px 8px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        fontWeight: "800",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {deterministicItem?.num || "INC0048219"}
+                    </span>
+                    <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700", color: "#f8fafc" }}>
+                      {deterministicItem?.service || deterministicItem?.num || "Automated Resolution Assistant"}
+                    </h3>
+                  </div>
                   <div style={{ fontSize: "12px", color: "#94a3b8", marginTop: "2px" }}>
                     Ticket: <strong>{deterministicItem?.subject?.split(" - ")[0] || deterministicItem?.subject || "Support Ticket"}</strong>
                   </div>
@@ -3662,6 +3784,7 @@ export default function LandingPage() {
 
             {/* Chat Body */}
             <div
+              ref={deterministicChatBodyRef}
               style={{
                 flex: 1,
                 overflowY: "auto",
@@ -3670,6 +3793,7 @@ export default function LandingPage() {
                 flexDirection: "column",
                 gap: "14px",
                 background: "#0b0f19",
+                scrollBehavior: "smooth",
               }}
             >
               {deterministicMessages.map((msg) => (
@@ -3777,7 +3901,7 @@ export default function LandingPage() {
                 </div>
               )}
 
-
+              <div ref={deterministicChatEndRef} style={{ height: "1px", width: "100%", flexShrink: 0 }} />
             </div>
 
             {/* Input Area / Footer */}
@@ -3796,11 +3920,11 @@ export default function LandingPage() {
 
                 if (stepCount === 1) {
                   let suggestedText = "";
-                  if (deterministicItem?.id === "ar1" || deterministicItem?.num?.includes("Member Portal")) {
+                  if (deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("Member Portal") || deterministicItem?.subject?.includes("Verification Code")) {
                     suggestedText = "I'm unable to log in to the member portal. It keeps asking for a verification code, but I'm not receiving any email";
-                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.num?.includes("Data Validation")) {
+                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Registration") || deterministicItem?.subject?.includes("Date of Birth")) {
                     suggestedText = "It says my date of birth is incorrect, but I'm entering the right one. I can't log in";
-                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.num?.includes("Account Identity")) {
+                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Account Identity") || deterministicItem?.subject?.includes("Existing Account")) {
                     suggestedText = "I'm trying to create an account, but it keeps saying I already have one";
                   }
 
