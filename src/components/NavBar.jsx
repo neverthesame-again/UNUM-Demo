@@ -7,8 +7,8 @@ import { useTheme } from "../context/ThemeContext";
 import { layoutService } from "../services/layout.service";
 import accessRequestService from "../services/access-request.service";
 import { useToast } from "./Toast";
-import darkModeLogo from "../assets/guidewell-darkmodelogo.png";
-import lightModeLogo from "../assets/guidewell-lightmodelogo.png";
+import darkModeLogo from "../assets/unum-darkmodelogo.png";
+import lightModeLogo from "../assets/unum-lightmodelogo.png";
 
 export const NavBar = () => {
   const { user, logout, isAuthenticated, loading } = useAuth();

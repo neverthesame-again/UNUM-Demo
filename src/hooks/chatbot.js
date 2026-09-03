@@ -14,8 +14,8 @@ export const PREDEFINED_PROMPTS = [
 ];
 
 const PROMPT_CHAR_LIMIT = 44;
-const STORAGE_SESSIONS_KEY = "guidewell_chatbot_sessions";
-const STORAGE_MESSAGES_PREFIX = "guidewell_chatbot_msgs_";
+const STORAGE_SESSIONS_KEY = "unum_chatbot_sessions";
+const STORAGE_MESSAGES_PREFIX = "unum_chatbot_msgs_";
 
 export function getCurrentTimestamp() {
   const now = new Date();
@@ -195,7 +195,7 @@ export function useChatbot() {
 
   const getWelcomeMessage = () => ({
     sender: "bot",
-    text: "Hi! How can I help you with GuideWell AI Hub IT operations or incident data today?",
+    text: "Hi! How can I help you with UNUM AI Hub IT operations or incident data today?",
     timestamp: getCurrentTimestamp(),
   });
 

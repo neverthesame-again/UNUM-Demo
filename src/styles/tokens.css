@@ -242,8 +242,8 @@
   --surface-overlay: rgba(16, 33, 76, 0.58);
   --surface-tooltip: #142654;
   /* white text on it = 13.6:1 */
-  --surface-nav: #142654;
-  /* index topbar navy         */
+  --surface-nav: #ffffff;
+  /* index topbar white         */
   --surface-subtle: rgba(36, 91, 232, 0.04);
 
   /* ── Semantic Border ──
@@ -264,15 +264,15 @@
   --text-faint: rgba(22, 32, 51, 0.42);
   --text-on-accent: #ffffff;
   /* on #245be8 = 5.6:1        */
-  --text-on-nav: #ffffff;
-  /* on #142654 = 13.6:1       */
+  --text-on-nav: #162033;
+  /* on white navbar = 15.4:1  */
 
-  /* ── Navbar User Profile Tokens (these sit on the navy bar) ── */
+  /* ── Navbar User Profile Tokens (these sit on the white bar) ── */
   --nav-user-bg: transparent;
-  --nav-user-hover: rgba(255, 255, 255, 0.08);
+  --nav-user-hover: rgba(22, 32, 51, 0.06);
   --nav-avatar-bg: var(--blue2);
   --nav-avatar-color: #ffffff;
-  --nav-user-subtext: rgba(255, 255, 255, 0.7);
+  --nav-user-subtext: #657184;
   --select-arrow-icon: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%23245be8%22 d=%22M6 9L1 4h10z%22/%3E%3C/svg%3E");
 
   /* ── Semantic Hover ── */
@@ -282,7 +282,7 @@
   --shadow-card: 0 2px 8px rgba(30, 43, 80, 0.07);
   --shadow-card-hover: 0 10px 28px rgba(30, 43, 80, 0.14);
   --shadow-modal: 0 24px 60px rgba(16, 33, 76, 0.22);
-  --shadow-nav: 0 9px 24px rgba(18, 35, 79, 0.20);
+  --shadow-nav: 0 4px 20px rgba(18, 35, 79, 0.08);
   --shadow-dropdown: 0 8px 24px rgba(16, 33, 76, 0.16);
 
   /* ── Alias (legacy names kept for backward compat) ── */

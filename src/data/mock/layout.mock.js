@@ -2,7 +2,7 @@
 
 export const layoutMock = {
   nav: {
-    logoText: "GuideWell",
+    logoText: "UNUM",
     links: [
       { label: "Home", href: "/", key: "home" },
       { label: "About", href: "/#mission", key: "about" },
@@ -12,6 +12,6 @@ export const layoutMock = {
     dashboardLink: { label: "Dashboard", href: "/dashboard", key: "dashboard" },
   },
   footer: {
-    text: "© 2026 GuideWell AI HUB· One GuideWell AI Platform · All rights reserved",
+    text: "© 2026 UNUM AI HUB· One UNUM AI Platform · All rights reserved",
   },
 };

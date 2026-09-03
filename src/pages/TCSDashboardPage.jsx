@@ -1795,10 +1795,10 @@ function AIOpsView({ data, selectedGroup, datePeriod, fromDate, toDate }) {
             </span>
           </div>
 
-          {/* GuideWell Queries Stacked Bar */}
+          {/* UNUM Queries Stacked Bar */}
           <div style={{ marginBottom: "20px" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
-              <span style={{ fontSize: "13px", color: "var(--cen-text-secondary, #94a3b8)", fontWeight: "500" }}>GuideWell Queries</span>
+              <span style={{ fontSize: "13px", color: "var(--cen-text-secondary, #94a3b8)", fontWeight: "500" }}>UNUM Queries</span>
               <span style={{ fontSize: "13px", color: "var(--cen-text-primary, #ffffff)", fontWeight: "700" }}>42% / 58%</span>
             </div>
             <div className="cen-progress-track" style={{ display: "flex" }}>

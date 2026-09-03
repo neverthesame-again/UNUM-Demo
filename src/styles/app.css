@@ -40,10 +40,6 @@
   display: block;
 }
 
-[data-theme='light'] .nav-logo-img {
-  filter: brightness(0) invert(1);
-}
-
 .nav-links {
   display: flex;
   align-items: center;
@@ -67,7 +63,7 @@
 
 .nav-link:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--nav-user-hover);
 }
 
 .nav-link.active {
@@ -88,8 +84,8 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--nav-user-hover);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   color: var(--text-on-nav);
   cursor: pointer;
@@ -98,8 +94,8 @@
 }
 
 .theme-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--hover-bg);
+  border-color: var(--border-hover);
 }
 
 /* Theme Toggle Button Tooltip */

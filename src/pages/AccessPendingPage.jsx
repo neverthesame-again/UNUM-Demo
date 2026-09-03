@@ -20,7 +20,7 @@ export default function AccessPendingPage() {
       
       <div className="login-split">
         <div className="login-left">
-          <div className="login-badge">GuideWell AI Platform</div>
+          <div className="login-badge">UNUM AI Platform</div>
           <h2>Access Request Pending</h2>
           <p>
             Your account is currently under review by an administrator. This process ensures the security and proper authorization of all platform users.

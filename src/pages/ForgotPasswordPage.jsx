@@ -130,7 +130,7 @@ export default function ForgotPasswordPage() {
       <div className="orb orb-2" style={{ opacity: 0.1 }} />
       <div className="login-split">
         <div className="login-left">
-          <div className="login-badge">GuideWell AI Platform</div>
+          <div className="login-badge">UNUM AI Platform</div>
           <h2>Account Recovery</h2>
           <p>
             Recover your account using your registered email and birth year.

@@ -185,7 +185,7 @@ export default function RegisterPage() {
       
       <div className="login-split">
         <div className="login-left">
-          <div className="login-badge">GuideWell AI Platform</div>
+          <div className="login-badge">UNUM AI Platform</div>
           <h2>Create Your Account</h2>
           <p>
             Get started with role-based enterprise AI designed for innovation. Select your domain and role to unlock dedicated AI agents and project workspaces
@@ -206,7 +206,7 @@ export default function RegisterPage() {
           </div>
         </div>
         <div className="login-right">
-          <h3>GuideWell AI Platform</h3>
+          <h3>UNUM AI Platform</h3>
           <p className="login-subtitle">Create your account</p>
 
           <form onSubmit={handleSubmit}>

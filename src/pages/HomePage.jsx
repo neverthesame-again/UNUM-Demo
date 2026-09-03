@@ -74,7 +74,7 @@ export default function HomePage() {
                 </div>
                 <div className="browser-url">
                   <span className="url-lock">🔒</span>
-                  <span>guidewell/dashboard</span>
+                  <span>unum/dashboard</span>
                 </div>
               </div>
               <div className="browser-content">
@@ -90,7 +90,7 @@ export default function HomePage() {
                       }}
                     />
                     <span style={{ fontSize: "10px", fontWeight: "700" }}>
-                      GuideWell AI HUB
+                      UNUM AI HUB
                     </span>
                   </div>
                 </div>

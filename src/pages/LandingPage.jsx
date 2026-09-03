@@ -57,7 +57,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "Product catalog; master data platform",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Duplicate product records",
@@ -76,7 +76,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "Product catalog; ERP",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Stale product documentation",
@@ -95,7 +95,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "SharePoint; product knowledge base",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Product launch checklist gaps",
@@ -114,7 +114,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "SharePoint; Planner; Teams",
     "Human Review Required": "FALSE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Product feedback not categorized",
@@ -133,7 +133,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "CRM; survey platform; product backlog",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Release notes assembly",
@@ -152,7 +152,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "Azure DevOps; SharePoint",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Unassigned inbound leads",
@@ -171,7 +171,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "CRM; territory data; Teams",
     "Human Review Required": "FALSE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Stalled sales opportunities",
@@ -190,7 +190,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "CRM; Outlook; Planner",
     "Human Review Required": "FALSE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Quote approval delays",
@@ -209,7 +209,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "CPQ; SharePoint Approvals; Teams",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "CRM contact data incomplete",
@@ -228,7 +228,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "CRM; enrichment provider",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Meeting follow-up tasks not created",
@@ -247,7 +247,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "Teams; Outlook; Planner; CRM",
     "Human Review Required": "TRUE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   },
   {
     "Issue or Task Summary": "Weekly pipeline summary preparation",
@@ -266,7 +266,7 @@ const AUTOMATION_DATA = [
     "Systems or Data Sources": "CRM; SharePoint; Teams",
     "Human Review Required": "FALSE",
     "Item Type": "Item",
-    "Path": "sites/GuideWellLargeDeal/Lists/Product and Sales Automation Grid"
+    "Path": "sites/UNUMLargeDeal/Lists/Product and Sales Automation Grid"
   }
 ];
 
