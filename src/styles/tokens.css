@@ -207,29 +207,29 @@
   --navy3: #eef2f8;
   /* recessed panel, foot of page gradient  */
 
-  --blue: #10214c;
-  /* deepest navy — headings, nav base      */
-  --blue2: #245be8;
-  /* action accent — links, primary CTA     */
-  --blue3: #4a7bf0;
+  --blue: #002d54;
+  /* deepest unum navy — headings, text     */
+  --blue2: #004b87;
+  /* UNUM logo brand blue — primary buttons */
+  --blue3: #005fa8;
   /* accent lifted — hover on solid blue    */
-  --blue4: #1c47c0;
+  --blue4: #003b6d;
   /* accent pressed — active state          */
-  --blue5: #142654;
-  /* chip / pill navy (index .panel-chip)   */
-  --cyan: #245be8;
-  /* alias of the action accent — no teal   */
-  --cyan2: #4a7bf0;
+  --blue5: #002544;
+  /* chip / pill navy                       */
+  --cyan: #004b87;
+  /* UNUM blue                              */
+  --cyan2: #005fa8;
   --gold: #f2aa22;
   /* index --warning                        */
 
   /* RGB tuples for rgba() — must track the hex values above */
-  --blue2-rgb: 36, 91, 232;
-  --cyan-rgb: 36, 91, 232;
-  --cyan-glow-rgb: 36, 91, 232;
+  --blue2-rgb: 0, 75, 135;
+  --cyan-rgb: 0, 75, 135;
+  --cyan-glow-rgb: 0, 75, 135;
   --gold-rgb: 242, 170, 34;
   --white-rgb: 255, 255, 255;
-  --navy-rgb: 16, 33, 76;
+  --navy-rgb: 0, 45, 84;
 
   /* ── Semantic Surface ── */
   --surface-page: var(--page-bg);

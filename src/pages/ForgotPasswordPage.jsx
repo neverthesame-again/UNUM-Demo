@@ -5,10 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { authService } from "../services/auth.service";
 import { useToast } from "../components/Toast";
-import { useForceTheme } from "../context/ThemeContext";
 
 export default function ForgotPasswordPage() {
-  useForceTheme("dark");
   const [step, setStep] = useState(1); // 1: Verify identity, 2: Reset password
   const [email, setEmail] = useState("");
   const [birthYear, setBirthYear] = useState("");

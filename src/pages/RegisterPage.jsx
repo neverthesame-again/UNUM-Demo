@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
-import { useForceTheme } from "../context/ThemeContext";
 
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 
@@ -17,7 +16,6 @@ const ALL_ROLES = [
 ];
 
 export default function RegisterPage() {
-  useForceTheme("dark");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -341,9 +339,9 @@ export default function RegisterPage() {
               {isDomainOpen && (
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0,
-                  background: '#0f172a', border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'var(--surface-card)', border: '1px solid var(--border)',
                   borderRadius: '8px', padding: '8px', zIndex: 10, marginTop: '4px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.8)'
+                  boxShadow: 'var(--shadow-dropdown)'
                 }}>
                   {BUSINESS_AREAS.filter(a => a.status !== 'coming_soon').map(area => (
                     <label key={area.id} style={{ display: 'flex', alignItems: 'center', padding: '8px', cursor: 'pointer' }}>
@@ -379,9 +377,9 @@ export default function RegisterPage() {
               {isRoleOpen && (
                 <div style={{
                   position: 'absolute', top: '100%', left: 0, right: 0,
-                  background: '#0f172a', border: '1px solid rgba(255, 255, 255, 0.1)',
+                  background: 'var(--surface-card)', border: '1px solid var(--border)',
                   borderRadius: '8px', padding: '8px', zIndex: 10, marginTop: '4px',
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.8)', maxHeight: '200px', overflowY: 'auto'
+                  boxShadow: 'var(--shadow-dropdown)', maxHeight: '200px', overflowY: 'auto'
                 }}>
                   {ALL_ROLES.map(r => {
                     const enabled = isRoleEnabled(r.domain);

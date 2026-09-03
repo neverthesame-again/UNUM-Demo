@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../components/Toast";
-import { useForceTheme } from "../context/ThemeContext";
 import { supabase } from '../lib/supabase';
 import { BUSINESS_AREAS, getRolesForBusinessArea } from "../constants/business-areas";
 import { isSuperAdminEmail } from "../constants/admin-emails";
@@ -21,7 +20,6 @@ const content = {
 };
 
 export default function LoginPage() {
-  useForceTheme("dark");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessArea, setBusinessArea] = useState("");
@@ -247,27 +245,27 @@ export default function LoginPage() {
                 cursor: "pointer"
               }}
             >
-              <option value="" disabled style={{ background: "#0f172a", color: "#94a3b8" }}>
+              <option value="" disabled style={{ background: "var(--surface-card)", color: "var(--text-muted)" }}>
                 Select Domain
               </option>
               {BUSINESS_AREAS.map((area) => {
-                const isComingSoon = area.status === "coming_soon";
-                const isAreaAllowed = isSuperAdmin || allowedDomains.includes(area.name);
-                const isDisabled = isComingSoon || (!isAreaAllowed && email.includes('@'));
-                return (
-                  <option
-                    key={area.id}
-                    value={area.name}
-                    disabled={isDisabled}
-                    style={{
-                      background: "#0f172a",
-                      color: isDisabled ? "#64748b" : "#e2e8f0"
-                    }}
-                  >
-                    {area.name} {isComingSoon ? "(Coming Soon)" : (email.includes('@') && !isAreaAllowed) ? "(Unauthorized)" : ""}
-                  </option>
-                );
-              })}
+                 const isComingSoon = area.status === "coming_soon";
+                 const isAreaAllowed = isSuperAdmin || allowedDomains.includes(area.name);
+                 const isDisabled = isComingSoon || (!isAreaAllowed && email.includes('@'));
+                 return (
+                   <option
+                     key={area.id}
+                     value={area.name}
+                     disabled={isDisabled}
+                     style={{
+                       background: "var(--surface-card)",
+                       color: isDisabled ? "var(--text-muted)" : "var(--text-primary)"
+                     }}
+                   >
+                     {area.name} {isComingSoon ? "(Coming Soon)" : (email.includes('@') && !isAreaAllowed) ? "(Unauthorized)" : ""}
+                   </option>
+                 );
+               })}
             </select>
 
             <label className="form-label">Role</label>
@@ -283,7 +281,7 @@ export default function LoginPage() {
                 cursor: !businessArea || allAreaRoles.length === 0 ? "not-allowed" : "pointer"
               }}
             >
-              <option value="" disabled style={{ background: "#0f172a", color: "#94a3b8" }}>
+              <option value="" disabled style={{ background: "var(--surface-card)", color: "var(--text-muted)" }}>
                 {!businessArea
                   ? "Select Business Area First"
                   : allAreaRoles.length === 0
@@ -298,8 +296,8 @@ export default function LoginPage() {
                     value={r.value}
                     disabled={!isAllowed && email.includes('@')}
                     style={{
-                      background: "#0f172a",
-                      color: (isAllowed || !email.includes('@')) ? "#e2e8f0" : "#64748b"
+                      background: "var(--surface-card)",
+                      color: (isAllowed || !email.includes('@')) ? "var(--text-primary)" : "var(--text-muted)"
                     }}
                   >
                     {r.label} {(!isAllowed && email.includes('@')) ? "(Unauthorized)" : ""}

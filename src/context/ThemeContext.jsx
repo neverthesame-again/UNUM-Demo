@@ -13,28 +13,20 @@ export const useTheme = () => {
   return context;
 };
 
-// Forces a specific theme (ignoring the user's saved preference and the toggle)
-// while the calling component is mounted, e.g. pre-login pages that should
-// always render dark. Restores the real preference on unmount.
-export const useForceTheme = (forced) => {
-  const { setForcedTheme } = useTheme();
-
-  useEffect(() => {
-    setForcedTheme(forced);
-    return () => setForcedTheme(null);
-  }, [forced, setForcedTheme]);
+// No-op to preserve backward compatibility without overriding user's chosen theme
+export const useForceTheme = () => {
+  // Theme is persistent across all pages based on user preference
 };
 
 const getInitialTheme = () => {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  return "dark";
+  return "light";
 };
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(getInitialTheme);
-  const [forcedTheme, setForcedTheme] = useState(null);
-  const effectiveTheme = forcedTheme || theme;
+  const effectiveTheme = theme;
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", effectiveTheme);
@@ -50,7 +42,7 @@ export const ThemeProvider = ({ children }) => {
 
   return (
     <ThemeContext.Provider
-      value={{ theme, toggleTheme, setTheme, setForcedTheme, forcedTheme }}
+      value={{ theme, toggleTheme, setTheme, setForcedTheme: () => {}, forcedTheme: null }}
     >
       {children}
     </ThemeContext.Provider>

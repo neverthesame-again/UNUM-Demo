@@ -5,10 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { homeService } from "../services/home.service";
 import { Icon } from "../components/Icon";
 import { Footer } from "../components/Footer";
-import { useForceTheme } from "../context/ThemeContext";
 
 export default function HomePage() {
-  useForceTheme("dark");
   const navigate = useNavigate();
   const [pillarCards, setPillarCards] = useState([]);
   const heroContent = homeService.getHeroContent();
