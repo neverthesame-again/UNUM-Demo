@@ -902,13 +902,13 @@ export default function LandingPage() {
               "Identity verification successful. A temporary password has been generated and sent to your registered email address. Please use the temporary password to sign in to the Business Application and update your password when prompted. Let me know once you have successfully logged in."
             );
           }, 7000);
-        } else if (stepCount === 7) {
+        } else if (stepCount === 8) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
             addMsg("agent", "Password reset completed successfully. Login Validated. Your access has been restored successfully.");
           }, 6000);
-        } else if (stepCount === 8) {
+        } else if (stepCount === 9) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
@@ -952,13 +952,13 @@ export default function LandingPage() {
               "Thank you. Running a post-restart health check now.\n\nService Status: Running\nHealth Check: Passed.\n\nPlease try launching the application again and let me know if it opens successfully."
             );
           }, 7000);
-        } else if (stepCount === 7) {
+        } else if (stepCount === 8) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
             addMsg("agent", "Application launch has been validated successfully. Application Launch Verified. The issue has been resolved successfully.");
           }, 6000);
-        } else if (stepCount === 8) {
+        } else if (stepCount === 9) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
@@ -3924,48 +3924,62 @@ export default function LandingPage() {
               }}
             >
               {(() => {
+                if (deterministicAgentTyping || deterministicIsResolved) return null;
                 const stepCount = deterministicMessages.length;
 
-                if (stepCount === 1) {
-                  let suggestedText = "";
-                  if (deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("MyU Portal") || deterministicItem?.subject?.includes("MyU Portal")) {
-                    suggestedText = "I cannot log in to MyU Portal.";
-                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Business Application") || deterministicItem?.subject?.includes("Business Application")) {
-                    suggestedText = "I forgot my password for the Business Application.";
-                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Employee Benefits") || deterministicItem?.subject?.includes("Application Not Launching")) {
-                    suggestedText = "Application is not launching.";
-                  }
+                let suggestedText = "";
+                const isFlow1 = deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("MyU Portal") || deterministicItem?.subject?.includes("MyU Portal");
+                const isFlow2 = deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Business Application") || deterministicItem?.subject?.includes("Business Application");
+                const isFlow3 = deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Employee Benefits") || deterministicItem?.subject?.includes("Application Not Launching");
 
-                  if (suggestedText) {
-                    return (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setDeterministicMessages((prev) => [
-                            ...prev,
-                            { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-                          ]);
-                        }}
-                        style={{
-                          background: "rgba(59, 130, 246, 0.1)",
-                          border: "1px solid #3b82f6",
-                          color: "#60a5fa",
-                          padding: "10px 16px",
-                          borderRadius: "20px",
-                          fontSize: "13px",
-                          cursor: "pointer",
-                          textAlign: "left",
-                          transition: "all 0.2s",
-                          alignSelf: "flex-start",
-                          marginBottom: "4px"
-                        }}
-                        onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
-                        onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
-                      >
-                        {suggestedText}
-                      </button>
-                    );
-                  }
+                if (isFlow1) {
+                  if (stepCount === 1) suggestedText = "I cannot log in to MyU Portal.";
+                  else if (stepCount === 3) suggestedText = "USR-40291";
+                  else if (stepCount === 5) suggestedText = "Cache cleared";
+                  else if (stepCount === 7) suggestedText = "Cookies cleared";
+                  else if (stepCount === 9) suggestedText = "Done";
+                  else if (stepCount === 11) suggestedText = "Logged in successfully";
+                } else if (isFlow2) {
+                  if (stepCount === 1) suggestedText = "I forgot my password for the Business Application.";
+                  else if (stepCount === 3) suggestedText = "USR-88219";
+                  else if (stepCount === 5) suggestedText = "david@example.com";
+                  else if (stepCount === 7) suggestedText = "Logged in successfully";
+                } else if (isFlow3) {
+                  if (stepCount === 1) suggestedText = "Application is not launching.";
+                  else if (stepCount === 3) suggestedText = "Employee Benefits Portal";
+                  else if (stepCount === 5) suggestedText = "Service restarted";
+                  else if (stepCount === 7) suggestedText = "The application launched successfully.";
+                }
+
+                if (suggestedText) {
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeterministicMessages((prev) => [
+                          ...prev,
+                          { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+                        ]);
+                      }}
+                      style={{
+                        background: "rgba(59, 130, 246, 0.1)",
+                        border: "1px solid #3b82f6",
+                        color: "#60a5fa",
+                        padding: "8px 14px",
+                        borderRadius: "20px",
+                        fontSize: "13px",
+                        cursor: "pointer",
+                        textAlign: "left",
+                        transition: "all 0.2s",
+                        alignSelf: "flex-start",
+                        marginBottom: "4px"
+                      }}
+                      onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
+                      onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
+                    >
+                      💡 Suggestion: {suggestedText}
+                    </button>
+                  );
                 }
                 return null;
               })()}
