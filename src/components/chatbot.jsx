@@ -373,7 +373,7 @@ function formatMarkdownText(text) {
   return ensureLinksOpenInNewTab(escaped);
 }
 
-export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
+export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false, isPrdMode = false }) {
   const [, setMarkedReady] = useState(false);
 
   const {
@@ -383,6 +383,8 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
     input,
     setInput,
     messages,
+    quickReplies,
+    activePrompts,
     showConfirmModal,
     messagesEndRef,
     // History & Sessions state
@@ -403,7 +405,7 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
     showConfirmation,
     confirmClose,
     cancelClose,
-  } = useChatbot();
+  } = useChatbot({ isPrdMode });
 
   // Load chatbot.css styling and marked library on mount
   useEffect(() => {
@@ -630,7 +632,16 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                             target.innerText.includes("Download PRD"))
                         ) {
                           e.preventDefault();
-                          downloadDocxFile(msg.text, "Product_Requirement_Document.docx");
+                          try {
+                            const link = document.createElement("a");
+                            link.href = "/PRD_SYNINC0000012_Dental_Coverage_Disambiguation.docx";
+                            link.download = "PRD_SYNINC0000012_Dental_Coverage_Disambiguation.docx";
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          } catch (_) {
+                            downloadDocxFile(msg.text, "PRD_SYNINC0000012_Dental_Coverage_Disambiguation.docx");
+                          }
                         }
                       }}
                     />
@@ -654,9 +665,18 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                               boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
                               transition: "background-color 0.2s ease",
                             }}
-                            onClick={() =>
-                              downloadDocxFile(msg.text, "Product_Requirement_Document.docx")
-                            }
+                            onClick={() => {
+                              try {
+                                const link = document.createElement("a");
+                                link.href = "/PRD_SYNINC0000012_Dental_Coverage_Disambiguation.docx";
+                                link.download = "PRD_SYNINC0000012_Dental_Coverage_Disambiguation.docx";
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                              } catch (_) {
+                                downloadDocxFile(msg.text, "PRD_SYNINC0000012_Dental_Coverage_Disambiguation.docx");
+                              }
+                            }}
                             title="Download PRD as Word Document (.docx)"
                           >
                             <svg
@@ -711,7 +731,7 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
             {/* Predefined Prompt Chips */}
             {showPrompts && (
               <div className="centene-predefined-prompts">
-                {PREDEFINED_PROMPTS.map((promptText, idx) => (
+                {(activePrompts || PREDEFINED_PROMPTS).map((promptText, idx) => (
                   <div
                     key={idx}
                     className="centene-prompt-item"
@@ -720,6 +740,59 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                   >
                     {promptText}
                   </div>
+                ))}
+              </div>
+            )}
+
+            {/* Dynamic Interactive Quick Replies */}
+            {!showPrompts && quickReplies && quickReplies.length > 0 && !loading && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "8px",
+                  flexWrap: "wrap",
+                  padding: "8px 16px",
+                  background: "rgba(0,0,0,0.15)",
+                }}
+              >
+                {quickReplies.map((qr, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => sendMessage(qr)}
+                    style={{
+                      background: "rgba(6, 182, 212, 0.15)",
+                      border: "1px solid rgba(6, 182, 212, 0.45)",
+                      color: "var(--cyan, #38bdf8)",
+                      padding: "6px 14px",
+                      borderRadius: "16px",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(6, 182, 212, 0.28)";
+                      e.currentTarget.style.transform = "translateY(-1px)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(6, 182, 212, 0.15)";
+                      e.currentTarget.style.transform = "none";
+                    }}
+                  >
+                    {qr.startsWith("generate RCA") ? (
+                      <>⚡ {qr}</>
+                    ) : qr === "yes" ? (
+                      <>✅ Yes</>
+                    ) : qr === "no" ? (
+                      <>❌ No</>
+                    ) : (
+                      qr
+                    )}
+                  </button>
                 ))}
               </div>
             )}

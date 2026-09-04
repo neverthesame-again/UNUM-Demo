@@ -2083,25 +2083,25 @@ export default function LandingPage() {
                 {/* Card header row — ID + badge */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--text-primary)" }}>
-                    CARE-DASHBOARD-HIGH
+                    SYNINC0000012
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "700",
                     background: "var(--cyan)", color: "var(--navy)",
                     padding: "3px 12px", borderRadius: "20px",
                   }}>
-                    High Priority
+                    Moderate Priority
                   </span>
                 </div>
 
                 {/* Cyan sub-title */}
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)", marginBottom: "10px" }}>
-                  Top 10 Incidents — Care Dashboard, January 2025
+                  Dental Coverage Not Displayed — MyMember Benefits Portal
                 </div>
 
                 {/* Description */}
                 <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.6 }}>
-                  Generate a PRD from the top 10 high-priority incidents in the Care Dashboard application for January 2025, including SLA breaches, MTTR and root cause analysis.
+                  Generate a PRD from incident SYNINC0000012 in MyMember Benefits Portal (Dental Coverage Not Displayed), resolving ambiguous person selection for covered dependents.
                 </p>
 
                 {/* Meta badges */}
@@ -2112,7 +2112,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(16,185,129,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Urgency: 1 – High
+                    Urgency: Moderate
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "700",
@@ -2120,7 +2120,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(6,182,212,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Application: Care Dashboard
+                    Application: MyMember Benefits Portal
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "600",
@@ -2128,14 +2128,14 @@ export default function LandingPage() {
                     border: "1px solid var(--border)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    CARE-DASH-JAN25
+                    SYNINC0000012
                   </span>
                 </div>
 
                 {/* Footer row */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                   <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-                    Application: <strong style={{ color: "var(--text-primary)" }}>BSpoke Application</strong>
+                    Application: <strong style={{ color: "var(--text-primary)" }}>MyMember Benefits Portal - Production</strong>
                   </span>
                   <button
                     type="button"
@@ -2179,6 +2179,7 @@ export default function LandingPage() {
                 key={prdChatKey}
                 hideFloat={true}
                 defaultOpen={true}
+                isPrdMode={true}
               />
             )}
           </div>

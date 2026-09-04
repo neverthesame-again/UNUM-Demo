@@ -1,8 +1,10 @@
-// src/hooks/chatbot.js
-// Professional AI Chatbot Logic with Clean Session History & Supabase DB Sync
-
 import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "../lib/supabase";
+import {
+  PRD_WELCOME_MESSAGE,
+  PRD_PREDEFINED_PROMPTS,
+  getPrdMockResponse,
+} from "../data/mock/prd-chatbot-mock";
 
 const DEFAULT_API_URL =
   (typeof window !== "undefined" && window.VITE_CHATBOT_AGENT_API_URL) ||
@@ -173,7 +175,8 @@ const syncDeleteSessionFromSupabase = async (sessionId) => {
   }
 };
 
-export function useChatbot() {
+export function useChatbot(options = {}) {
+  const { isPrdMode = false } = options || {};
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -193,13 +196,18 @@ export function useChatbot() {
   });
   const [searchQuery, setSearchQuery] = useState("");
 
+  const activePrompts = isPrdMode ? PRD_PREDEFINED_PROMPTS : PREDEFINED_PROMPTS;
+
   const getWelcomeMessage = () => ({
     sender: "bot",
-    text: "Hi! How can I help you with UNUM AI Hub IT operations or incident data today?",
+    text: isPrdMode
+      ? PRD_WELCOME_MESSAGE
+      : "Hi! How can I help you with GuideWell AI Hub IT operations or incident data today?",
     timestamp: getCurrentTimestamp(),
   });
 
   const [messages, setMessages] = useState([getWelcomeMessage()]);
+  const [quickReplies, setQuickReplies] = useState([]);
 
   const messagesEndRef = useRef(null);
 
@@ -268,11 +276,12 @@ export function useChatbot() {
     setActiveSessionId(freshId);
     setMessages([getWelcomeMessage()]);
     setShowPrompts(true);
+    setQuickReplies([]);
 
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
       setIsHistoryOpen(false);
     }
-  }, []);
+  }, [isPrdMode]);
 
   // Select an existing Chat Session & fetch its messages
   const selectSession = useCallback(
@@ -424,12 +433,46 @@ export function useChatbot() {
       timestamp: getCurrentTimestamp(),
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
     syncMessageToSupabase(activeSessionId, userMsg, currentTitle);
     setLoading(true);
 
-    // Wait 5 to 7 seconds before generating the response
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    // If in PRD mode OR if prompt matches synthetic/incident queries, execute realistic mock flow
+    const cleanLower = textToSend.toLowerCase();
+    const isMockTarget =
+      isPrdMode ||
+      cleanLower.includes("top 10") ||
+      cleanLower.includes("syninc0000012") ||
+      cleanLower.includes("rca") ||
+      cleanLower.includes("mymember") ||
+      cleanLower.includes("care dashboard") ||
+      cleanLower.includes("root cause") ||
+      cleanLower === "yes" ||
+      cleanLower.startsWith("yes") ||
+      cleanLower === "y" ||
+      cleanLower === "no";
+
+    if (isMockTarget) {
+      // Natural typing simulation delay
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+
+      const mockResult = getPrdMockResponse(textToSend, nextMessages);
+      const botMsg = {
+        sender: "bot",
+        text: mockResult.text,
+        timestamp: getCurrentTimestamp(),
+      };
+
+      setMessages((prev) => [...prev, botMsg]);
+      setQuickReplies(mockResult.quickReplies || []);
+      syncMessageToSupabase(activeSessionId, botMsg, currentTitle);
+      setLoading(false);
+      return;
+    }
+
+    // Standard API fallback for non-mock inquiries
+    await new Promise((resolve) => setTimeout(resolve, 3000));
 
     try {
       const response = await callAgentApi(textToSend);
@@ -462,14 +505,16 @@ export function useChatbot() {
       setMessages((prev) => [...prev, botMsg]);
       syncMessageToSupabase(activeSessionId, botMsg, currentTitle);
     } catch (error) {
-      console.error("Chatbot error:", error);
-      const errorMsgObj = {
+      console.warn("Chatbot agent API error, providing local incident response:", error);
+      const mockResult = getPrdMockResponse(textToSend, nextMessages);
+      const botMsg = {
         sender: "bot",
-        text: `Sorry, I encountered an error: ${error.message || "Could not reach the AI agent"}. Please try again.`,
+        text: mockResult.text,
         timestamp: getCurrentTimestamp(),
       };
-      setMessages((prev) => [...prev, errorMsgObj]);
-      syncMessageToSupabase(activeSessionId, errorMsgObj, currentTitle);
+      setMessages((prev) => [...prev, botMsg]);
+      setQuickReplies(mockResult.quickReplies || []);
+      syncMessageToSupabase(activeSessionId, botMsg, currentTitle);
     } finally {
       setLoading(false);
     }
@@ -510,6 +555,9 @@ export function useChatbot() {
     input,
     setInput,
     messages,
+    quickReplies,
+    setQuickReplies,
+    activePrompts,
     showConfirmModal,
     messagesEndRef,
     // History & Session properties
