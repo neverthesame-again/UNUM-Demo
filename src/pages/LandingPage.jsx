@@ -3829,7 +3829,7 @@ export default function LandingPage() {
                           Issue is resolved successfully!
                         </h4>
                         <p style={{ margin: 0, fontSize: "12px", color: "#cbd5e1" }}>
-                          Deterministic agent conversational validation completed. Ticket <strong>{deterministicItem?.num || "RITM004120"}</strong> status updated to <strong>Resolved</strong>.
+                          Ticket <strong>{deterministicItem?.num || "RITM004120"}</strong> status updated to <strong>Resolved</strong>.
                         </p>
                       </div>
                     </div>
