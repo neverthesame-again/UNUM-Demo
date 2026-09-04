@@ -3924,62 +3924,48 @@ export default function LandingPage() {
               }}
             >
               {(() => {
-                if (deterministicAgentTyping || deterministicIsResolved) return null;
                 const stepCount = deterministicMessages.length;
 
-                let suggestedText = "";
-                const isFlow1 = deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("MyU Portal") || deterministicItem?.subject?.includes("MyU Portal");
-                const isFlow2 = deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Business Application") || deterministicItem?.subject?.includes("Business Application");
-                const isFlow3 = deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Employee Benefits") || deterministicItem?.subject?.includes("Application Not Launching");
+                if (stepCount === 1) {
+                  let suggestedText = "";
+                  if (deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("MyU Portal") || deterministicItem?.subject?.includes("MyU Portal")) {
+                    suggestedText = "I cannot log in to MyU Portal.";
+                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Business Application") || deterministicItem?.subject?.includes("Business Application")) {
+                    suggestedText = "I forgot my password for the Business Application.";
+                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Employee Benefits") || deterministicItem?.subject?.includes("Application Not Launching")) {
+                    suggestedText = "Application is not launching.";
+                  }
 
-                if (isFlow1) {
-                  if (stepCount === 1) suggestedText = "I cannot log in to MyU Portal.";
-                  else if (stepCount === 3) suggestedText = "USR-40291";
-                  else if (stepCount === 5) suggestedText = "Cache cleared";
-                  else if (stepCount === 7) suggestedText = "Cookies cleared";
-                  else if (stepCount === 9) suggestedText = "Done";
-                  else if (stepCount === 11) suggestedText = "Logged in successfully";
-                } else if (isFlow2) {
-                  if (stepCount === 1) suggestedText = "I forgot my password for the Business Application.";
-                  else if (stepCount === 3) suggestedText = "USR-88219";
-                  else if (stepCount === 5) suggestedText = "david@example.com";
-                  else if (stepCount === 7) suggestedText = "Logged in successfully";
-                } else if (isFlow3) {
-                  if (stepCount === 1) suggestedText = "Application is not launching.";
-                  else if (stepCount === 3) suggestedText = "Employee Benefits Portal";
-                  else if (stepCount === 5) suggestedText = "Service restarted";
-                  else if (stepCount === 7) suggestedText = "The application launched successfully.";
-                }
-
-                if (suggestedText) {
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDeterministicMessages((prev) => [
-                          ...prev,
-                          { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
-                        ]);
-                      }}
-                      style={{
-                        background: "rgba(59, 130, 246, 0.1)",
-                        border: "1px solid #3b82f6",
-                        color: "#60a5fa",
-                        padding: "8px 14px",
-                        borderRadius: "20px",
-                        fontSize: "13px",
-                        cursor: "pointer",
-                        textAlign: "left",
-                        transition: "all 0.2s",
-                        alignSelf: "flex-start",
-                        marginBottom: "4px"
-                      }}
-                      onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
-                      onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
-                    >
-                      💡 Suggestion: {suggestedText}
-                    </button>
-                  );
+                  if (suggestedText) {
+                    return (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDeterministicMessages((prev) => [
+                            ...prev,
+                            { id: prev.length + 1, sender: "user", text: suggestedText, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }) }
+                          ]);
+                        }}
+                        style={{
+                          background: "rgba(59, 130, 246, 0.1)",
+                          border: "1px solid #3b82f6",
+                          color: "#60a5fa",
+                          padding: "10px 16px",
+                          borderRadius: "20px",
+                          fontSize: "13px",
+                          cursor: "pointer",
+                          textAlign: "left",
+                          transition: "all 0.2s",
+                          alignSelf: "flex-start",
+                          marginBottom: "4px"
+                        }}
+                        onMouseOver={(e) => e.target.style.background = "rgba(59, 130, 246, 0.2)"}
+                        onMouseOut={(e) => e.target.style.background = "rgba(59, 130, 246, 0.1)"}
+                      >
+                        {suggestedText}
+                      </button>
+                    );
+                  }
                 }
                 return null;
               })()}
