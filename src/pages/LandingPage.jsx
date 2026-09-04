@@ -567,9 +567,9 @@ export default function LandingPage() {
   // All tickets that live in Human-in-The-Loop.
   // They are NOT in the agent_resolve tab initially — they move there only after resolution.
   const HITL_SOURCE_ITEMS = [
-    { id: "ar1", num: "INC0048219", service: "Member Portal Auth", subject: "Verification Code Email Not Received - Member Portal Password Reset", desc: "User unable to log in to member portal due to unreceived password reset verification code email.", resolution: "Email Suppression Removal & Verification Reset Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
-    { id: "ar2", num: "INC0047582", service: "Member Registration", subject: "Application Issue - Date of Birth Validation Error", desc: "User unable to log in during registration due to date of birth validation error.", resolution: "DOB Validation & Format Verification Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
-    { id: "ar3", num: "INC0049301", service: "Account Identity", subject: "Application Issue - Existing Account Registration Conflict", desc: "User unable to create account due to system reporting existing account conflict.", resolution: "Account State Verification & Password Reset Guidance Flow", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar1", num: "INC0048219", service: "MyU Portal Auth", subject: "MyU Portal Login Issue", desc: "User unable to log in to MyU Portal. Authentication attempt failed.", resolution: "Browser Cache & Cookies Cleared — Login Validated", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar2", num: "INC0047582", service: "Business Application", subject: "Business Application — Forgot Password", desc: "User forgot password for Business Application. Password expired, identity verification required.", resolution: "Temporary Password Issued & Login Validated", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
+    { id: "ar3", num: "INC0049301", service: "Employee Benefits Portal", subject: "Application Not Launching — Employee Benefits Portal", desc: "Employee Benefits Portal is not launching. Service unavailable, restart and health check required.", resolution: "Service Restarted & Application Launch Verified", status: "Action Required", statusType: "warn", isDeterministic: true, actionLabel: "Agent Resolve" },
     { id: "arb1", num: "INC0046824", service: "Batch Scheduler", subject: "Batch Job Failure — Auto-Restart Required", desc: "Nightly batch job encountered an exception and stalled. AI auto-restart and lock clearance ready.", system: "Batch Scheduler", resolution: "Automated Batch Job Restart & Lock Clearance", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Batch Job Auto-Restart" },
     { id: "arb2", num: "INC0048915", service: "HR Enrollment", subject: "Member Enrollment Batch Stalled — Auto-Resume Required", desc: "Overnight HR member sign-up batch feed paused due to file lock. AI auto-resume ready.", system: "HR Enrollment", resolution: "Automated Member Enrollment Batch Resume", status: "Action Required", statusType: "warn", isIgnio: true, actionLabel: "Auto Resolve", batchTag: "Enrollment Batch Resume" },
   ];
@@ -823,39 +823,45 @@ export default function LandingPage() {
         ]);
       };
 
+      // ── Flow 1: MyU Portal Login Troubleshooting ─────────────────────────
       if (isVerificationFlow) {
         if (stepCount === 2) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I'm sorry you're having trouble logging in because the verification code email isn't coming through.\n\nAre you trying to log in, reset your password, or register a new account?");
+            addMsg("agent", "I can help with that. Could you please provide your User ID?");
           }, 6000);
         } else if (stepCount === 4) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I can help you reset your password and get the verification code email delivered.\n\nHave you checked your Spam/Junk (and Promotions, if you use Gmail) folders for the verification code email?");
+            addMsg("agent", "Thanks. I've found your account and checked the authentication records.\n\nApplication: MyU Portal\nAccount Status: Active\nLatest Authentication Attempt: Failed\n\nLet's go through a few troubleshooting steps. Please clear your browser cache and let me know once completed.");
           }, 7000);
         } else if (stepCount === 6) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I understand-thank you for confirming you've checked Spam/Junk and it's not there.\n\nWhat email address are you using to request the password reset verification code?");
+            addMsg("agent", "Great. Please clear your browser cookies. This helps remove any outdated authentication data. Let me know when you've completed this step.");
           }, 7000);
         } else if (stepCount === 8) {
-          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
-          const emailMatch = lastUserMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-          const targetEmail = emailMatch ? emailMatch[0] : (lastUserMsg.trim() || "supriya@yahoo.com");
-
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg(
-              "agent",
-              `I've got it - you're using ${targetEmail} for the password reset.\n\nI checked the status for that email and found it's suppressed (hard bounce), which means our verification/OTP emails are being blocked and won't deliver. I've removed the suppression and cleared the stale verification attempts, so the system is ready to send a new code.\n\nPlease follow these steps:\n\n1. Clear your browser cache and cookies (or open a Private/Incognito window).\n2. Go back to the portal sign-in page and select "Change Password" / "Forgot Password."\n3. Request a new verification code (use only the most recent code).\n4. Check your Inbox (and Spam/Junk again, just in case).\n5. The email will come from no-reply@mail.entrykeyid.com.\n6. Your verification code expires in about 5 minutes-if it expires, wait for it to fully expire before requesting another.\n\nYou should now be able to receive the code and reset your password successfully.`
-            );
-          }, 8000);
-        } else if (stepCount === 9) {
+            addMsg("agent", "Thank you. Please close and restart your browser. Once the browser has restarted, reply with Done.");
+          }, 7000);
+        } else if (stepCount === 10) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "Perfect. Please try signing in to MyU Portal again using your credentials. Were you able to log in successfully?");
+          }, 7000);
+        } else if (stepCount === 12) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "Your login has been validated successfully.");
+          }, 6000);
+        } else if (stepCount === 13) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
@@ -866,40 +872,43 @@ export default function LandingPage() {
             if (deterministicItem) {
               deterministicItem.status = "Resolved";
               deterministicItem.statusType = "good";
-              deterministicItem.resolution = "Suppression Removed & Verification Reset";
+              deterministicItem.resolution = "Browser Cache & Cookies Cleared — Login Validated";
               deterministicItem.timeToResolve = "14 seconds";
               deterministicItem.csat = "5/5 Stars";
               deterministicItem.isResolved = true;
             }
           }, 2000);
         }
+      // ── Flow 2: Business Application Password Reset ─────────────────────────────
       } else if (isDobFlow) {
         if (stepCount === 2) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I'm sorry you're running into that-I'd like to help get you logged in. Are you trying to register for a new account or log in to an existing account?");
+            addMsg("agent", "I can help you reset your password. Please provide your User ID.");
           }, 6000);
         } else if (stepCount === 4) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I understand-thanks for confirming you're registering for a new account.\n\nWhat exact date of birth are you entering (please type it exactly as you're inputting it, including any dashes or slashes)?");
+            addMsg("agent", "Thank you. I've found your account and checked the password details. Password was expired.\n\nI need to verify your identity before proceeding. Please confirm your registered email address: david@example.com");
           }, 7000);
         } else if (stepCount === 6) {
-          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
-          const dobMatch = lastUserMsg.match(/\d{2}[-/]\d{2}[-/]\d{4}/);
-          const typedDob = dobMatch ? dobMatch[0] : (lastUserMsg.trim() || "10-25-1990");
-
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks-yes, you're entering your date of birth in the correct format. ${typedDob} matches the required MM-DD-YYYY format, so this doesn't look like a formatting issue.\n\nPlease try re-entering it exactly as ${typedDob} (with dashes) and make sure there are no extra spaces before or after it.`
+              "Identity verification successful. A temporary password has been generated and sent to your registered email address. Please use the temporary password to sign in to the Business Application and update your password when prompted. Let me know once you have successfully logged in."
             );
-          }, 8000);
+          }, 7000);
         } else if (stepCount === 7) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "Password reset completed successfully. Login Validated. Your access has been restored successfully.");
+          }, 6000);
+        } else if (stepCount === 8) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
@@ -910,47 +919,46 @@ export default function LandingPage() {
             if (deterministicItem) {
               deterministicItem.status = "Resolved";
               deterministicItem.statusType = "good";
-              deterministicItem.resolution = "DOB Format Validated & Account Match Verified";
+              deterministicItem.resolution = "Temporary Password Issued & Login Validated";
               deterministicItem.timeToResolve = "12 seconds";
               deterministicItem.csat = "5/5 Stars";
               deterministicItem.isResolved = true;
             }
           }, 2000);
         }
+      // ── Flow 3: Employee Benefits Portal Not Launching ────────────────────
       } else if (isAccountConflictFlow) {
         if (stepCount === 2) {
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
-            addMsg("agent", "I understand how frustrating that can be. To help me check whether there's an existing, inactive, or blocked account tied to your details, please share the email address you're using to register (the exact one you entered on the sign-up page).");
+            addMsg("agent", "I can help troubleshoot that. Please provide the application name.");
           }, 6000);
         } else if (stepCount === 4) {
-          const lastUserMsg = deterministicMessages[deterministicMessages.length - 1]?.text || "";
-          const emailMatch = lastUserMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-          const targetEmail = emailMatch ? emailMatch[0] : (lastUserMsg.trim() || "supriya@yahoo.com");
-
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thanks. I just want to confirm one detail so I can proceed correctly: is ${targetEmail} the exact email address you're entering on the registration page (spelled exactly the same, with no extra spaces)?\n\nOnce you confirm, I'll check whether there's an existing (active/inactive/blocked) account tied to it and guide you on the next step.`
+              "Thank you. I've checked the application service details. The likely cause is Service Unavailable.\n\nLet's begin the troubleshooting steps. Please restart the application service and let me know once the restart is complete."
             );
           }, 7000);
         } else if (stepCount === 6) {
-          const emailMsg = deterministicMessages.find((m) => m.sender === "user" && m.text.includes("@"))?.text || "supriya@yahoo.com";
-          const emailMatch = emailMsg.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-          const targetEmail = emailMatch ? emailMatch[0] : "supriya@yahoo.com";
-
           setDeterministicAgentTyping(true);
           timer = setTimeout(() => {
             setDeterministicAgentTyping(false);
             addMsg(
               "agent",
-              `Thank you for confirming. I've checked the records available to me, and ${targetEmail} is not showing as an Active/Inactive/Blocked account in the current list-so there isn't an inactive legacy account I can delete on my side based on this data.\n\nTo get you registered successfully, please try these quick steps:\n\n1. Use "Sign in / Forgot password" (since the system is indicating an account already exists) and attempt a password reset for ${targetEmail}.\n2. If you don't receive the reset email, check Spam/Junk and confirm there are no typos or extra spaces in the email.`
+              "Thank you. Running a post-restart health check now.\n\nService Status: Running\nHealth Check: Passed.\n\nPlease try launching the application again and let me know if it opens successfully."
             );
-          }, 8000);
+          }, 7000);
         } else if (stepCount === 7) {
+          setDeterministicAgentTyping(true);
+          timer = setTimeout(() => {
+            setDeterministicAgentTyping(false);
+            addMsg("agent", "Application launch has been validated successfully. Application Launch Verified. The issue has been resolved successfully.");
+          }, 6000);
+        } else if (stepCount === 8) {
           timer = setTimeout(() => {
             setDeterministicMessages((prev) => [
               ...prev,
@@ -961,7 +969,7 @@ export default function LandingPage() {
             if (deterministicItem) {
               deterministicItem.status = "Resolved";
               deterministicItem.statusType = "good";
-              deterministicItem.resolution = "Account Existence Verified & Reset Guidance Provided";
+              deterministicItem.resolution = "Service Restarted & Application Launch Verified";
               deterministicItem.timeToResolve = "11 seconds";
               deterministicItem.csat = "5/5 Stars";
               deterministicItem.isResolved = true;
@@ -2757,7 +2765,7 @@ export default function LandingPage() {
                                 }}
                               >
                                 <Icon name="zap" size={13} />
-                                {item.isIgnio ? "Auto Resolve" : "Agent + Human Resolve"}
+                                {item.isIgnio ? "Auto Resolve" : "Human + AI Resolve"}
                               </button>
                             )}
                           </div>
@@ -3920,12 +3928,12 @@ export default function LandingPage() {
 
                 if (stepCount === 1) {
                   let suggestedText = "";
-                  if (deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("Member Portal") || deterministicItem?.subject?.includes("Verification Code")) {
-                    suggestedText = "I'm unable to log in to the member portal. It keeps asking for a verification code, but I'm not receiving any email";
-                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Registration") || deterministicItem?.subject?.includes("Date of Birth")) {
-                    suggestedText = "It says my date of birth is incorrect, but I'm entering the right one. I can't log in";
-                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Account Identity") || deterministicItem?.subject?.includes("Existing Account")) {
-                    suggestedText = "I'm trying to create an account, but it keeps saying I already have one";
+                  if (deterministicItem?.id === "ar1" || deterministicItem?.service?.includes("MyU Portal") || deterministicItem?.subject?.includes("MyU Portal")) {
+                    suggestedText = "I cannot log in to MyU Portal.";
+                  } else if (deterministicItem?.id === "ar2" || deterministicItem?.service?.includes("Business Application") || deterministicItem?.subject?.includes("Business Application")) {
+                    suggestedText = "I forgot my password for the Business Application.";
+                  } else if (deterministicItem?.id === "ar3" || deterministicItem?.service?.includes("Employee Benefits") || deterministicItem?.subject?.includes("Application Not Launching")) {
+                    suggestedText = "Application is not launching.";
                   }
 
                   if (suggestedText) {

@@ -306,7 +306,7 @@ export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange, hid
                 <div className="ad-bot-header-title">{roleLabel} AI Assistant</div>
                 <div className="ad-bot-header-subtitle">
                   {isConfigured
-                    ? `Grounded to your live ${roleLabel} dashboard · Powered by Gemini`
+                    ? `Grounded to your live ${roleLabel} dashboard`
                     : "⚠️ Gemini API key not configured"}
                 </div>
               </div>
@@ -418,7 +418,7 @@ export function UnifiedBotWidget({ selectedRole, data, domain, onOpenChange, hid
 
           {/* Gemini branding footer */}
           <div className="ad-bot-footer">
-            Powered by Gemini · Responses are grounded to your dashboard data
+            Responses are grounded to your dashboard data
           </div>
         </div>
       )}
