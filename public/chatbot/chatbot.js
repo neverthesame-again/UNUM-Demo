@@ -12,7 +12,7 @@
 const HorizonChatbot = {
   // ==================== CONFIGURATION ====================
   config: {
-    title: "GuideWell AI Hub Agent",
+    title: "AI Agent",
     promptCharLimit: 44,
     apiUrl:
       (typeof window !== "undefined" && window.VITE_CHATBOT_AGENT_API_URL) ||
@@ -20,7 +20,7 @@ const HorizonChatbot = {
     agents: [
       {
         id: "default",
-        name: "GuideWell Chatbot Agent",
+        name: "AI Agent",
       },
     ],
   },
@@ -48,7 +48,7 @@ const HorizonChatbot = {
     // Add welcome message
     this.state.messages.push({
       sender: "bot",
-      text: "Hi! How can I help you with GuideWell AI Hub IT operations today?",
+      text: "Hi! How can I help you with AI Agent IT operations today?",
       timestamp: this.getCurrentTimestamp(),
     });
 
@@ -109,27 +109,15 @@ const HorizonChatbot = {
       </div>
 
       <div class="centene-chat-messages"></div>
-      
-      <div class="centene-predefined-prompts">
-        <div class="centene-prompt-item" data-prompt="Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025">
-          Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025
-        </div>
-      </div>
 
       <div class="centene-file-preview-bar" style="display: none;"></div>
       
       <div class="centene-chat-input-container">
         <div class="centene-chat-input-wrapper">
-          <input type="file" class="centene-file-input" accept=".xlsx,.xls,.csv,.pdf" style="display: none;" />
-          <button class="centene-chat-btn-attach" type="button" title="Attach Excel, CSV or PDF">
-            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paperclip">
-              <path d="M13.234 20.252 21 12.3a5 5 0 0 0-7.071-7.071L4.858 14.3a3 3 0 0 0 4.243 4.243l7.071-7.071a1 1 0 0 0-1.414-1.414l-6.364 6.364"/>
-            </svg>
-          </button>
           <input 
             type="text" 
             class="centene-chat-input" 
-            placeholder="Ask about incidents, health, SLAs or analyze files..."
+            placeholder="Ask about incidents and more"
             autocomplete="off"
           />
         </div>
@@ -160,9 +148,6 @@ const HorizonChatbot = {
       ".centene-chat-messages",
     );
     this.state.elements.input = container.querySelector(".centene-chat-input");
-    this.state.elements.fileInput = container.querySelector(".centene-file-input");
-    this.state.elements.attachBtn = container.querySelector(".centene-chat-btn-attach");
-    this.state.elements.filePreviewBar = container.querySelector(".centene-file-preview-bar");
     this.state.elements.confirmModal = container.querySelector(
       ".centene-confirm-modal",
     );
@@ -173,29 +158,8 @@ const HorizonChatbot = {
     // Attach event listeners
     this.attachEventListeners();
 
-    // Truncate predefined prompts based on config
-    this.truncatePredefinedPrompts();
-
     // Render initial messages
     this.renderMessages();
-  },
-
-  truncatePredefinedPrompts() {
-    const promptItems = this.state.elements.window.querySelectorAll(
-      ".centene-prompt-item",
-    );
-    const charLimit = this.config.promptCharLimit;
-
-    promptItems.forEach((item) => {
-      const fullText = item.getAttribute("data-prompt");
-      const displayText =
-        fullText.length > charLimit
-          ? fullText.substring(0, charLimit) + "..."
-          : fullText;
-
-      item.textContent = displayText;
-      item.setAttribute("title", fullText);
-    });
   },
 
   attachEventListeners() {
@@ -216,18 +180,6 @@ const HorizonChatbot = {
       this.cancelClose();
     confirmModal.querySelector(".centene-confirm-overlay").onclick = () =>
       this.cancelClose();
-
-    // Attach File button
-    if (attachBtn && fileInput) {
-      attachBtn.onclick = () => fileInput.click();
-      fileInput.onchange = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          this.handleFileUpload(file);
-        }
-        fileInput.value = ""; // Reset input
-      };
-    }
 
     // Send button
     win.querySelector(".centene-chat-btn-send").onclick = () =>
@@ -393,7 +345,7 @@ const HorizonChatbot = {
     this.state.messages = [];
     this.state.messages.push({
       sender: "bot",
-      text: "Hi! How can I help you with GuideWell AI Hub IT operations today?",
+      text: "Hi! How can I help you with AI Agent IT operations today?",
       timestamp: this.getCurrentTimestamp(),
     });
 
@@ -510,8 +462,7 @@ const HorizonChatbot = {
       },
       body: JSON.stringify({
         message: fullMessage,
-        sessionId: this.state.agentStates.default?.sessionId || null,
-        fileData: this.state.activeDocument || null,
+        lastBotMessage: "",
       }),
     });
   },

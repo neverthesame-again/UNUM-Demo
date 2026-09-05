@@ -2104,12 +2104,12 @@ export default function LandingPage() {
 
                 {/* Cyan sub-title */}
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)", marginBottom: "10px" }}>
-                  Top 10 Incidents — Care Dashboard, January 2025
+                  AI PRD Creation
                 </div>
 
                 {/* Description */}
                 <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.6 }}>
-                  Generate a PRD from the top 10 high-priority incidents in the Care Dashboard application for January 2025, including SLA breaches, MTTR and root cause analysis.
+                  Generate a comprehensive Product Requirement Document (PRD) from your ideas or issues using the AI Agent.
                 </p>
 
                 {/* Meta badges */}
@@ -2120,7 +2120,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(16,185,129,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Urgency: 1 – High
+                    AI Assisted
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "700",
@@ -2128,7 +2128,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(6,182,212,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Application: Care Dashboard
+                    Context: General IT Operations
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "600",
@@ -2136,7 +2136,7 @@ export default function LandingPage() {
                     border: "1px solid var(--border)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    CARE-DASH-JAN25
+                    AI-PRD-GEN
                   </span>
                 </div>
 
@@ -2172,7 +2172,7 @@ export default function LandingPage() {
                       e.currentTarget.style.transform = "none";
                     }}
                   >
-                    🤖 Create PRD
+                    Create PRD
                   </button>
                 </div>
               </div>

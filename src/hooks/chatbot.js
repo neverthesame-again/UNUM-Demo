@@ -1,21 +1,31 @@
 // src/hooks/chatbot.js
-// Professional AI Chatbot Logic with Clean Session History & Supabase DB Sync
+// Professional AI Chatbot Logic (Stateless / Hardcoded version)
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "../lib/supabase";
+import { WELCOME_MESSAGE, PREDEFINED_PROMPTS, TOP_11_INCIDENTS_TABLE, RCA_DATA } from "../data/mock/chatbot.mock.js";
 
-const DEFAULT_API_URL =
-  (typeof window !== "undefined" && window.VITE_CHATBOT_AGENT_API_URL) ||
-  (import.meta.env && import.meta.env.VITE_CHATBOT_AGENT_API_URL) ||
-  "https://iscbfcgkfmzswnmarlbe.supabase.co/functions/v1/chatbot-agent";
+export const PRD_DOCUMENT_CONTENT = `# Product Requirement Document (PRD)
 
-export const PREDEFINED_PROMPTS = [
-  "Provide the top 10 incident details where the Priority is 'High' and the Application is 'Care Dashboard' for January 2025",
-];
+## 1. Executive Summary & Problem Statement
+This PRD outlines the requirements for resolving duplicate dependent identities and mapping issues within the MyMember Benefits Portal.
 
-const PROMPT_CHAR_LIMIT = 44;
-const STORAGE_SESSIONS_KEY = "unum_chatbot_sessions";
-const STORAGE_MESSAGES_PREFIX = "unum_chatbot_msgs_";
+## 2. Objectives & Scope
+Improve deterministic identity mapping and provide clear user verification for dependents to avoid broken coverage experiences.
+
+## 3. User Personas & Use Cases
+- Members viewing dependent benefits.
+
+## 4. Functional Requirements
+- Prompt users to verify identity on duplicate matches.
+
+## 5. Non-Functional Requirements (Security, Performance, SLA)
+- Identity verification must execute in <200ms.
+
+## 6. System Architecture & Technical Specifications
+- Implementation of a unique ID token for coverage fetch.
+`;
+
+export { PREDEFINED_PROMPTS };
 
 export function getCurrentTimestamp() {
   const now = new Date();
@@ -38,141 +48,6 @@ export function truncatePromptText(fullText, limit = PROMPT_CHAR_LIMIT) {
   return fullText;
 }
 
-export function generateSessionId() {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID();
-  }
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c === "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
-export function ensureValidUuid(id) {
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  if (id && uuidRegex.test(id)) return id;
-  return generateSessionId();
-}
-
-function loadInitialSessions() {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_SESSIONS_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed
-          .filter((s) => s.title && s.title !== "New Chat")
-          .map((s) => ({
-            ...s,
-            id: ensureValidUuid(s.id),
-          }));
-      }
-    }
-  } catch (err) {
-    console.error("Failed to load sessions from storage:", err);
-  }
-  return [];
-}
-
-function loadSessionMessages(sessionId) {
-  if (typeof window === "undefined" || !sessionId) return null;
-  try {
-    const raw = localStorage.getItem(STORAGE_MESSAGES_PREFIX + sessionId);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch (err) {
-    console.error("Failed to load session messages:", err);
-  }
-  return null;
-}
-
-function saveSessionMessages(sessionId, messages) {
-  if (typeof window === "undefined" || !sessionId) return;
-  try {
-    localStorage.setItem(STORAGE_MESSAGES_PREFIX + sessionId, JSON.stringify(messages));
-  } catch (err) {
-    console.error("Failed to save session messages:", err);
-  }
-}
-
-function saveSessions(sessions) {
-  if (typeof window === "undefined") return;
-  try {
-    const validSessions = sessions.filter((s) => s.title && s.title !== "New Chat");
-    localStorage.setItem(STORAGE_SESSIONS_KEY, JSON.stringify(validSessions));
-  } catch (err) {
-    console.error("Failed to save sessions:", err);
-  }
-}
-
-// Helper to sync sessions to Supabase DB table chat_sessions
-const syncSessionToSupabase = async (session) => {
-  if (!supabase || !session?.id || session.title === "New Chat") return;
-  const validId = ensureValidUuid(session.id);
-  try {
-    const { error } = await supabase.from("chat_sessions").upsert({
-      id: validId,
-      title: session.title,
-      updated_at: new Date().toISOString(),
-    });
-    if (error) {
-      console.error("❌ Supabase chat_sessions Error:", error.message, error);
-    } else {
-      console.log("✅ Supabase chat_sessions Saved:", validId, session.title);
-    }
-  } catch (err) {
-    console.error("❌ Supabase chat_sessions Exception:", err);
-  }
-};
-
-// Helper to sync single message to Supabase DB table chat_messages
-const syncMessageToSupabase = async (sessionId, msg, sessionTitle = "New Chat") => {
-  if (!supabase || !sessionId || !msg) return;
-  const validId = ensureValidUuid(sessionId);
-  try {
-    if (sessionTitle && sessionTitle !== "New Chat") {
-      await supabase.from("chat_sessions").upsert({
-        id: validId,
-        title: sessionTitle,
-        updated_at: new Date().toISOString(),
-      });
-    }
-
-    const { error } = await supabase.from("chat_messages").insert({
-      session_id: validId,
-      sender: msg.sender,
-      text: msg.text,
-    });
-    if (error) {
-      console.error("❌ Supabase chat_messages Error:", error.message, error);
-    } else {
-      console.log("✅ Supabase chat_messages Saved:", validId, msg.sender);
-    }
-  } catch (err) {
-    console.error("❌ Supabase chat_messages Exception:", err);
-  }
-};
-
-// Helper to delete session from Supabase DB
-const syncDeleteSessionFromSupabase = async (sessionId) => {
-  if (!supabase || !sessionId) return;
-  const validId = ensureValidUuid(sessionId);
-  try {
-    const { error } = await supabase.from("chat_sessions").delete().eq("id", validId);
-    if (error) {
-      console.error("❌ Supabase Delete Session Error:", error.message);
-    } else {
-      console.log("✅ Supabase Session Deleted:", validId);
-    }
-  } catch (err) {
-    console.error("❌ Supabase Delete Session Exception:", err);
-  }
-};
-
 export function useChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
@@ -181,21 +56,9 @@ export function useChatbot() {
   const [input, setInput] = useState("");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // History & Sessions State
-  const [sessions, setSessions] = useState(loadInitialSessions);
-  const [activeSessionId, setActiveSessionId] = useState(generateSessionId);
-
-  const [isHistoryOpen, setIsHistoryOpen] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth >= 1024;
-    }
-    return true;
-  });
-  const [searchQuery, setSearchQuery] = useState("");
-
   const getWelcomeMessage = () => ({
     sender: "bot",
-    text: "Hi! How can I help you with UNUM AI Hub IT operations or incident data today?",
+    text: WELCOME_MESSAGE,
     timestamp: getCurrentTimestamp(),
   });
 
@@ -213,144 +76,6 @@ export function useChatbot() {
     scrollToBottom();
   }, [messages, loading, scrollToBottom]);
 
-  // Fetch past conversation sessions from Supabase DB on mount
-  useEffect(() => {
-    const fetchSupabaseHistory = async () => {
-      if (!supabase) return;
-      try {
-        const { data: dbSessions, error: sessionErr } = await supabase
-          .from("chat_sessions")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (!sessionErr && dbSessions && dbSessions.length > 0) {
-          const validDbSessions = dbSessions
-            .filter((s) => s.title && s.title !== "New Chat")
-            .map((s) => ({
-              id: s.id,
-              title: s.title,
-              timestampFormatted: getFormattedDate(new Date(s.created_at)),
-              createdAt: new Date(s.created_at).getTime(),
-            }));
-
-          if (validDbSessions.length > 0) {
-            setSessions(validDbSessions);
-          }
-        }
-      } catch (err) {
-        console.warn("Could not fetch sessions from Supabase:", err);
-      }
-    };
-
-    fetchSupabaseHistory();
-  }, []);
-
-  // Sync messages to localStorage whenever they change
-  useEffect(() => {
-    if (activeSessionId && messages.length > 1) {
-      saveSessionMessages(activeSessionId, messages);
-    }
-  }, [messages, activeSessionId]);
-
-  // Sync sessions list to localStorage whenever it changes
-  useEffect(() => {
-    saveSessions(sessions);
-  }, [sessions]);
-
-  // Toggle History Overlay / Sidebar
-  const toggleHistory = useCallback(() => {
-    setIsHistoryOpen((prev) => !prev);
-  }, []);
-
-  // Create New Chat Session
-  const createNewSession = useCallback(() => {
-    const freshId = generateSessionId();
-    setActiveSessionId(freshId);
-    setMessages([getWelcomeMessage()]);
-    setShowPrompts(true);
-
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setIsHistoryOpen(false);
-    }
-  }, []);
-
-  // Select an existing Chat Session & fetch its messages
-  const selectSession = useCallback(
-    async (sessionId) => {
-      const validId = ensureValidUuid(sessionId);
-      if (validId === activeSessionId) {
-        if (typeof window !== "undefined" && window.innerWidth < 1024) {
-          setIsHistoryOpen(false);
-        }
-        return;
-      }
-
-      setActiveSessionId(validId);
-      setShowPrompts(false);
-
-      if (typeof window !== "undefined" && window.innerWidth < 1024) {
-        setIsHistoryOpen(false);
-      }
-
-      // Check local storage first
-      const savedMsgs = loadSessionMessages(validId);
-      if (savedMsgs && savedMsgs.length > 0) {
-        setMessages(savedMsgs);
-        return;
-      }
-
-      // Fallback: Fetch from Supabase database table chat_messages
-      if (supabase) {
-        try {
-          const { data: dbMsgs, error } = await supabase
-            .from("chat_messages")
-            .select("*")
-            .eq("session_id", validId)
-            .order("timestamp", { ascending: true });
-
-          if (!error && dbMsgs && dbMsgs.length > 0) {
-            const formattedMsgs = dbMsgs.map((m) => ({
-              sender: m.sender,
-              text: m.text,
-              timestamp: getFormattedDate(new Date(m.timestamp)),
-            }));
-            setMessages(formattedMsgs);
-            saveSessionMessages(validId, formattedMsgs);
-            return;
-          }
-        } catch (err) {
-          console.warn("Could not fetch messages from Supabase:", err);
-        }
-      }
-
-      setMessages([getWelcomeMessage()]);
-    },
-    [activeSessionId]
-  );
-
-  // Delete a Chat Session
-  const deleteSession = useCallback(
-    (sessionId, e) => {
-      if (e) e.stopPropagation();
-      const validId = ensureValidUuid(sessionId);
-
-      setSessions((prev) => {
-        const updated = prev.filter((s) => s.id !== validId);
-        if (validId === activeSessionId) {
-          createNewSession();
-        }
-        return updated;
-      });
-
-      try {
-        localStorage.removeItem(STORAGE_MESSAGES_PREFIX + validId);
-      } catch (_) {}
-
-      syncDeleteSessionFromSupabase(validId);
-    },
-    [activeSessionId, createNewSession]
-  );
-
   // Open chatbot window
   const open = useCallback(() => {
     setIsOpen(true);
@@ -361,31 +86,75 @@ export function useChatbot() {
   const close = useCallback(() => {
     setIsOpen(false);
     setIsMinimized(false);
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setIsHistoryOpen(false);
-    }
   }, []);
 
   // Minimize chatbot window
   const minimize = useCallback(() => {
     setIsMinimized(true);
     setIsOpen(false);
-    if (typeof window !== "undefined" && window.innerWidth < 1024) {
-      setIsHistoryOpen(false);
-    }
   }, []);
 
-  // API Call to Supabase chatbot-agent Edge Function
+  // API Call to chatbot agent logic (MOCKED LOCALLY)
   const callAgentApi = async (messageText) => {
-    return fetch(DEFAULT_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message: messageText,
-        sessionId: activeSessionId,
-      }),
+    const cleanMsg = messageText.trim().toLowerCase();
+
+    // Check conversation milestone history to know exactly what step we are on
+    const hasPrd = messages.some((m) => m.sender === "bot" && m.text.includes("PRD generated"));
+    const hasJira = messages.some((m) => m.sender === "bot" && (m.text.includes("Jira Ticket ID:") || m.text.includes("ENH-")));
+    const hasRca = messages.some((m) => m.sender === "bot" && m.text.includes("Identified Issue:"));
+    const hasTable = messages.some((m) => m.sender === "bot" && (m.text.includes("| Incident Number |") || m.text.includes("generate an RCA")));
+
+    const isAffirmative = ["yes", "yeah", "yep", "yup", "sure", "do it", "please", "ok", "okay", "proceed", "generate", "create", "go ahead"].some(p => cleanMsg.includes(p));
+
+    let replyText = "";
+
+    // STEP 4: PRD Creation Request (Jira was created, user confirming PRD)
+    if (hasJira) {
+      if (isAffirmative || cleanMsg.includes("prd") || cleanMsg.includes("doc")) {
+        replyText = "PRD generated, please download:";
+      } else {
+        replyText = "I understand. Would you like me to analyze this enhancement and create the PRD document?";
+      }
+    }
+    // STEP 3: Jira Creation Request (RCA was shown, user confirming Jira ticket)
+    else if (hasRca) {
+      if (isAffirmative || cleanMsg.includes("jira") || cleanMsg.includes("ticket") || cleanMsg.includes("syninc") || cleanMsg.includes("enhancement")) {
+        const randomId = crypto.randomUUID().split("-")[0].toUpperCase();
+        const randomNum = Math.floor(Math.random() * 90000) + 10000;
+        replyText = `Jira Ticket ID: ${randomId}\nJira Ticket Number: ENH-${randomNum}\n\nThe Ticket has been created successfully. Would you like me to analyze this enhancement and create a detailed PRD?`;
+      } else {
+        replyText = "I understand. Would you like me to create a Jira enhancement ticket for incident SYNINC0000012?";
+      }
+    }
+    // STEP 2: RCA Request (Table was shown, user confirming RCA)
+    else if (hasTable) {
+      if (isAffirmative || cleanMsg.includes("rca") || cleanMsg.includes("analysis") || cleanMsg.includes("root cause")) {
+        replyText = RCA_DATA;
+      } else {
+        replyText = "I understand. Would you like me to generate the Root Cause Analysis (RCA) for all 11 incidents?";
+      }
+    }
+    // STEP 1: Table Request (Start of flow)
+    else {
+      if (
+        cleanMsg.includes("incident") ||
+        cleanMsg.includes("11") ||
+        cleanMsg.includes("top") ||
+        cleanMsg.includes("january") ||
+        cleanMsg.includes("moderate") ||
+        cleanMsg.includes("give me") ||
+        cleanMsg.includes("portal") ||
+        isAffirmative
+      ) {
+        replyText = `${TOP_11_INCIDENTS_TABLE}\n\nWould you like me to generate an RCA (Root Cause Analysis) for all 11 incidents?`;
+      } else {
+        replyText = "I understand. Would you like me to retrieve the top 11 incidents from the MyMember Benefits Portal for January 2026?";
+      }
+    }
+
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ response: replyText })
     });
   };
 
@@ -400,23 +169,6 @@ export function useChatbot() {
 
     setShowPrompts(false);
 
-    // Create session in History on first user message if not exists
-    let currentTitle = "New Chat";
-    const existingSession = sessions.find((s) => s.id === activeSessionId);
-    if (!existingSession) {
-      currentTitle = truncatePromptText(textToSend, 35);
-      const newSessionObj = {
-        id: activeSessionId,
-        title: currentTitle,
-        timestampFormatted: getFormattedDate(),
-        createdAt: Date.now(),
-      };
-      setSessions((prev) => [newSessionObj, ...prev]);
-      syncSessionToSupabase(newSessionObj);
-    } else {
-      currentTitle = existingSession.title;
-    }
-
     // Add user message
     const userMsg = {
       sender: "user",
@@ -425,11 +177,10 @@ export function useChatbot() {
     };
 
     setMessages((prev) => [...prev, userMsg]);
-    syncMessageToSupabase(activeSessionId, userMsg, currentTitle);
     setLoading(true);
 
-    // Wait 5 to 7 seconds before generating the response
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    // Wait 15-18 seconds before generating the response (simulating AI agent analysis)
+    await new Promise((resolve) => setTimeout(resolve, 15000 + Math.floor(Math.random() * 3000)));
 
     try {
       const response = await callAgentApi(textToSend);
@@ -460,7 +211,6 @@ export function useChatbot() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
-      syncMessageToSupabase(activeSessionId, botMsg, currentTitle);
     } catch (error) {
       console.error("Chatbot error:", error);
       const errorMsgObj = {
@@ -469,7 +219,6 @@ export function useChatbot() {
         timestamp: getCurrentTimestamp(),
       };
       setMessages((prev) => [...prev, errorMsgObj]);
-      syncMessageToSupabase(activeSessionId, errorMsgObj, currentTitle);
     } finally {
       setLoading(false);
     }
@@ -486,21 +235,11 @@ export function useChatbot() {
   const cancelClose = () => setShowConfirmModal(false);
 
   const confirmClose = () => {
-    createNewSession();
+    setMessages([getWelcomeMessage()]);
+    setShowPrompts(true);
     setShowConfirmModal(false);
     close();
   };
-
-  // Filtered sessions list for History sidebar
-  const filteredSessions = sessions.filter((s) => {
-    if (!s.title || s.title === "New Chat") return false;
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      (s.title && s.title.toLowerCase().includes(q)) ||
-      (s.timestampFormatted && s.timestampFormatted.toLowerCase().includes(q))
-    );
-  });
 
   return {
     isOpen,
@@ -512,17 +251,6 @@ export function useChatbot() {
     messages,
     showConfirmModal,
     messagesEndRef,
-    // History & Session properties
-    sessions,
-    filteredSessions,
-    activeSessionId,
-    isHistoryOpen,
-    searchQuery,
-    setSearchQuery,
-    toggleHistory,
-    createNewSession,
-    selectSession,
-    deleteSession,
     // Actions
     open,
     close,
@@ -534,4 +262,3 @@ export function useChatbot() {
     cancelClose,
   };
 }
-

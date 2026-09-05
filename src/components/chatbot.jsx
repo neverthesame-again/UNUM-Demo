@@ -18,8 +18,9 @@ import {
 } from "docx";
 import {
   useChatbot,
-  PREDEFINED_PROMPTS,
   truncatePromptText,
+  PREDEFINED_PROMPTS,
+  PRD_DOCUMENT_CONTENT,
 } from "../hooks/chatbot.js";
 
 const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
@@ -126,9 +127,9 @@ function parseFormattedText(text) {
 export async function downloadDocxFile(text, filename = "Product_Requirement_Document.docx") {
   // 1. Clean the markdown of download links and automation headers
   let cleanText = text
-    .replace(/### 📥 Document Download[\s\S]*?(\n\n|$)/gi, "")
-    .replace(/\[📥 Download PRD \(\.docx\)\]\(#download-prd\)/gi, "")
-    .replace(/### 🚀 Automation Pipeline[\s\S]*?(\n\n|$)/gi, "")
+    .replace(/###\s*.*Document Download[\s\S]*?(\n\n|$)/gi, "")
+    .replace(/\[.*Download PRD \(\.docx\)\]\(#download-prd\)/gi, "")
+    .replace(/###\s*.*Automation Pipeline[\s\S]*?(\n\n|$)/gi, "")
     .replace(/.*https:\/\/mnnb9bbkgu\.ap-south-1\.awsapprunner\.com\/agents\/automation.*/gi, "");
 
   const lines = cleanText.split("\n");
@@ -332,20 +333,132 @@ export async function downloadDocxFile(text, filename = "Product_Requirement_Doc
   }
 }
 
+// Helper to parse markdown when marked library is not available
+function parseMarkdownFallback(text) {
+  const lines = text.split("\n");
+  const output = [];
+  let inTable = false;
+  let inList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i].trim();
+
+    // Table row detection
+    if (line.startsWith("|") && line.endsWith("|")) {
+      if (inList) {
+        output.push("</ul>");
+        inList = false;
+      }
+      if (/^\|[\s\-:|]+\|$/.test(line)) {
+        continue;
+      }
+      const rawCells = line.split("|").slice(1, -1);
+      const cells = rawCells.map((c) => c.trim());
+
+      if (!inTable) {
+        inTable = true;
+        output.push("<div style='overflow-x:auto;'><table><thead><tr>");
+        cells.forEach((c) => output.push(`<th>${escapeHtml(c)}</th>`));
+        output.push("</tr></thead><tbody>");
+      } else {
+        output.push("<tr>");
+        cells.forEach((c) => output.push(`<td>${escapeHtml(c)}</td>`));
+        output.push("</tr>");
+      }
+      continue;
+    } else if (inTable) {
+      output.push("</tbody></table></div>");
+      inTable = false;
+    }
+
+    // List item detection
+    if (/^[-*]\s+(.*)$/.test(line)) {
+      const match = line.match(/^[-*]\s+(.*)$/);
+      if (!inList) {
+        output.push("<ul>");
+        inList = true;
+      }
+      output.push(`<li>${escapeHtml(match[1])}</li>`);
+      continue;
+    } else if (inList) {
+      output.push("</ul>");
+      inList = false;
+    }
+
+    // Headings
+    if (line.startsWith("#### ")) {
+      output.push(`<h4>${escapeHtml(line.replace(/^####\s+/, ""))}</h4>`);
+      continue;
+    }
+    if (line.startsWith("### ")) {
+      output.push(`<h3>${escapeHtml(line.replace(/^###\s+/, ""))}</h3>`);
+      continue;
+    }
+    if (line.startsWith("## ")) {
+      output.push(`<h2>${escapeHtml(line.replace(/^##\s+/, ""))}</h2>`);
+      continue;
+    }
+    if (line.startsWith("# ")) {
+      output.push(`<h1>${escapeHtml(line.replace(/^#\s+/, ""))}</h1>`);
+      continue;
+    }
+
+    // Horizontal rule
+    if (line === "---" || line === "***" || line.startsWith("-------")) {
+      output.push("<hr>");
+      continue;
+    }
+
+    // Empty line
+    if (!line) {
+      continue;
+    }
+
+    // Regular paragraph
+    output.push(`<p>${escapeHtml(line)}</p>`);
+  }
+
+  if (inTable) {
+    output.push("</tbody></table></div>");
+  }
+  if (inList) {
+    output.push("</ul>");
+  }
+
+  let result = output.join("");
+
+  // Bold **text**
+  result = result.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+  // Inline Code `text`
+  result = result.replace(/`(.*?)`/g, "<code>$1</code>");
+
+  // Markdown Links [Text](URL)
+  result = result.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+  );
+
+  return result;
+}
+
 // Simple markdown formatter helper for messages
 function formatMarkdownText(text) {
   if (!text) return "";
 
   // Strip the document download section and automation link section from rendering in the chat bubble UI
   const cleanText = text
-    .replace(/### 📥 Document Download/gi, "")
-    .replace(/\[📥 Download PRD \(\.docx\)\]\(#download-prd\)/gi, "")
-    .replace(/### 🚀 Automation Pipeline/gi, "")
+    .replace(/###\s*.*Document Download/gi, "")
+    .replace(/\[.*Download PRD \(\.docx\)\]\(#download-prd\)/gi, "")
+    .replace(/###\s*.*Automation Pipeline/gi, "")
     .replace(/.*https:\/\/mnnb9bbkgu\.ap-south-1\.awsapprunner\.com\/agents\/automation.*/gi, "");
 
   // If marked.js is available on window, use it
   if (typeof window !== "undefined" && window.marked && typeof window.marked.parse === "function") {
     try {
+      if (typeof window.marked.setOptions === "function") {
+        window.marked.setOptions({ gfm: true, breaks: true });
+      }
       const parsedHtml = window.marked.parse(cleanText);
       return ensureLinksOpenInNewTab(parsedHtml);
     } catch (_) {
@@ -353,24 +466,7 @@ function formatMarkdownText(text) {
     }
   }
 
-  let escaped = escapeHtml(cleanText);
-
-  // Markdown Links [Text](URL)
-  escaped = escaped.replace(
-    /\[([^\]]+)\]\(([^)]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
-  );
-
-  // Bold **text**
-  escaped = escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-  // Inline Code `text`
-  escaped = escaped.replace(/`(.*?)`/g, "<code>$1</code>");
-
-  // Line breaks
-  escaped = escaped.replace(/\n/g, "<br>");
-
-  return ensureLinksOpenInNewTab(escaped);
+  return ensureLinksOpenInNewTab(parseMarkdownFallback(cleanText));
 }
 
 export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
@@ -379,22 +475,12 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
   const {
     isOpen,
     loading,
-    showPrompts,
     input,
     setInput,
     messages,
     showConfirmModal,
     messagesEndRef,
-    // History & Sessions state
-    filteredSessions,
-    activeSessionId,
-    isHistoryOpen,
-    searchQuery,
-    setSearchQuery,
-    toggleHistory,
-    createNewSession,
-    selectSession,
-    deleteSession,
+    showPrompts,
     // Actions
     open,
     minimize,
@@ -423,8 +509,6 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
 
 
 
-  const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
-
   return (
     <>
       {/* Floating Chat Button */}
@@ -446,22 +530,13 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
 
       {/* Main Chatbot Window */}
       <div
-        className={`centene-chat-window ${(isHistoryOpen || isDesktop) ? "has-sidebar" : ""}`}
+        className="centene-chat-window"
         data-theme="dark"
         style={{ display: isOpen ? "flex" : "none" }}
       >
         {/* Full-Width Header */}
         <div className="centene-chat-header">
           <div className="centene-chat-header-left">
-            <button
-              className="centene-chat-btn-hamburger"
-              title="Toggle History Sidebar"
-              onClick={toggleHistory}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20" height="20">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
             <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10h8c1.1 0 2-.9 2-2v-8c0-5.52-4.48-10-10-10zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8v8h-8z" />
               <circle cx="8.5" cy="12" r="1.5" />
@@ -519,86 +594,6 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
 
         {/* Chat Body Container holding Sidebar + Main Content */}
         <div className="centene-chat-body">
-          {/* History Panel (Permanent Sidebar on Desktop/iPad, Overlay on Mobile) */}
-          {(isHistoryOpen || isDesktop) && (
-            <div className="centene-history-overlay">
-              <div className="centene-history-header">
-                <span>History</span>
-                <button
-                  className="centene-history-close-btn"
-                  onClick={toggleHistory}
-                  title="Close History"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="centene-history-search-container">
-                <svg
-                  className="centene-history-search-icon"
-                  viewBox="0 0 24 24"
-                  width="16"
-                  height="16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                  type="text"
-                  className="centene-history-search-input"
-                  placeholder="Search history..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              <div className="centene-history-list">
-                {filteredSessions.length === 0 ? (
-                  <div className="centene-history-empty">No chat history found</div>
-                ) : (
-                  filteredSessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className={`centene-history-card ${session.id === activeSessionId ? "active" : ""
-                        }`}
-                      onClick={() => selectSession(session.id)}
-                    >
-                      <div className="centene-history-card-content">
-                        <div className="centene-history-card-title">
-                          {truncatePromptText(session.title || "New Chat", 35)}
-                        </div>
-                        <div className="centene-history-card-time">
-                          {session.timestampFormatted}
-                        </div>
-                      </div>
-                      <button
-                        className="centene-history-card-delete"
-                        title="Delete Session"
-                        onClick={(e) => deleteSession(session.id, e)}
-                      >
-                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-
-              <div className="centene-history-footer">
-                <button
-                  className="centene-new-chat-btn"
-                  onClick={createNewSession}
-                >
-                  New Chat
-                </button>
-              </div>
-            </div>
-          )}
-
           {/* Main Chat Content Area */}
           <div className="centene-chat-main">
 
@@ -607,10 +602,9 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
               {messages.map((msg, index) => {
                 const isPrdMessage =
                   msg.sender === "bot" &&
-                  (msg.text.includes("Product Requirement Document") ||
-                    msg.text.includes("# PRD") ||
-                    msg.text.includes("## 1. Executive Summary") ||
-                    msg.text.includes("#download-prd"));
+                  (msg.text.toLowerCase().includes("prd generated") ||
+                    msg.text.includes("Product Requirement Document") ||
+                    msg.text.includes("# PRD"));
 
                 return (
                   <div
@@ -630,20 +624,20 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                             target.innerText.includes("Download PRD"))
                         ) {
                           e.preventDefault();
-                          downloadDocxFile(msg.text, "Product_Requirement_Document.docx");
+                          downloadDocxFile(PRD_DOCUMENT_CONTENT, "Product_Requirement_Document.docx");
                         }
                       }}
                     />
 
                     {isPrdMessage && (
-                      <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                      <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "8px" }}>
                         <div>
                           <button
                             style={{
                               display: "inline-flex",
                               alignItems: "center",
-                              gap: "6px",
-                              padding: "8px 14px",
+                              gap: "8px",
+                              padding: "9px 16px",
                               backgroundColor: "#0284c7",
                               color: "#ffffff",
                               border: "none",
@@ -651,11 +645,11 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                               fontSize: "13px",
                               fontWeight: "600",
                               cursor: "pointer",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
                               transition: "background-color 0.2s ease",
                             }}
                             onClick={() =>
-                              downloadDocxFile(msg.text, "Product_Requirement_Document.docx")
+                              downloadDocxFile(PRD_DOCUMENT_CONTENT, "Product_Requirement_Document.docx")
                             }
                             title="Download PRD as Word Document (.docx)"
                           >
@@ -673,20 +667,8 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                               <polyline points="7 10 12 15 17 10" />
                               <line x1="12" y1="15" x2="12" y2="3" />
                             </svg>
-                            📥 Download PRD (.docx)
+                            Download PRD (.docx)
                           </button>
-                        </div>
-                        <div style={{ fontSize: "13px", color: "#94a3b8", marginTop: "4px", lineHeight: "1.5" }}>
-                          Switch to the{" "}
-                          <a
-                            href="https://mnnb9bbkgu.ap-south-1.awsapprunner.com/agents/automation"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{ color: "#38bdf8", textDecoration: "underline", fontWeight: "600" }}
-                          >
-                            SEL Nexus Automation Pipeline
-                          </a>{" "}
-                          to execute SEL Nexus.
                         </div>
                       </div>
                     )}
@@ -708,17 +690,18 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
               )}
             </div>
 
-            {/* Predefined Prompt Chips */}
-            {showPrompts && (
+            {/* Predefined Prompts */}
+            {showPrompts && messages.length === 1 && (
               <div className="centene-predefined-prompts">
-                {PREDEFINED_PROMPTS.map((promptText, idx) => (
+                {PREDEFINED_PROMPTS.map((prompt, i) => (
                   <div
-                    key={idx}
+                    key={i}
                     className="centene-prompt-item"
-                    title={promptText}
-                    onClick={() => selectPredefinedPrompt(promptText)}
+                    onClick={() => selectPredefinedPrompt(prompt)}
                   >
-                    {promptText}
+                    <span className="centene-prompt-text">
+                      {prompt}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -730,7 +713,7 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                 <input
                   type="text"
                   className="centene-chat-input"
-                  placeholder="Ask about Incidents, IT Operations & more"
+                  placeholder="Ask about incidents and more"
                   autoComplete="off"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
