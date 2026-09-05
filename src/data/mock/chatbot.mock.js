@@ -346,3 +346,123 @@ Multiple duplicate-dependent incidents across the dataset suggest a systemic wea
 
 ### Next Steps
 **Would you like to create Jira enhancement requests for any of these incidents and assign them to the appropriate development scrum teams?**`;
+
+export const PRD_DOCUMENT_CONTENT = `# Product Requirement Document (PRD)
+
+## Document Details
+- **Project**: MyMember Benefits Portal - Deterministic Identity & Coverage Resolution
+- **Target Release**: Q1 2026
+- **Associated Jira Ticket**: SCRUM-1042
+- **Source Incident**: SYNINC0000012 (Related: SYNINC0000006, SYNINC0000018, SYNINC0000252)
+- **Status**: Ready for Engineering Review
+
+---
+
+## 1. Executive Summary & Problem Statement
+
+### 1.1 Executive Summary
+During January 2026 operations, multiple moderate-priority incidents were logged for the MyMember Benefits Portal where members reported that dependent coverage (notably Dental and Hospital benefits) failed to appear on-screen. Root cause investigation of incident SYNINC0000012 revealed that when a covered dependent (e.g., spouse) shares an identical display name with another dependent (e.g., child), the selection component falls back to non-unique display name matching. Consequently, coverage retrieval queries either fail to identify the intended covered individual or query using an ambiguous identifier, causing silent coverage retrieval drops and false "missing coverage" errors for members.
+
+### 1.2 Problem Statement
+- **Name Collision Ambiguity**: The UI dependent selector treats display names as unique keys, resulting in request routing failures when multiple dependents share identical or overlapping name attributes.
+- **Absence of Unique Token Enforcement**: Downstream benefit retrieval services accept name/relationship combinations without enforcing a deterministic, immutable Dependent Identity Token (dependent_id).
+- **Misleading Error Presentation**: When coverage lookups encounter ambiguity or un-elected policies, the UI surfaces a generic missing coverage state rather than an actionable status or disambiguation prompt.
+- **Support Burden**: Resolving these incidents currently requires manual support intervention and knowledge-based triage, creating an average resolution lag of 5 to 7 days.
+
+---
+
+## 2. Objectives & Scope
+
+### 2.1 Core Objectives
+- Eliminate coverage display failures caused by duplicate or matching dependent names through deterministic identity token mapping.
+- Introduce an intuitive dependent disambiguation interface that guides members to confirm the exact individual when multiple dependents share common naming attributes.
+- Ensure 100% deterministic coverage retrieval by refactoring backend API contracts to require verified unique dependent IDs.
+- Provide clear, user-friendly status explanations when a dependent is not elected under a policy rather than displaying a blank or broken benefit card.
+
+### 2.2 In-Scope
+- Refactoring the MyMember Benefits Portal dependent selection component to render relationship labels and masked member/dependent IDs.
+- Implementing client-side and server-side disambiguation confirmation when name collisions are detected.
+- Updating the benefit coverage retrieval API endpoint to mandate dependent_id parameters.
+- Comprehensive regression testing fixtures for same-name and duplicate dependent data models.
+
+### 2.3 Out-of-Scope
+- Overhauling upstream enterprise master patient index (EMPI) data ingestion systems.
+- Modifying underlying policy underwriting or election rules.
+
+---
+
+## 3. User Personas & Use Cases
+
+### 3.1 Target Personas
+- **Primary Member**: Enrolled subscriber attempting to review benefits and download dental ID cards for family dependents.
+- **Customer Care Specialist**: Internal tier-1/tier-2 support representative answering member calls regarding coverage visibility.
+- **Benefits Operations Analyst**: Team member monitoring portal error rates, identity matching accuracy, and policy election discrepancies.
+
+### 3.2 Key Use Cases
+- **UC-01 (Disambiguated Selection)**: A member with a spouse and child sharing identical names navigates to the Dental Benefits page. The portal clearly renders person cards with relationship tags ("Spouse" vs "Child") and masked IDs ("ID ending in 4102" vs "ID ending in 8891").
+- **UC-02 (Deterministic Benefit Retrieval)**: When the member selects the spouse card, the application issues a secure request keyed exclusively on the unique dependent_id, reliably returning the spouse's active dental coverage.
+- **UC-03 (Non-Elected Policy Clarification)**: If a dependent is not elected under a specific coverage tier, the portal displays "Not Enrolled for this Policy" with guidance on enrollment periods, eliminating false defect perceptions.
+
+---
+
+## 4. Functional Requirements
+
+### 4.1 Dependent Selection Component Enhancement
+- **FR-01**: The dependent selection UI must display relationship badges (e.g., Spouse, Child, Domestic Partner) alongside every dependent name.
+- **FR-02**: The dependent selection UI must display a masked unique identifier (format: ***-**-XXXX) for each dependent to guarantee visible differentiation.
+- **FR-03**: If two or more dependents share identical first and last names, the system must disable auto-selection and require explicit manual selection by the member.
+- **FR-04**: An inline confirmation badge ("Selected: [Relationship] - [Masked ID]") must appear immediately upon selection.
+
+### 4.2 API Contract & Retrieval Logic
+- **FR-05**: The /api/v2/benefits/coverage endpoint must strictly require a validated dependent_id in the request payload or path parameter.
+- **FR-06**: The backend must reject coverage queries that rely solely on name or relationship parameters with HTTP 400 (Bad Request: Missing Unique Dependent Identifier).
+- **FR-07**: The portal must validate dependent-policy election status prior to requesting plan details.
+
+### 4.3 Error Handling & Status Presentation
+- **FR-08**: If coverage retrieval returns empty due to policy non-election, the portal must display an informational card ("Dependent not elected under this dental plan") rather than an error banner or blank screen.
+- **FR-09**: Detailed telemetry logs must record the reason code (NOT_ELECTED, INACTIVE_POLICY, DATA_MISMATCH) for support triage without exposing PII.
+
+---
+
+## 5. Non-Functional Requirements (Security, Performance, SLA)
+
+### 5.1 Performance & Latency
+- **NFR-01 (Response Latency)**: Dependent card rendering and disambiguation checks must execute within 150ms of initial page load.
+- **NFR-02 (API Throughput)**: The updated coverage lookup service must maintain sub-250ms response times at peak load (500 requests/sec).
+
+### 5.2 Security & Compliance
+- **NFR-03 (HIPAA & PII Protection)**: Dependent identifiers rendered in the client interface must remain masked at all times (displaying only the last 4 digits).
+- **NFR-04 (Token Authorization)**: The dependent_id submitted in API calls must be verified against the authenticated member's session token to prevent unauthorized access across accounts (BOLA prevention).
+
+### 5.3 Reliability & Availability
+- **NFR-05 (Availability SLA)**: The benefits coverage retrieval service must maintain 99.95% uptime during open enrollment and standard operational windows.
+- **NFR-06 (Graceful Degradation)**: In the event of a partial service degradation, cached election summaries must be rendered with an offline indicator rather than an unhandled UI crash.
+
+---
+
+## 6. System Architecture & Technical Specifications
+
+### 6.1 Architectural Workflow
+1. **Client Request**: The client application requests the member's profile and associated dependent list via /api/v2/members/me/dependents.
+2. **Disambiguation Check**: The client-side state manager scans the dependent array. If duplicate display names exist, the UI activates the collision disambiguation mode.
+3. **User Selection**: The member chooses the desired individual from the disambiguated person cards.
+4. **Coverage Lookup**: The client dispatches a GET request to /api/v2/benefits/coverage?dependent_id={unique_id}&policy_type=DENTAL.
+5. **Validation & Response**: The backend validates session ownership of dependent_id, verifies policy election status, and returns the plan details payload.
+
+### 6.2 Data Model Changes
+- **Dependent Record Attributes**:
+  - dependent_id (UUID, Primary Key, Non-Nullable)
+  - member_id (UUID, Foreign Key)
+  - first_name (String)
+  - last_name (String)
+  - relationship_code (Enum: SPOUSE, CHILD, DOMESTIC_PARTNER, OTHER)
+  - masked_ssn (String: ***-**-XXXX)
+  - election_status (Enum: ACTIVE, WAIVED, TERMINATED)
+
+### 6.3 Integration Interfaces
+- **Coverage Service Endpoint**: GET /api/v2/benefits/coverage
+- **Request Headers**: Authorization: Bearer <JWT>, X-Correlation-ID: <UUID>
+- **Query Parameters**: dependent_id=<UUID>, benefit_category=DENTAL
+- **Response Format**: JSON containing policy number, tier, deductible status, copay schedules, and active coverage effective dates.
+`;
+

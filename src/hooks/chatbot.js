@@ -1,31 +1,11 @@
+
 // src/hooks/chatbot.js
 // Professional AI Chatbot Logic (Stateless / Hardcoded version)
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { WELCOME_MESSAGE, PREDEFINED_PROMPTS, TOP_11_INCIDENTS_TABLE, RCA_DATA } from "../data/mock/chatbot.mock.js";
+import { WELCOME_MESSAGE, PREDEFINED_PROMPTS, TOP_11_INCIDENTS_TABLE, RCA_DATA, PRD_DOCUMENT_CONTENT } from "../data/mock/chatbot.mock.js";
 
-export const PRD_DOCUMENT_CONTENT = `# Product Requirement Document (PRD)
-
-## 1. Executive Summary & Problem Statement
-This PRD outlines the requirements for resolving duplicate dependent identities and mapping issues within the MyMember Benefits Portal.
-
-## 2. Objectives & Scope
-Improve deterministic identity mapping and provide clear user verification for dependents to avoid broken coverage experiences.
-
-## 3. User Personas & Use Cases
-- Members viewing dependent benefits.
-
-## 4. Functional Requirements
-- Prompt users to verify identity on duplicate matches.
-
-## 5. Non-Functional Requirements (Security, Performance, SLA)
-- Identity verification must execute in <200ms.
-
-## 6. System Architecture & Technical Specifications
-- Implementation of a unique ID token for coverage fetch.
-`;
-
-export { PREDEFINED_PROMPTS };
+export { PREDEFINED_PROMPTS, PRD_DOCUMENT_CONTENT };
 
 export function getCurrentTimestamp() {
   const now = new Date();

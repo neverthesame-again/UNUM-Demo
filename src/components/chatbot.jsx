@@ -3,24 +3,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  Document,
-  Paragraph,
-  TextRun,
-  Table,
-  TableRow,
-  TableCell,
-  Packer,
-  HeadingLevel,
-  BorderStyle,
-  WidthType,
-  ExternalHyperlink,
-  UnderlineType
-} from "docx";
-import {
   useChatbot,
   truncatePromptText,
   PREDEFINED_PROMPTS,
-  PRD_DOCUMENT_CONTENT,
 } from "../hooks/chatbot.js";
 
 const MARKED_SRC = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
@@ -78,259 +63,14 @@ function ensureLinksOpenInNewTab(html) {
   });
 }
 
-// Helper to parse formatted inline markdown text into docx TextRuns/ExternalHyperlinks
-function parseFormattedText(text) {
-  if (!text) return [];
-  const children = [];
-  
-  const tokenRegex = /(\*\*.*?\*\*|\*.*?\*|\[.*?\]\(.*?\))/g;
-  const parts = text.split(tokenRegex);
-  
-  for (const part of parts) {
-    if (!part) continue;
-    
-    if (part.startsWith('**') && part.endsWith('**')) {
-      const innerText = part.slice(2, -2);
-      children.push(new TextRun({ text: innerText, bold: true, size: 22, color: "222222", font: "Calibri" }));
-    } else if (part.startsWith('*') && part.endsWith('*')) {
-      const innerText = part.slice(1, -1);
-      children.push(new TextRun({ text: innerText, italic: true, size: 22, color: "222222", font: "Calibri" }));
-    } else if (part.startsWith('[') && part.includes('](') && part.endsWith(')')) {
-      const closeBracketIndex = part.indexOf('](');
-      const linkText = part.slice(1, closeBracketIndex);
-      const url = part.slice(closeBracketIndex + 2, -1);
-      children.push(new ExternalHyperlink({
-        children: [
-          new TextRun({
-            text: linkText,
-            style: "Hyperlink",
-            color: "0563C1",
-            underline: {
-              type: UnderlineType.SINGLE,
-              color: "0563C1"
-            },
-            size: 22,
-            font: "Calibri"
-          })
-        ],
-        link: url
-      }));
-    } else {
-      children.push(new TextRun({ text: part, size: 22, color: "222222", font: "Calibri" }));
-    }
-  }
-  
-  return children;
-}
-
-// Helper to generate and download Word (.docx) file from PRD text
-export async function downloadDocxFile(text, filename = "Product_Requirement_Document.docx") {
-  // 1. Clean the markdown of download links and automation headers
-  let cleanText = text
-    .replace(/###\s*.*Document Download[\s\S]*?(\n\n|$)/gi, "")
-    .replace(/\[.*Download PRD \(\.docx\)\]\(#download-prd\)/gi, "")
-    .replace(/###\s*.*Automation Pipeline[\s\S]*?(\n\n|$)/gi, "")
-    .replace(/.*https:\/\/mnnb9bbkgu\.ap-south-1\.awsapprunner\.com\/agents\/automation.*/gi, "");
-
-  const lines = cleanText.split("\n");
-  const docChildren = [];
-  
-  let inTable = false;
-  let tableLines = [];
-  
-  const flushTable = () => {
-    if (tableLines.length === 0) return;
-    
-    const rows = [];
-    let isHeader = true;
-    
-    for (const line of tableLines) {
-      if (/^[|:\-\s]+$/.test(line)) {
-        continue;
-      }
-      
-      const rawCells = line.split("|");
-      if (line.trim().startsWith("|")) rawCells.shift();
-      if (line.trim().endsWith("|")) rawCells.pop();
-      
-      const rowCells = rawCells.map(c => c.trim());
-      
-      const cellElements = rowCells.map(cellText => {
-        const textRuns = parseFormattedText(cellText);
-        if (isHeader) {
-          textRuns.forEach(run => {
-            if (run instanceof TextRun) {
-              run.options.bold = true;
-            }
-          });
-        }
-        
-        return new TableCell({
-          children: [
-            new Paragraph({
-              children: textRuns,
-              spacing: { before: 80, after: 80 }
-            })
-          ],
-          shading: isHeader ? { fill: "F0F4F8" } : undefined,
-          margins: { top: 100, bottom: 100, left: 150, right: 150 }
-        });
-      });
-      
-      rows.push(
-        new TableRow({
-          children: cellElements
-        })
-      );
-      
-      isHeader = false;
-    }
-    
-    if (rows.length > 0) {
-      docChildren.push(
-        new Table({
-          rows,
-          width: {
-            size: 100,
-            type: WidthType.PERCENTAGE
-          },
-          borders: {
-            top: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
-            bottom: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
-            left: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
-            right: { style: BorderStyle.SINGLE, size: 4, color: "CCCCCC" },
-            insideHorizontal: { style: BorderStyle.SINGLE, size: 4, color: "E5E5E5" },
-            insideVertical: { style: BorderStyle.SINGLE, size: 4, color: "E5E5E5" }
-          }
-        })
-      );
-      
-      docChildren.push(new Paragraph({ spacing: { after: 120 } }));
-    }
-    
-    tableLines = [];
-    inTable = false;
-  };
-  
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const trimmed = line.trim();
-    
-    if (trimmed.startsWith("|")) {
-      inTable = true;
-      tableLines.push(line);
-      continue;
-    } else if (inTable) {
-      flushTable();
-    }
-    
-    if (trimmed === "") {
-      continue;
-    }
-    
-    if (trimmed.startsWith("#")) {
-      const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
-      if (headingMatch) {
-        const level = headingMatch[1].length;
-        const headingText = headingMatch[2];
-        
-        let size = 22;
-        let color = "222222";
-        let spacingBefore = 240;
-        let spacingAfter = 120;
-        
-        if (level === 1) {
-          size = 36;
-          color = "003366";
-          spacingBefore = 360;
-          spacingAfter = 180;
-        } else if (level === 2) {
-          size = 28;
-          color = "004488";
-          spacingBefore = 280;
-          spacingAfter = 140;
-        } else if (level === 3) {
-          size = 24;
-          color = "333333";
-          spacingBefore = 200;
-          spacingAfter = 100;
-        }
-        
-        docChildren.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: headingText,
-                bold: true,
-                size: size,
-                color: color,
-                font: "Calibri"
-              })
-            ],
-            spacing: { before: spacingBefore, after: spacingAfter },
-            keepWithNext: true
-          })
-        );
-        continue;
-      }
-    }
-    
-    const listMatch = trimmed.match(/^([\-\*\+])\s+(.*)$/);
-    if (listMatch) {
-      const listContent = listMatch[2];
-      docChildren.push(
-        new Paragraph({
-          children: parseFormattedText(listContent),
-          bullet: { level: 0 },
-          spacing: { before: 40, after: 40 }
-        })
-      );
-      continue;
-    }
-    
-    docChildren.push(
-      new Paragraph({
-        children: parseFormattedText(trimmed),
-        spacing: { before: 80, after: 80 }
-      })
-    );
-  }
-  
-  if (inTable) {
-    flushTable();
-  }
-
-  try {
-    const doc = new Document({
-      sections: [
-        {
-          properties: {
-            page: {
-              margin: {
-                top: 1440,
-                right: 1440,
-                bottom: 1440,
-                left: 1440
-              }
-            }
-          },
-          children: docChildren
-        }
-      ]
-    });
-
-    const docxBlob = await Packer.toBlob(doc);
-    const url = URL.createObjectURL(docxBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Failed to generate DOCX file:', error);
-  }
+// Helper to directly download the PRD file placed in the PRD folder
+export function downloadPrdFile() {
+  const link = document.createElement("a");
+  link.href = "/PRD/Product_Requirement_Document.docx";
+  link.setAttribute("download", "Product_Requirement_Document.docx");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 // Helper to parse markdown when marked library is not available
@@ -624,7 +364,7 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                             target.innerText.includes("Download PRD"))
                         ) {
                           e.preventDefault();
-                          downloadDocxFile(PRD_DOCUMENT_CONTENT, "Product_Requirement_Document.docx");
+                          downloadPrdFile();
                         }
                       }}
                     />
@@ -649,7 +389,7 @@ export function Chatbot({ hideFloat, autoPrompt, defaultOpen = false }) {
                               transition: "background-color 0.2s ease",
                             }}
                             onClick={() =>
-                              downloadDocxFile(PRD_DOCUMENT_CONTENT, "Product_Requirement_Document.docx")
+                              downloadPrdFile()
                             }
                             title="Download PRD as Word Document (.docx)"
                           >

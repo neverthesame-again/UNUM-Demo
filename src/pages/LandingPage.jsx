@@ -2074,7 +2074,7 @@ export default function LandingPage() {
                   AI PRD Creation
                 </h2>
                 <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "6px 0 0" }}>
-                  Analyse high-priority incidents and generate a Product Requirement Document with AI
+                  Analyse moderate-priority incidents and generate a Product Requirement Document with AI
                 </p>
               </div>
 
@@ -2091,14 +2091,14 @@ export default function LandingPage() {
                 {/* Card header row — ID + badge */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--text-primary)" }}>
-                    CARE-DASHBOARD-HIGH
+                    MYMEMBER-PORTAL-MODERATE
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "700",
                     background: "var(--cyan)", color: "var(--navy)",
                     padding: "3px 12px", borderRadius: "20px",
                   }}>
-                    High Priority
+                    Moderate Priority
                   </span>
                 </div>
 
@@ -2128,7 +2128,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(6,182,212,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Context: General IT Operations
+                    Context: MyMember Benefits Portal
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "600",
@@ -2143,7 +2143,7 @@ export default function LandingPage() {
                 {/* Footer row */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                   <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-                    Application: <strong style={{ color: "var(--text-primary)" }}>BSpoke Application</strong>
+                    Application: <strong style={{ color: "var(--text-primary)" }}>MyMember Benefits Portal</strong>
                   </span>
                   <button
                     type="button"
