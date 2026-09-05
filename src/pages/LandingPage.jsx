@@ -2074,7 +2074,7 @@ export default function LandingPage() {
                   AI PRD Creation
                 </h2>
                 <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "6px 0 0" }}>
-                  Analyse high-priority incidents and generate a Product Requirement Document with AI
+                  Analyse moderate-priority incidents and generate a Product Requirement Document with AI
                 </p>
               </div>
 
@@ -2091,25 +2091,25 @@ export default function LandingPage() {
                 {/* Card header row — ID + badge */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
                   <span style={{ fontSize: "15px", fontWeight: "800", color: "var(--text-primary)" }}>
-                    CARE-DASHBOARD-HIGH
+                    MYMEMBER-PORTAL-MODERATE
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "700",
                     background: "var(--cyan)", color: "var(--navy)",
                     padding: "3px 12px", borderRadius: "20px",
                   }}>
-                    High Priority
+                    Moderate Priority
                   </span>
                 </div>
 
                 {/* Cyan sub-title */}
                 <div style={{ fontSize: "14px", fontWeight: "700", color: "var(--cyan)", marginBottom: "10px" }}>
-                  Top 10 Incidents — Care Dashboard, January 2025
+                  AI PRD Creation
                 </div>
 
                 {/* Description */}
                 <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.6 }}>
-                  Generate a PRD from the top 10 high-priority incidents in the Care Dashboard application for January 2025, including SLA breaches, MTTR and root cause analysis.
+                  Generate a comprehensive Product Requirement Document (PRD) from your ideas or issues using the AI Agent.
                 </p>
 
                 {/* Meta badges */}
@@ -2120,7 +2120,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(16,185,129,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Urgency: 1 – High
+                    AI Assisted
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "700",
@@ -2128,7 +2128,7 @@ export default function LandingPage() {
                     border: "1px solid rgba(6,182,212,0.3)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    Application: Care Dashboard
+                    Context: MyMember Benefits Portal
                   </span>
                   <span style={{
                     fontSize: "12px", fontWeight: "600",
@@ -2136,14 +2136,14 @@ export default function LandingPage() {
                     border: "1px solid var(--border)",
                     padding: "4px 12px", borderRadius: "20px",
                   }}>
-                    CARE-DASH-JAN25
+                    AI-PRD-GEN
                   </span>
                 </div>
 
                 {/* Footer row */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "12px" }}>
                   <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
-                    Application: <strong style={{ color: "var(--text-primary)" }}>BSpoke Application</strong>
+                    Application: <strong style={{ color: "var(--text-primary)" }}>MyMember Benefits Portal</strong>
                   </span>
                   <button
                     type="button"
@@ -2172,7 +2172,7 @@ export default function LandingPage() {
                       e.currentTarget.style.transform = "none";
                     }}
                   >
-                    🤖 Create PRD
+                    Create PRD
                   </button>
                 </div>
               </div>
