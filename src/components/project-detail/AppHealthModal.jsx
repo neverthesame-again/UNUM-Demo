@@ -163,11 +163,6 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                 <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#10b981" }}>
                   <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }}></span> Healthy (≥99.6%)
                 </span>
-                {isWarn && (
-                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#f59e0b" }}>
-                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }}></span> Degraded (99.5%)
-                  </span>
-                )}
                 {isDownApp && (
                   <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#ef4444" }}>
                     <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#ef4444" }}></span> Outage (99.4%)
