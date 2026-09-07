@@ -2233,7 +2233,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: "12px", flex: 1 }}>
-                      {/* Products Card (Blue) */}
+                      {/* O & E Customer Support Card (Blue) */}
                       <div
                         style={{
                           background: "rgba(59, 130, 246, 0.05)",
@@ -2250,7 +2250,7 @@ export default function LandingPage() {
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             <div style={{ background: "rgba(59, 130, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#3b82f6", display: "flex" }}><Icon name="cube" size={16} /></div>
-                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Products</span>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>O & E Customer Support</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
                             <span
@@ -2293,7 +2293,7 @@ export default function LandingPage() {
                         </div>
                       </div>
 
-                      {/* Sales Card (Green) */}
+                      {/* Corporate Legacy Card (Green) */}
                       <div
                         style={{
                           background: "rgba(16, 185, 129, 0.05)",
@@ -2310,7 +2310,7 @@ export default function LandingPage() {
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             <div style={{ background: "rgba(16, 185, 129, 0.1)", padding: "6px", borderRadius: "8px", color: "#10b981", display: "flex" }}><Icon name="chart" size={16} /></div>
-                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Sales</span>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Corporate Legacy</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
                             <span
@@ -2350,7 +2350,7 @@ export default function LandingPage() {
                         </div>
                       </div>
 
-                      {/* Acquisition Card (Purple) */}
+                      {/* Data and Analytics Card (Purple) */}
                       <div
                         style={{
                           background: "rgba(139, 92, 246, 0.05)",
@@ -2367,7 +2367,7 @@ export default function LandingPage() {
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                             <div style={{ background: "rgba(139, 92, 246, 0.1)", padding: "6px", borderRadius: "8px", color: "#8b5cf6", display: "flex" }}><Icon name="cart" size={16} /></div>
-                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Acquisition</span>
+                            <span style={{ fontWeight: "700", fontSize: "14px" }}>Data and Analytics</span>
                           </div>
                           <div style={{ display: "flex", alignItems: "center", cursor: "default" }}>
                             <span

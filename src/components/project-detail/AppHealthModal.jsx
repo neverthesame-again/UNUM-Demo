@@ -70,16 +70,17 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
           };
         }
       } else if (isWarn) {
-        // Warning app: 3–8 errors
-        const warnUptimes = [97.8, 98.2, 96.9, 98.4, 97.6, 98.1, 98.5];
+        // Warning app: all points above 99.5% in green, exactly one point at 99.5% in yellow
+        const warnUptimes = [99.8, 99.7, 99.5, 99.8, 99.6, 99.8, 99.9];
         return {
           day,
           fullDay: FULL_DAYS[i],
           uptime: warnUptimes[i],
-          errors: rand(i + 10, 5) + 3,
+          errors: warnUptimes[i] === 99.5 ? 3 : rand(i + 10, 1),
           isWed,
-          color: "#f59e0b",
-          bg: "rgba(245, 158, 11, 0.15)",
+          isYellow: warnUptimes[i] === 99.5,
+          color: warnUptimes[i] === 99.5 ? "#f59e0b" : "#10b981",
+          bg: warnUptimes[i] === 99.5 ? "rgba(245, 158, 11, 0.15)" : "rgba(16, 185, 129, 0.15)",
         };
       } else {
         // Good healthy app: 0–3 errors
@@ -98,7 +99,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
   }, [app.title, app.statusType, isDownApp, isWarn]);
 
   // SVG polyline coords: Y-axis 98.8–100 covers 99.4–100% ranges smoothly
-  const yMin = isWarn ? 95.0 : 98.8;
+  const yMin = 98.8;
   const yMax = 100.0;
   const yRange = yMax - yMin;
 
@@ -162,6 +163,11 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                 <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#10b981" }}>
                   <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }}></span> Healthy (≥99.6%)
                 </span>
+                {isWarn && (
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#f59e0b" }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }}></span> Degraded (99.5%)
+                  </span>
+                )}
                 {isDownApp && (
                   <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#ef4444" }}>
                     <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#ef4444" }}></span> Outage (99.4%)
@@ -186,16 +192,18 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                   {/* Multi-color gradient along the line */}
                   <linearGradient id={`lineGrad-${app.id || 'app'}`} x1="0%" y1="0%" x2="100%" y2="0%">
                     <stop offset="0%" stopColor={dayData[0].color} />
-                    <stop offset="18%" stopColor={dayData[1].color} />
+                    <stop offset="16.6%" stopColor={dayData[1].color} />
                     <stop offset="33.33%" stopColor={dayData[2].color} />
-                    <stop offset="48%" stopColor={dayData[3].color} />
+                    <stop offset="50%" stopColor={dayData[3].color} />
+                    <stop offset="66.6%" stopColor={dayData[4].color} />
+                    <stop offset="83.3%" stopColor={dayData[5].color} />
                     <stop offset="100%" stopColor={dayData[6].color} />
                   </linearGradient>
 
                   {/* Gradient fill under line */}
                   <linearGradient id={`areaGrad-${app.id || 'app'}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={isDownApp ? "#10b981" : appColor} stopOpacity="0.25" />
-                    <stop offset="100%" stopColor={isDownApp ? "#10b981" : appColor} stopOpacity="0.01" />
+                    <stop offset="0%" stopColor={isDownApp ? "#ef4444" : "#10b981"} stopOpacity="0.25" />
+                    <stop offset="100%" stopColor={isDownApp ? "#ef4444" : "#10b981"} stopOpacity="0.01" />
                   </linearGradient>
                 </defs>
 
@@ -205,7 +213,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                 />
                 <polyline
                   fill="none"
-                  stroke={isDownApp ? `url(#lineGrad-${app.id || 'app'})` : appColor}
+                  stroke={(isDownApp || isWarn) ? `url(#lineGrad-${app.id || 'app'})` : appColor}
                   strokeWidth="2.5"
                   strokeLinejoin="round"
                   strokeLinecap="round"
@@ -218,6 +226,12 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                     <g key={i}>
                       {d.isWed && isDownApp && (
                         <circle cx={cx} cy={cy} r="5.5" fill="none" stroke="#ef4444" strokeWidth="1.5" opacity="0.6">
+                          <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                      )}
+                      {d.isYellow && (
+                        <circle cx={cx} cy={cy} r="5.5" fill="none" stroke="#f59e0b" strokeWidth="1.5" opacity="0.6">
                           <animate attributeName="r" values="4;7;4" dur="2s" repeatCount="indefinite" />
                           <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
                         </circle>
@@ -248,15 +262,15 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                     flex: 1,
                     padding: "4px 2px",
                     borderRadius: "8px",
-                    background: d.isWed && isDownApp ? "rgba(239, 68, 68, 0.12)" : "transparent",
-                    border: d.isWed && isDownApp ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid transparent",
+                    background: (d.isWed && isDownApp) ? "rgba(239, 68, 68, 0.12)" : d.isYellow ? "rgba(245, 158, 11, 0.12)" : "transparent",
+                    border: (d.isWed && isDownApp) ? "1px solid rgba(239, 68, 68, 0.3)" : d.isYellow ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid transparent",
                   }}
                 >
                   <span style={{ fontSize: "12px", fontWeight: "700", color: d.color }}>{d.uptime}%</span>
                   <span style={{
                     fontSize: "11px",
-                    fontWeight: d.isWed ? "700" : "500",
-                    color: d.isWed && isDownApp ? "#ef4444" : "var(--text-secondary)",
+                    fontWeight: (d.isWed && isDownApp) || d.isYellow ? "700" : "500",
+                    color: (d.isWed && isDownApp) ? "#ef4444" : d.isYellow ? "#f59e0b" : "var(--text-secondary)",
                     marginTop: "2px"
                   }}>
                     {d.day}
@@ -271,7 +285,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
               <h3 style={{ margin: 0, fontSize: "15px", fontWeight: "700" }}>Error Rate / Incidents (Last 7 Days)</h3>
               <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
-                Total: <strong style={{ color: isDownApp ? "#ef4444" : appColor }}>{totalErrors} errors</strong>
+                Total: <strong style={{ color: isDownApp ? "#ef4444" : isWarn ? "#f59e0b" : appColor }}>{totalErrors} errors</strong>
               </span>
             </div>
 
@@ -285,8 +299,8 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                       background: d.color,
                       height: `${heightPct}%`,
                       borderRadius: "4px 4px 0 0",
-                      opacity: d.isWed && isDownApp ? 1 : 0.85,
-                      boxShadow: d.isWed && isDownApp ? "0 0 10px rgba(239, 68, 68, 0.45)" : "none",
+                      opacity: (d.isWed && isDownApp) || d.isYellow ? 1 : 0.85,
+                      boxShadow: (d.isWed && isDownApp) ? "0 0 10px rgba(239, 68, 68, 0.45)" : d.isYellow ? "0 0 10px rgba(245, 158, 11, 0.45)" : "none",
                       minHeight: d.errors > 0 ? "4px" : "0",
                       transition: "height 0.25s ease"
                     }} />
@@ -307,15 +321,15 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
                     flex: 1,
                     padding: "4px 2px",
                     borderRadius: "8px",
-                    background: d.isWed && isDownApp ? "rgba(239, 68, 68, 0.12)" : "transparent",
-                    border: d.isWed && isDownApp ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid transparent",
+                    background: (d.isWed && isDownApp) ? "rgba(239, 68, 68, 0.12)" : d.isYellow ? "rgba(245, 158, 11, 0.12)" : "transparent",
+                    border: (d.isWed && isDownApp) ? "1px solid rgba(239, 68, 68, 0.3)" : d.isYellow ? "1px solid rgba(245, 158, 11, 0.3)" : "1px solid transparent",
                   }}
                 >
                   <span style={{ fontSize: "12px", fontWeight: "700", color: d.color }}>{d.errors}</span>
                   <span style={{
                     fontSize: "11px",
-                    fontWeight: d.isWed ? "700" : "500",
-                    color: d.isWed && isDownApp ? "#ef4444" : "var(--text-secondary)",
+                    fontWeight: (d.isWed && isDownApp) || d.isYellow ? "700" : "500",
+                    color: (d.isWed && isDownApp) ? "#ef4444" : d.isYellow ? "#f59e0b" : "var(--text-secondary)",
                     marginTop: "2px"
                   }}>
                     {d.day}
