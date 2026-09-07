@@ -609,18 +609,20 @@ export default function LandingPage() {
   });
 
   const L0_CLASSIFICATIONS = [
-    "Acquisition",
-    "Medical Management",
-    "Back Office Mgmt.",
-    "Engagement Management",
-    "Corporate Functions",
-    "Enterprise",
-    "Enterprise Analytics",
-    "Enterprise Data",
+    "O&E Customer Support",
+    "O&E Customer Facing",
+    "O&E Client Reporting",
+    "Data and Analytics",
+    "Dental and Vision",
+    "Corporate – Legacy",
+    "Corporate – New",
+    "CLA Acquisition & Products",
+    "Individual Disability Income",
   ];
 
   const [selectedL0, setSelectedL0] = useState(() => {
-    return sessionStorage.getItem("landing_selected_l0") || "Acquisition";
+    const saved = sessionStorage.getItem("landing_selected_l0");
+    return L0_CLASSIFICATIONS.includes(saved) ? saved : L0_CLASSIFICATIONS[0];
   });
 
 
@@ -1475,7 +1477,7 @@ export default function LandingPage() {
     );
   }
 
-  if (selectedArea === "AI for AMS" && selectedL0 !== "Acquisition") {
+  if (selectedArea === "AI for AMS" && selectedL0 !== "O&E Customer Support") {
     return (
       <main className="re-landing-page fade-in" style={{ minHeight: "85vh", display: "flex", flexDirection: "column" }}>
         {contextSelectorBar}

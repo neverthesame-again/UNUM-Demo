@@ -24,7 +24,7 @@ export const AppHealthModal = ({ isOpen, onClose, app }) => {
   const appColor = getColor(app.statusType);
   const appBg = getBg(app.statusType);
 
-  const isDownApp = app.statusType === 'danger' || app.status === 'Down' || app.title.toLowerCase().includes('sales connect');
+  const isDownApp = app.statusType === 'danger' || app.status === 'Down' || app.title.toLowerCase().includes('myunum for clients') || app.title.toLowerCase().includes('sales connect');
   const isWarn = app.statusType === 'warn';
 
   // Generate 7-day data with per-app seeded random errors (max 8 per day)
